@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  dev:
+    build:
+      context: .
+      target: dev
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    stdin_open: true
+    tty: true
+    entrypoint: []
+    command:
+      [
+        "sh",
+        "-c",
+        "cp --update /opt/build/poetry/poetry.lock /app/ && mkdir -p /app/.git/hooks/ && cp --update /opt/build/git/* /app/.git/hooks/ && zsh"
+      ]
+    environment:
+      - POETRY_PYPI_TOKEN_PYPI
+      - SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock
+    volumes:
+      - .:/app/
+      - ~/.gitconfig:/etc/gitconfig
+      - ~/.ssh/known_hosts:/home/app/.ssh/known_hosts
+      - ${SSH_AGENT_AUTH_SOCK:-/run/host-services/ssh-auth.sock}:/run/host-services/ssh-auth.sock
+  app:
+    build:
+      context: .
+      target: app
+    tty: true
+    profiles:
+      - app

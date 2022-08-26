@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install @devcontainers/cli
+        run: npm install --location=global @devcontainers/cli
+
+      - name: Start Dev Container
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+          git config --global init.defaultBranch main
+          devcontainer up --workspace-folder .
+
+      - name: Lint package
+        run: devcontainer exec --workspace-folder . poe lint
+
+      - name: Test package
+        run: devcontainer exec --workspace-folder . poe test
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: reports/coverage.xml
