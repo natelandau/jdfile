@@ -38,6 +38,9 @@ def test_files(tmp_path):
         "some_file_12-22-2021.txt",  # 18
         "specialChars(@#$)-&*.txt",  # 19
         "two-extensions.tar.gz",  # 20
+        "testfile.txt",  # 21
+        "testfile.txt.1",  # 22
+        "testfile 1.txt",  # 23
     ]
 
     originals = tmp_path / "originals"

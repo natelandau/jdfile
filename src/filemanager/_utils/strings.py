@@ -74,4 +74,7 @@ def use_specified_separator(string: str, separator: Enum) -> str:
         string = re.sub(r" +", " ", string)
         return string.strip(" ")
     else:
-        return string
+        string = re.sub(r"_+", "_", string)
+        string = re.sub(r"-+", "-", string)
+        string = re.sub(r" +", " ", string)
+        return string.strip(" -_")

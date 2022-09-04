@@ -300,7 +300,7 @@ def parse_date(  # noqa: C901
     try:
         return date_string, datetime.strptime(constructed_date, "%m/%d/%Y").strftime(date_format)
     except ValueError:
-        log.error(f"{constructed_date} is not a valid date")  # noqa: TC400
+        log.error(f"{constructed_date} is not a valid date")
         return None, None
 
 

@@ -5,7 +5,7 @@
 color = always
 doctests = True
 exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv
-ignore = DAR103,E203,E501,W503,D107,B006,SIM103,S404,S603,S607,RST213,B008,NQA102
+ignore = DAR103,E203,E501,W503,D107,B006,SIM103,S404,S603,S607,RST213,B008,NQA102,TC400
 max_line_length = 100
 max_complexity = 10
 

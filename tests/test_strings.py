@@ -33,8 +33,7 @@ def test_use_specified_separator():
     assert use_specified_separator("-string-to__dashes---", Separator.dash) == "string-to-dashes"
     assert use_specified_separator("-string-to__spaces---", Separator.space) == "string to spaces"
     assert (
-        use_specified_separator("-string-to__ ignore---", Separator.ignore)
-        == "-string-to__ ignore---"
+        use_specified_separator("-string-to__ ignore---", Separator.ignore) == "string-to_ ignore"
     )
 
 

@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore [no-redef]
 
-from filemanager._utils import alerts
+from filemanager._utils import alerts, create_unique_filename
 from filemanager._utils.alerts import logger as log
 from filemanager._utils.dates import date_in_filename
 from filemanager._utils.strings import change_case, clean_special_chars, use_specified_separator
@@ -71,8 +71,7 @@ class Separator(str, Enum):
 
 
 @app.command()
-# @pysnooper.snoop(depth=2)
-def main(
+def main(  # noqa: C901
     verbosity: int = typer.Option(
         0,
         "-v",
@@ -123,6 +122,19 @@ def main(
         "-c",
         help="Clean filename",
         rich_help_panel="Clean Options",
+    ),
+    overwrite: bool = typer.Option(
+        False,
+        help="Overwrite existing files when renaming.  If false, will create a numbered version of the file.",
+        show_default=True,
+        rich_help_panel="Clean Options",
+    ),
+    append_unique_integer: bool = typer.Option(
+        False,
+        "--append",
+        help="When renaming, if the file already exists, append a unique integer after the file extension. Default places the unique integer before the file extension.",
+        rich_help_panel="Clean Options",
+        show_default=True,
     ),
     add_date: bool = typer.Option(
         None,
@@ -203,5 +215,21 @@ def main(
         stem = use_specified_separator(stem, separator)
         stem = change_case(stem, case)
 
+        if overwrite:
+            target = Path(parent / f"{date}{stem}{''.join(suffixes)}")
+        else:
+            target = create_unique_filename(
+                Path(parent / f"{date}{stem}{''.join(suffixes)}"),
+                separator,
+                append_integer=append_unique_integer,
+            )
+
         if dry_run:
-            alerts.dryrun(f"{orig_stem}{''.join(suffixes)} -> {date}{stem}{''.join(suffixes)}")
+            alerts.dryrun(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
+        else:
+            try:
+                alerts.success(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
+                file.rename(target)
+            except Exception as e:
+                alerts.error(f"{e}")
+                raise typer.Exit(code=1) from e
