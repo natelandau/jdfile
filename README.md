@@ -1,14 +1,22 @@
 # filemanager
 
-Cleans and formats filenames. Default behavior is to:
+A script which cleans and reformats
 
--   Prepend a date in the format YYYY-MM-DD
--   Clean up special characters
--   Trim unneeded whitespace
--   Move all .jpeg extensions to .jpg
--   Ensure that all file extensions are lowercase
--   Replace all spaces and dashes (-) with underscores (\_)
--   Avoid overwriting files by adding a unique integer to the end of the filename if it already exists
+Run in `--dry-run` mode to see what changes would be made.
+
+Default behavior is to rename a file with the following options:
+
+-   Remove special characters
+-   Trim multiple separators (`_`, `-`, ` `)
+-   Replace all `.jpeg` extensions to `.jpg`
+-   Lowercase extensions
+-   Avoid overwriting files by adding a unique integer
+
+Additional options:
+
+-   Parse the filename for a date which can be reformated as `YYYY-MM-DD` and added to the beginning of the filename, or removed
+-   Normalize to a common word separator (`_`, `-`, ` `)
+-   Normalize the filename to lowercase, uppercase, or titlecase
 
 ## Install
 

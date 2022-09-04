@@ -89,7 +89,7 @@ def main(  # noqa: C901
         False,
         "--dry-run",
         "-n",
-        help="Dry run",
+        help="Dry run – don't actually change anything",
     ),
     log_to_file: bool = typer.Option(
         False,
@@ -122,23 +122,22 @@ def main(  # noqa: C901
         resolve_path=True,
     ),
     clean: bool = typer.Option(
-        False,
-        "--clean",
-        "-c",
-        help="Clean filename",
-        rich_help_panel="Clean Options",
+        True,
+        "--clean/--no-clean",
+        help="Clean the filename – rempve special characters, optionally change case and word separators",
+        rich_help_panel="Filename Options",
     ),
     overwrite: bool = typer.Option(
         False,
         help="Overwrite existing files when renaming.  If false, will create a numbered version of the file.",
         show_default=True,
-        rich_help_panel="Clean Options",
+        rich_help_panel="Filesystem Options",
     ),
     append_unique_integer: bool = typer.Option(
         False,
         "--append",
-        help="When renaming, if the file already exists, append a unique integer after the file extension. Default places the unique integer before the file extension.",
-        rich_help_panel="Clean Options",
+        help="When renaming, if the file already exists, append a unique integer after the file extension. [dim]Default places the unique integer before the file extension.[/dim]",
+        rich_help_panel="Filesystem Options",
         show_default=True,
     ),
     add_date: bool = typer.Option(
@@ -146,44 +145,49 @@ def main(  # noqa: C901
         "--add-date/--remove-date",
         "-d/-r",
         help="Add a formatted date to beginning of filename.",
-        rich_help_panel="Clean Options",
+        rich_help_panel="Filename Options",
     ),
     case: Case = typer.Option(
         Case.ignore,
         case_sensitive=False,
         help="Case transformation. [dim](default: ignore)[/dim]",
-        rich_help_panel="Clean Options",
+        rich_help_panel="Filename Options",
         show_default=False,
     ),
     separator: Separator = typer.Option(
         Separator.ignore,
         "--separator",
-        "-s",
+        "--sep",
         case_sensitive=False,
         help="Word separator. [dim](default: ignore)[/dim]",
-        rich_help_panel="Clean Options",
+        rich_help_panel="Filename Options",
         show_default=False,
     ),
     date_format: str = typer.Option(
         "%Y-%m-%d",
         "--date-format",
-        "-f",
         help="Specify a date format.",
-        rich_help_panel="Clean Options",
+        rich_help_panel="Filename Options",
         show_default=True,
     ),
 ) -> None:
-    """Cleans and formats filenames.
+    """A script which cleans and reformats filenames.
 
-    Default behavior is to:
+    Run in [blue]--dry-run[/blue] mode to see what changes would be made.
 
-    • Prepend a date in the format YYYY-MM-DD
-    • Clean up special characters
-    • Trim unneeded whitespace
-    • Move all .jpeg extensions to .jpg
-    • Ensure that all file extensions are lowercase
-    • Replace all spaces and dashes (-) with underscores (_)
-    • Avoid overwriting files by adding a unique integer to the end of the filename if it already exists
+    Default behavior is to rename a file with the following options:
+
+    • Remove special characters
+    • Trim multiple separators ([blue]_[/blue], [blue]-[/blue], [reverse blue] [/reverse blue])
+    • Replace all [blue].jpeg[/blue] extensions to [blue].jpg[/blue]
+    • Lowercase extensions
+    • Avoid overwriting files by adding a unique integer
+
+    Additional options:
+
+    • Parse the filename for a date which can be reformated as [blue]YYYY-MM-DD[/blue] and added to the beginning of the filename, or removed
+    • Normalize to a common word separator ([blue]_[/blue], [blue]-[/blue], [reverse blue] [/reverse blue])
+    • Normalize the filename to lowercase, uppercase, or titlecase
 
 
     """
