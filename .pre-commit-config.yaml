@@ -7,7 +7,6 @@ repos:
     rev: v1.9.0
     hooks:
       - id: python-check-blanket-noqa
-      - id: python-check-blanket-type-ignore
       - id: python-check-mock-methods
       - id: python-no-eval
       - id: python-no-log-warn
@@ -39,8 +38,14 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
         types: [python]
+        args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
         types: [python]
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.0
+    hooks:
+      - id: python-safety-dependencies-check
+        files: pyproject.toml
   - repo: local
     hooks:
       - id: commitizen
@@ -55,6 +60,7 @@ repos:
         require_serial: true
         language: system
         types: [python]
+        exclude: cli\.py
       - id: absolufy-imports
         name: absolufy-imports
         entry: absolufy-imports
@@ -108,5 +114,12 @@ repos:
       - id: mypy
         name: mypy
         entry: mypy
+        exclude: tests/
         language: system
+        types: [python]
+      - id: pytest
+        name: pytest
+        entry: poe test
+        language: system
+        pass_filenames: false
         types: [python]

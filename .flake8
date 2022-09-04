@@ -4,11 +4,13 @@
 # TODO: https://github.com/PyCQA/flake8/issues/234
 color = always
 doctests = True
-ignore = DAR103,E203,E501,W503
+exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv
+ignore = DAR103,E203,E501,W503,D107,B006,SIM103,S404,S603,S607,RST213,B008,NQA102
 max_line_length = 100
 max_complexity = 10
 
 # https://github.com/terrencepreilly/darglint#flake8
 # TODO: https://github.com/terrencepreilly/darglint/issues/130
 docstring_style = google
+docstring-convention=google
 strictness = long
