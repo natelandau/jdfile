@@ -2,7 +2,18 @@
 """Test string utility functions."""
 from enum import Enum
 
-from filemanager._utils.strings import change_case, clean_special_chars, use_specified_separator
+from filemanager._utils.strings import (
+    change_case,
+    clean_extensions,
+    clean_special_chars,
+    use_specified_separator,
+)
+
+
+def test_clean_extensions():
+    """Test cleaning file extensions."""
+    exts = [".jpeg", ".jpg", "PNG", "XLS", ".bmp", ".tar", "tif"]
+    assert clean_extensions(exts) == [".jpg", ".jpg", "png", "xls", ".bmp", ".tar", "tif"]
 
 
 def test_clean_special_chars():

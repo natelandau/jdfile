@@ -13,7 +13,12 @@ except ModuleNotFoundError:
 from filemanager._utils import alerts, create_unique_filename
 from filemanager._utils.alerts import logger as log
 from filemanager._utils.dates import date_in_filename
-from filemanager._utils.strings import change_case, clean_special_chars, use_specified_separator
+from filemanager._utils.strings import (
+    change_case,
+    clean_extensions,
+    clean_special_chars,
+    use_specified_separator,
+)
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, rich_markup_mode="rich")
 
@@ -168,7 +173,20 @@ def main(  # noqa: C901
         show_default=True,
     ),
 ) -> None:
-    """Clean and act on specified files and directories."""
+    """Cleans and formats filenames.
+
+    Default behavior is to:
+
+    • Prepend a date in the format YYYY-MM-DD
+    • Clean up special characters
+    • Trim unneeded whitespace
+    • Move all .jpeg extensions to .jpg
+    • Ensure that all file extensions are lowercase
+    • Replace all spaces and dashes (-) with underscores (_)
+    • Avoid overwriting files by adding a unique integer to the end of the filename if it already exists
+
+
+    """
     alerts.LoggerManager(  # pragma: no cover
         log_file,
         verbosity,
@@ -206,6 +224,7 @@ def main(  # noqa: C901
         orig_stem: str = stem
 
         suffixes: list[str] = file.suffixes
+        new_suffixes = clean_extensions(suffixes)
 
         stem, date = date_in_filename(stem, file, add_date, date_format, separator)
 
@@ -215,21 +234,25 @@ def main(  # noqa: C901
         stem = use_specified_separator(stem, separator)
         stem = change_case(stem, case)
 
-        if overwrite:
-            target = Path(parent / f"{date}{stem}{''.join(suffixes)}")
+        target = Path(parent / f"{date}{stem}{''.join(new_suffixes)}")
+        if file == target:
+            alerts.success(f"{orig_stem}{''.join(suffixes)} -> No change")
         else:
-            target = create_unique_filename(
-                Path(parent / f"{date}{stem}{''.join(suffixes)}"),
-                separator,
-                append_integer=append_unique_integer,
-            )
+            if overwrite:
+                target = Path(parent / f"{date}{stem}{''.join(new_suffixes)}")
+            else:
+                target = create_unique_filename(
+                    Path(parent / f"{date}{stem}{''.join(new_suffixes)}"),
+                    separator,
+                    append_integer=append_unique_integer,
+                )
 
-        if dry_run:
-            alerts.dryrun(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
-        else:
-            try:
-                alerts.success(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
-                file.rename(target)
-            except Exception as e:
-                alerts.error(f"{e}")
-                raise typer.Exit(code=1) from e
+            if dry_run:
+                alerts.dryrun(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
+            else:
+                try:
+                    alerts.success(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
+                    file.rename(target)
+                except Exception as e:
+                    alerts.error(f"{e}")
+                    raise typer.Exit(code=1) from e

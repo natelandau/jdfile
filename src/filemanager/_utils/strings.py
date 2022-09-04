@@ -3,6 +3,12 @@ import re
 from enum import Enum
 
 
+def clean_extensions(extensions: list[str]) -> list:
+    """Cleans file extensions."""
+    new_extensions = [ext.lower() for ext in extensions]
+    return [".jpg" if ext == ".jpeg" else ext for ext in new_extensions]
+
+
 def change_case(string: str, case: Enum) -> str:
     """Changes the case of a string.
 

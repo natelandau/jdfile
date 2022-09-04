@@ -55,11 +55,10 @@ def test_filenames_in_dryrun(test_files, tmp_path):
 
     result = runner.invoke(app, ["-c", "--overwrite", str(test_files[21])])
     assert result.exit_code == 0
-    assert result.output == Regex(r"testfile\.txt -> testfile.txt")
+    assert result.output == Regex(r"testfile\.txt -> No change")
     assert Path(tmp_path / "originals" / "testfile.txt").exists()
 
-    result = runner.invoke(app, ["-c", str(test_files[21])])
+    result = runner.invoke(app, ["-c", "--case", "lower", "-s", "space", str(test_files[24])])
     assert result.exit_code == 0
-    assert result.output == Regex(r"testfile\.txt -> testfile-1\.txt")
-    assert Path(tmp_path / "originals" / "testfile.txt").exists() is False
-    assert Path(tmp_path / "originals" / "testfile-1.txt").exists()
+    assert result.output == Regex(r"TESTFILE\.txt -> testfile 2\.txt")
+    assert Path(tmp_path / "originals" / "testfile 2.txt").exists()

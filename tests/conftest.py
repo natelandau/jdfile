@@ -41,6 +41,7 @@ def test_files(tmp_path):
         "testfile.txt",  # 21
         "testfile.txt.1",  # 22
         "testfile 1.txt",  # 23
+        "TESTFILE.txt",  # 24
     ]
 
     originals = tmp_path / "originals"

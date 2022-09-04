@@ -1,17 +1,40 @@
 # filemanager
 
-A cli for personalized file management
+Cleans and formats filenames. Default behavior is to:
 
-## Using
+-   Prepend a date in the format YYYY-MM-DD
+-   Clean up special characters
+-   Trim unneeded whitespace
+-   Move all .jpeg extensions to .jpg
+-   Ensure that all file extensions are lowercase
+-   Replace all spaces and dashes (-) with underscores (\_)
+-   Avoid overwriting files by adding a unique integer to the end of the filename if it already exists
 
-To add and install this package as a dependency of your project, run `poetry add filemanager`.
+## Install
 
-To view this app's commands once it's installed, run `filemanager --help`. Alternatively, you can also use `docker compose run --rm app --help`.
+Pip
+
+```bash
+pip install git+https://github.com/natelandau/filemanager
+```
+
+[PIPX](https://pypa.github.io/pipx/)
+
+```bash
+pipx install git+https://github.com/natelandau/filemanager
+```
+
+## Usage
+
+Run `filemanager --help` for usage
+
+## Caveats
+
+Built this file management application for my own personal use. It is tested on MacOS and Raspberry Pi systems. YMMV depending on your system and requirements.
 
 ## Contributing
 
-<details>
-<summary>Setup: once per device</summary>
+### Setup: once per device
 
 1. [Generate an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) and [add the SSH key to your GitHub account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
 1. Configure SSH to automatically load your SSH keys:
@@ -37,10 +60,16 @@ To view this app's commands once it's installed, run `filemanager --help`. Alter
 1. [Install VS Code](https://code.visualstudio.com/) and [VS Code's Remote-Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). Alternatively, install [PyCharm](https://www.jetbrains.com/pycharm/download/).
     - _Optional:_ Install a [Nerd Font](https://www.nerdfonts.com/font-downloads) such as [FiraCode Nerd Font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode) with `brew tap homebrew/cask-fonts && brew install --cask font-fira-code-nerd-font` and [configure VS Code](https://github.com/tonsky/FiraCode/wiki/VS-Code-Instructions) or [configure PyCharm](https://github.com/tonsky/FiraCode/wiki/Intellij-products-instructions) to use `'FiraCode Nerd Font'`.
 
-</details>
+### Setup: once per project
 
-<details open>
-<summary>Setup: once per project</summary>
+#### Local development
+
+1. Clone this repository.
+2. Install the Poetry environment with `poetry install`.
+3. Activate your Poetry environment with `poetry shell`.
+4. Install the pre-commit hooks with `pre-commit install --install-hooks`.
+
+#### Containerized development
 
 1. Clone this repository.
 2. Start a [Dev Container](https://code.visualstudio.com/docs/remote/containers) in your preferred development environment:
@@ -48,16 +77,13 @@ To view this app's commands once it's installed, run `filemanager --help`. Alter
     - _PyCharm_: open the cloned repository and [configure Docker Compose as a remote interpreter](https://www.jetbrains.com/help/pycharm/using-docker-compose-as-a-remote-interpreter.html#docker-compose-remote).
     - _Terminal_: open the cloned repository and run `docker compose run --rm dev` to start an interactive Dev Container.
 
-</details>
+### Developing
 
-<details>
-<summary>Developing</summary>
-
-- This project follows the [Conventional Commits](https://www.conventionalcommits.org/) standard to automate [Semantic Versioning](https://semver.org/) and [Keep A Changelog](https://keepachangelog.com/) with [Commitizen](https://github.com/commitizen-tools/commitizen).
-- Run `poe` from within the development environment to print a list of [Poe the Poet](https://github.com/nat-n/poethepoet) tasks available to run on this project.
-- Run `poetry add {package}` from within the development environment to install a run time dependency and add it to `pyproject.toml` and `poetry.lock`.
-- Run `poetry remove {package}` from within the development environment to uninstall a run time dependency and remove it from `pyproject.toml` and `poetry.lock`.
-- Run `poetry update` from within the development environment to upgrade all dependencies to the latest versions allowed by `pyproject.toml`.
-- Run `cz bump` to bump the package's version, update the `CHANGELOG.md`, and create a git tag.
-
-</details>
+-   Access an interactive terminal within the container from an external terminal application `docker compose exec -it dev /usr/bin/zsh`
+-   Rebuild the `app` Docker image `docker compose build --no-cache app`
+-   This project follows the [Conventional Commits](https://www.conventionalcommits.org/) standard to automate [Semantic Versioning](https://semver.org/) and [Keep A Changelog](https://keepachangelog.com/) with [Commitizen](https://github.com/commitizen-tools/commitizen).
+-   Run `poe` from within the development environment to print a list of [Poe the Poet](https://github.com/nat-n/poethepoet) tasks available to run on this project.
+-   Run `poetry add {package}` from within the development environment to install a run time dependency and add it to `pyproject.toml` and `poetry.lock`.
+-   Run `poetry remove {package}` from within the development environment to uninstall a run time dependency and remove it from `pyproject.toml` and `poetry.lock`.
+-   Run `poetry update` from within the development environment to upgrade all dependencies to the latest versions allowed by `pyproject.toml`.
+-   Run `cz bump` to bump the package's version, update the `CHANGELOG.md`, and create a git tag.
