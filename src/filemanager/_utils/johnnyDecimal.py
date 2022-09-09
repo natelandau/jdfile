@@ -12,8 +12,8 @@ from filemanager._utils.alerts import logger as log
 
 
 @rich.repr.auto
-class JDFolder:
-    """Class defining a Johnny Decimal Folder."""
+class JDProject:
+    """Class defining a Johnny Decimal project."""
 
     def __init__(
         self,
@@ -23,8 +23,8 @@ class JDFolder:
         """Initialize JohnnyDecimalFolder object.
 
         Args:
-            root: (Path) Root directory of the folder.
-            name: (str) Name of the folder.
+            root: (Path) Root directory of the project.
+            name: (str) Name of the project.
         """
         self.root = Path(root).expanduser().resolve()
         self.name = name
@@ -39,10 +39,10 @@ class JDFolder:
         yield "categories", self.category_dict
 
     def print_tree(self) -> None:  # pragma: no cover
-        """Print the folder tree.
+        """Print the project tree.
 
         Raises:
-            Abort: If the folder tree is empty.
+            Abort: If the project tree is empty.
         """
         try:
             tree = local["tree"]
@@ -61,15 +61,15 @@ class JDFolder:
 
 
 @rich.repr.auto
-class FilingCabinet:
-    """Class defining a folder available for moving files into."""
+class Project:
+    """Class defining Johnny Decimal project folder available for moving files into."""
 
     def __init__(
         self,
         path: Path,
         level: int,
     ) -> None:
-        """Initialize JohnnyDecimalFolder object.
+        """Initialize Project object.
 
         Args:
             path: (Path) Path to the folder.

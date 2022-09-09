@@ -17,9 +17,9 @@ except ModuleNotFoundError:
 from filemanager._utils import (
     File,
     alerts,
+    build_project_folder_list,
     instantiate_nltk,
-    populate_cabinets,
-    populate_folders,
+    populate_projects,
     populate_stopwords,
 )
 from filemanager._utils.alerts import logger as log
@@ -189,7 +189,7 @@ def main(  # noqa: C901
         None,
         "--organize",
         "-o",
-        help="JohnnyDecimal folder tree to organize files into.",
+        help="JohnnyDecimal project to organize files into.",
         rich_help_panel="Filesystem Options",
     ),
     use_synonyms: bool = typer.Option(
@@ -256,8 +256,8 @@ def main(  # noqa: C901
                     list_of_files.append(File(f, terms))
 
     if organize:
-        folder = populate_folders(config, organize)
-        cabinets: list = populate_cabinets(folder)
+        project = build_project_folder_list(config, organize)
+        projects: list = populate_projects(project)
         if use_synonyms:
             instantiate_nltk()
 
@@ -269,6 +269,6 @@ def main(  # noqa: C901
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
         if organize:
-            file.organize(stopwords, cabinets, use_synonyms)
+            file.organize(stopwords, projects, use_synonyms)
 
         file.rename(dry_run, overwrite, separator, append_unique_integer)

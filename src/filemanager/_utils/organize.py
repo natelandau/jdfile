@@ -6,10 +6,10 @@ from pathlib import Path
 from typer import Abort
 
 from filemanager._utils.alerts import logger as log
-from filemanager._utils.johnnyDecimal import FilingCabinet, JDFolder
+from filemanager._utils.johnnyDecimal import JDProject, Project
 
 
-def populate_folders(config: dict, requested_name: str) -> JDFolder:
+def build_project_folder_list(config: dict, requested_name: str) -> JDProject:
     """Populate the list of folders.
 
     Args:
@@ -17,18 +17,18 @@ def populate_folders(config: dict, requested_name: str) -> JDFolder:
         requested_name: (str) The folder name to index.
 
     Returns:
-        JDFolder: JDFolder object.
+        JDProject: JDProject object.
 
     Raises:
         Abort: If the folder tree is empty.
     """
     try:
-        if config["folders"]:
-            for folder in config["folders"]:
-                if requested_name.lower() == config["folders"][folder]["name"].lower():
-                    return JDFolder(
-                        root=config["folders"][folder]["path"],
-                        name=config["folders"][folder]["name"],
+        if config["projects"]:
+            for project in config["projects"]:
+                if requested_name.lower() == config["projects"][project]["name"].lower():
+                    return JDProject(
+                        root=config["projects"][project]["path"],
+                        name=config["projects"][project]["name"],
                     )
             log.error(f"No folders matching '{requested_name}' found in the configuration file")
             raise Abort()  # noqa: TC301
@@ -40,20 +40,20 @@ def populate_folders(config: dict, requested_name: str) -> JDFolder:
         raise Abort() from e
 
 
-def populate_cabinets(folder: JDFolder) -> list[FilingCabinet]:
-    """Populate the list of Filing Cabinets (deepest level available for filing).
+def populate_projects(project: JDProject) -> list[Project]:
+    """Populate the list of Project objects (deepest level available for filing).
 
     Args:
-        folder: (JDFolder) Folder object
+        project: (JDProject) Folder object
 
     Returns:
-        list[str]: List of FilingCabinets.
+        list[str]: List of Projects.
     """
     # TODO: Invert from category > subcat > area to area > subcat > category
-    # TODO: Remove populate_areas() and merge functionality into populate_cabinets()
-    filing_cabinets: list[FilingCabinet] = []
+    # TODO: Remove populate_areas() and merge functionality into populate_projects()
+    filing_projects: list[Project] = []
 
-    categories = folder.category_dict
+    categories = project.category_dict
     for category in categories:
         subcats = categories[category]["subcategories"]
 
@@ -64,15 +64,15 @@ def populate_cabinets(folder: JDFolder) -> list[FilingCabinet]:
                 if areas:
                     for area in areas:
                         path = typing.cast(Path, area)
-                        filing_cabinets.append(FilingCabinet(path, 3))
+                        filing_projects.append(Project(path, 3))
                 else:
                     path = typing.cast(Path, subcats[subcategory]["path"])  # type: ignore[index]
-                    filing_cabinets.append(FilingCabinet(path, 2))
+                    filing_projects.append(Project(path, 2))
         else:
             path = typing.cast(Path, categories[category]["path"])
-            filing_cabinets.append(FilingCabinet(path, 1))
+            filing_projects.append(Project(path, 1))
 
-    return filing_cabinets
+    return filing_projects
 
 
 def populate_stopwords(config: dict = {}, organize_folder: str | None = None) -> list[str]:
@@ -1370,14 +1370,14 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
 
     if organize_folder:
         try:
-            if config["folders"]:
-                for folder in config["folders"]:
-                    if organize_folder.lower() == config["folders"][folder]["name"].lower():
+            if config["projects"]:
+                for project in config["projects"]:
+                    if organize_folder.lower() == config["projects"][project]["name"].lower():
                         with contextlib.suppress(KeyError):
-                            for word in config["folders"][folder]["stopwords"]:
+                            for word in config["projects"][project]["stopwords"]:
                                 stopwords.append(word)
             else:
-                log.error("No folders found in the configuration file")
+                log.error("No projects found in the configuration file")
                 raise Abort()  # noqa: TC301
         except KeyError as e:
             log.error(f"{e} is not defined in the config file.")
