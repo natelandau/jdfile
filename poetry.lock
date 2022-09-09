@@ -104,7 +104,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "certifi"
-version = "2022.6.15"
+version = "2022.6.15.1"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "dev"
 optional = false
@@ -158,7 +158,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "commitizen"
-version = "2.32.2"
+version = "2.32.4"
 description = "Python commitizen client tool"
 category = "dev"
 optional = false
@@ -510,7 +510,7 @@ gitdb = ">=4.0.1,<5"
 
 [[package]]
 name = "identify"
-version = "2.5.3"
+version = "2.5.5"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -1319,7 +1319,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.16.4"
+version = "20.16.5"
 description = "Virtual Python Environment builder"
 category = "dev"
 optional = false
@@ -1436,8 +1436,8 @@ black = [
     {file = "black-22.8.0.tar.gz", hash = "sha256:792f7eb540ba9a17e8656538701d3eb1afcb134e3b45b71f20b25c77a8db7e6e"},
 ]
 certifi = [
-    {file = "certifi-2022.6.15-py3-none-any.whl", hash = "sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412"},
-    {file = "certifi-2022.6.15.tar.gz", hash = "sha256:84c85a9078b11105f04f3036a9482ae10e4621616db313fe045dd24743a0820d"},
+    {file = "certifi-2022.6.15.1-py3-none-any.whl", hash = "sha256:43dadad18a7f168740e66944e4fa82c6611848ff9056ad910f8f7a3e46ab89e0"},
+    {file = "certifi-2022.6.15.1.tar.gz", hash = "sha256:cffdcd380919da6137f76633531a5817e3a9f268575c128249fb637e4f9e73fb"},
 ]
 cfgv = [
     {file = "cfgv-3.3.1-py2.py3-none-any.whl", hash = "sha256:c6a0883f3917a037485059700b9e75da2464e6c27051014ad85ba6aaa5884426"},
@@ -1460,8 +1460,8 @@ colorama = [
     {file = "colorama-0.4.5.tar.gz", hash = "sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4"},
 ]
 commitizen = [
-    {file = "commitizen-2.32.2-py3-none-any.whl", hash = "sha256:44a07dc8bb5c6fb737471c1e92985b604ba5cad826ea928936537ff75c7b4a0c"},
-    {file = "commitizen-2.32.2.tar.gz", hash = "sha256:44be55e35e727fdcbbb35fbe62e4cafedd8844393461906d753f7afc8ab62b0d"},
+    {file = "commitizen-2.32.4-py3-none-any.whl", hash = "sha256:3113a4d807cea74c2f2e5bcd96c46a111c2ce87114c7411b17688aa0bbe6e738"},
+    {file = "commitizen-2.32.4.tar.gz", hash = "sha256:49966db4fed8840b424198019b83e38cf45c8d8727afcfc04ae8f174bfdb0e73"},
 ]
 commonmark = [
     {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
@@ -1624,8 +1624,8 @@ gitpython = [
     {file = "GitPython-3.1.27.tar.gz", hash = "sha256:1c885ce809e8ba2d88a29befeb385fcea06338d3640712b59ca623c220bb5704"},
 ]
 identify = [
-    {file = "identify-2.5.3-py2.py3-none-any.whl", hash = "sha256:25851c8c1370effb22aaa3c987b30449e9ff0cece408f810ae6ce408fdd20893"},
-    {file = "identify-2.5.3.tar.gz", hash = "sha256:887e7b91a1be152b0d46bbf072130235a8117392b9f1828446079a816a05ef44"},
+    {file = "identify-2.5.5-py2.py3-none-any.whl", hash = "sha256:ef78c0d96098a3b5fe7720be4a97e73f439af7cf088ebf47b620aeaa10fadf97"},
+    {file = "identify-2.5.5.tar.gz", hash = "sha256:322a5699daecf7c6fd60e68852f36f2ecbb6a36ff6e6e973e0d2bb6fca203ee6"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
@@ -2104,8 +2104,8 @@ urllib3 = [
     {file = "urllib3-1.26.12.tar.gz", hash = "sha256:3fa96cf423e6987997fc326ae8df396db2a8b7c667747d47ddd8ecba91f4a74e"},
 ]
 virtualenv = [
-    {file = "virtualenv-20.16.4-py3-none-any.whl", hash = "sha256:035ed57acce4ac35c82c9d8802202b0e71adac011a511ff650cbcf9635006a22"},
-    {file = "virtualenv-20.16.4.tar.gz", hash = "sha256:014f766e4134d0008dcaa1f95bafa0fb0f575795d07cae50b1bee514185d6782"},
+    {file = "virtualenv-20.16.5-py3-none-any.whl", hash = "sha256:d07dfc5df5e4e0dbc92862350ad87a36ed505b978f6c39609dc489eadd5b0d27"},
+    {file = "virtualenv-20.16.5.tar.gz", hash = "sha256:227ea1b9994fdc5ea31977ba3383ef296d7472ea85be9d6732e42a91c04e80da"},
 ]
 vulture = [
     {file = "vulture-2.5-py2.py3-none-any.whl", hash = "sha256:a7c7e7a23b11e78840fdd821509d05a6134aa9fd60418fe39d60b3026fe698d9"},
