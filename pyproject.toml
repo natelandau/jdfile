@@ -18,7 +18,10 @@ bump_message = "bump(release): v$current_version → v$new_version"
 tag_format = "v$version"
 update_changelog_on_bump = true
 version = "0.0.2"
-version_files = ["pyproject.toml:version"]
+version_files = [
+  "pyproject.toml:version",
+  "src/filemanager/__version__.py:__version__"
+  ]
 
 # https://python-poetry.org/docs/pyproject/#scripts
 [tool.poetry.scripts]
@@ -164,7 +167,7 @@ xfail_strict = true
 [tool.vulture]
 # exclude = ["file*.py", "dir/"]
 # ignore_decorators = ["@app.route", "@require_*"]
-ignore_names = ["args", "kwargs", "request"]
+ignore_names = ["args", "kwargs", "request", "version"]
 # make_whitelist = true
 min_confidence = 80
 paths = ["src", "tests"]

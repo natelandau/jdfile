@@ -11,6 +11,13 @@ from tests.helpers import Regex
 runner = CliRunner()
 
 
+def test_version():
+    """Test printing version and then exiting."""
+    result = runner.invoke(app, ["-n", "--version"])
+    assert result.exit_code == 0
+    assert result.output == Regex(r"filemanager version: \d+\.\d+\.\d+$")
+
+
 def test_filenames_in_dryrun(test_files, tmp_path):
     """Test clean command."""
     result = runner.invoke(app, ["-n", str(test_files[3])])

@@ -2,8 +2,12 @@
 
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 import typer
+from rich import print
+
+from filemanager.__version__ import __version__
 
 try:
     import tomllib
@@ -57,6 +61,13 @@ def load_configuration(paths: list[Path], required: bool = False) -> dict:
         return config
 
 
+def version_callback(value: bool) -> None:
+    """Print version and exit."""
+    if value:
+        print(f"filemanager version: {__version__}")
+        raise typer.Exit()
+
+
 class Case(str, Enum):
     """Define choices for case transformation."""
 
@@ -84,6 +95,9 @@ def main(  # noqa: C901
         show_default=False,
         help="""Set verbosity level (0=WARN, 1=INFO, 2=DEBUG, 3=TRACE)""",
         count=True,
+    ),
+    version: Optional[bool] = typer.Option(
+        None, "--version", callback=version_callback, is_eager=True
     ),
     dry_run: bool = typer.Option(
         False,
