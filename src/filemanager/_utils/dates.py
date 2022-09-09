@@ -1,51 +1,9 @@
 """Work with dates."""
 import re
 from datetime import date, datetime, timezone
-from enum import Enum
 from pathlib import Path
 
 from filemanager._utils.alerts import logger as log
-
-
-def date_in_filename(
-    stem: str, full_file: Path, add_date: bool | None, date_format: str, separator: Enum
-) -> tuple[str, str]:
-    """Add or remove a date from the beginning of a filename.
-
-    Args:
-        stem (str): The filename to add or remove a date from.
-        full_file (Path): The full path to the file.
-        add_date (bool): Whether to add a date to the beginning of the filename.
-        date_format (str): The date format to use.
-        separator (Enum): The separator to use.
-
-    Returns:
-        stem: The filename with the date optionally removed.
-        new_date: The date and separator to prepend to the filename.
-    """
-    if add_date is None:
-        return stem, ""
-    else:
-        date_string, new_date = parse_date(stem, date_format)
-        if date_string is None:
-            date_string = ""
-            new_date = create_date(full_file, date_format)
-
-    stem = stem.replace(date_string, "")
-
-    if add_date is True:
-
-        if separator == "underscore":
-            sep = "_"
-        elif separator == "dash":
-            sep = "-"
-        else:
-            sep = " "
-        date = f"{new_date}{sep}"
-    else:
-        date = ""
-
-    return stem, date
 
 
 def parse_date(  # noqa: C901

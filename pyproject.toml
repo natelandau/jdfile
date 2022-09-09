@@ -30,6 +30,7 @@ filemanager = "filemanager.cli:app"
 [tool.poetry.dependencies]
 arrow = "^1.2.2"
 loguru = "^0.6.0"
+nltk = "^3.7"
 plumbum = "^1.7.2"
 python = "^3.10"
 rich = "^12.5.1"

@@ -1,3 +1,8 @@
+# Local dev
+scratch/
+filemanager.toml
+testfiles/
+
 # Coverage.py
 htmlcov/
 reports/

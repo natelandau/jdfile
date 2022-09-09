@@ -10,15 +10,15 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore [no-redef]
 
-from filemanager._utils import alerts, create_unique_filename
-from filemanager._utils.alerts import logger as log
-from filemanager._utils.dates import date_in_filename
-from filemanager._utils.strings import (
-    change_case,
-    clean_extensions,
-    clean_special_chars,
-    use_specified_separator,
+from filemanager._utils import (
+    File,
+    alerts,
+    instantiate_nltk,
+    populate_cabinets,
+    populate_folders,
+    populate_stopwords,
 )
+from filemanager._utils.alerts import logger as log
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, rich_markup_mode="rich")
 
@@ -124,8 +124,8 @@ def main(  # noqa: C901
     clean: bool = typer.Option(
         True,
         "--clean/--no-clean",
-        help="Clean the filename – rempve special characters, optionally change case and word separators",
-        rich_help_panel="Filename Options",
+        help="Clean the filename – remove special characters, optionally change case and word separators",
+        rich_help_panel="Clean Filename Options",
     ),
     overwrite: bool = typer.Option(
         False,
@@ -144,14 +144,15 @@ def main(  # noqa: C901
         None,
         "--add-date/--remove-date",
         "-d/-r",
-        help="Add a formatted date to beginning of filename.",
-        rich_help_panel="Filename Options",
+        help="Add or remove a formatted date to beginning of filename. [dim]Default does nothing with dates.[/dim]",
+        rich_help_panel="Clean Filename Options",
+        show_default=False,
     ),
     case: Case = typer.Option(
         Case.ignore,
         case_sensitive=False,
         help="Case transformation. [dim](default: ignore)[/dim]",
-        rich_help_panel="Filename Options",
+        rich_help_panel="Clean Filename Options",
         show_default=False,
     ),
     separator: Separator = typer.Option(
@@ -160,15 +161,36 @@ def main(  # noqa: C901
         "--sep",
         case_sensitive=False,
         help="Word separator. [dim](default: ignore)[/dim]",
-        rich_help_panel="Filename Options",
+        rich_help_panel="Clean Filename Options",
         show_default=False,
     ),
     date_format: str = typer.Option(
         "%Y-%m-%d",
         "--date-format",
         help="Specify a date format.",
-        rich_help_panel="Filename Options",
+        rich_help_panel="Clean Filename Options",
         show_default=True,
+    ),
+    organize: str = typer.Option(
+        None,
+        "--organize",
+        "-o",
+        help="JohnnyDecimal folder tree to organize files into.",
+        rich_help_panel="Filesystem Options",
+    ),
+    use_synonyms: bool = typer.Option(
+        True,
+        "--syns/--no-syns",
+        help="Use synonyms to match words.",
+        show_default=True,
+        rich_help_panel="Filesystem Options",
+    ),
+    terms: list[str] = typer.Option(
+        None,
+        "--term",
+        "-t",
+        help="Term or JohnnyDecimal numbers used to match files. Add multiple terms with multiple --term flags.",
+        rich_help_panel="Filesystem Options",
     ),
 ) -> None:
     """A script which cleans and reformats filenames.
@@ -208,55 +230,31 @@ def main(  # noqa: C901
             Path.cwd() / f".{__package__}.toml",
         ]
 
-    config = load_configuration(possible_config_locations, required=False)  # noqa: F841
+    config = load_configuration(possible_config_locations, required=False)
 
-    list_of_files: list[Path] = []
-    for file in files:
-        if file.is_file():
-            list_of_files.append(file)
-        if file.is_dir():
-            for f in file.iterdir():
-                if f.is_file():
-                    list_of_files.append(f)
+    list_of_files: list[File] = []
+    for possible_file in files:
+        if possible_file.is_file() and possible_file not in config["ignored_files"]:
+            list_of_files.append(File(possible_file, terms))
+        if possible_file.is_dir():
+            for f in possible_file.iterdir():
+                if f.is_file() and f not in config["ignored_files"]:
+                    list_of_files.append(File(f, terms))
+
+    if organize:
+        folder = populate_folders(config, organize)
+        cabinets: list = populate_cabinets(folder)
+        if use_synonyms:
+            instantiate_nltk()
+
+    stopwords = populate_stopwords(config, organize)
 
     for file in list_of_files:
-        log.info(f"Processing: {file}")
-        parent: Path = file.parent
-        stem: str = str(file)[: str(file).rfind("".join(file.suffixes))].replace(
-            f"{str(parent)}/", ""
-        )
-        orig_stem: str = stem
-
-        suffixes: list[str] = file.suffixes
-        new_suffixes = clean_extensions(suffixes)
-
-        stem, date = date_in_filename(stem, file, add_date, date_format, separator)
-
         if clean:
-            stem = clean_special_chars(stem)
+            file.clean(separator, case, stopwords)
+        if add_date is not None:
+            file.add_date(add_date, date_format, separator)
+        if organize:
+            file.organize(stopwords, cabinets, use_synonyms)
 
-        stem = use_specified_separator(stem, separator)
-        stem = change_case(stem, case)
-
-        target = Path(parent / f"{date}{stem}{''.join(new_suffixes)}")
-        if file == target:
-            alerts.success(f"{orig_stem}{''.join(suffixes)} -> No change")
-        else:
-            if overwrite:
-                target = Path(parent / f"{date}{stem}{''.join(new_suffixes)}")
-            else:
-                target = create_unique_filename(
-                    Path(parent / f"{date}{stem}{''.join(new_suffixes)}"),
-                    separator,
-                    append_integer=append_unique_integer,
-                )
-
-            if dry_run:
-                alerts.dryrun(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
-            else:
-                try:
-                    alerts.success(f"{orig_stem}{''.join(suffixes)} -> {target.name}")
-                    file.rename(target)
-                except Exception as e:
-                    alerts.error(f"{e}")
-                    raise typer.Exit(code=1) from e
+        file.rename(dry_run, overwrite, separator, append_unique_integer)

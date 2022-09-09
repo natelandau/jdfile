@@ -17,7 +17,7 @@ def test_filenames_in_dryrun(test_files, tmp_path):
     assert result.exit_code == 0
     assert (
         result.output
-        == "DRYRUN   | 2022-08-28 a_fine &(filename).txt -> 2022-08-28 a_fine filename.txt\n"
+        == "DRYRUN   | 2022-08-28 a_FIne &(filename).txt -> 2022-08-28 FIne filename.txt\n"
     )
 
     result = runner.invoke(app, ["-n", "--sep", "space", str(test_files[7])])
@@ -48,16 +48,11 @@ def test_filenames_in_dryrun(test_files, tmp_path):
         [
             "-n",
             "--no-clean",
-            "--sep",
-            "dash",
-            "--case",
-            "lower",
-            "--overwrite",
             str(test_files[19]),
         ],
     )
     assert result.exit_code == 0
-    assert result.output == "DRYRUN   | specialChars(@#$)-&*.txt -> specialchars(@#$)-&*.txt\n"
+    assert result.output == "INFO     | specialChars(@#$)-&*.txt -> No change\n"
 
     result = runner.invoke(app, ["-nd", "--sep", "dash", str(test_files[8])])
     assert result.exit_code == 0
