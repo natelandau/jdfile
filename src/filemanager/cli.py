@@ -252,6 +252,10 @@ def main(  # noqa: C901
         ]
 
     config = load_configuration(possible_config_locations, required=False)
+    try:
+        config["ignored_files"]
+    except KeyError:
+        config["ignored_files"] = []
 
     list_of_files: list[File] = []
     for possible_file in files:
