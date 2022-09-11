@@ -1,22 +1,53 @@
 # filemanager
 
-A script which cleans and reformats
+A script to normalize filenames and organize files into directories.
 
-Run in `--dry-run` mode to see what changes would be made.
+## Summary
 
-Default behavior is to rename a file with the following options:
+### Why build this?
+
+It's nearly impossible to file away documents with normalized names when everyone has a different convention for naming files. On any given day, tons of files are attached to emails or sent via Slack by people who have their won way of naming files. For example:
+
+-   `department 2023 financials and budget 08232002.xlsx`
+-   `some contract Jan7 reviewed NOT FINAL (NL comments) v13.docx`
+-   `John&Jane-meeting-notes.txt`
+-   `Project_mockups(WIP)___sep92022.pdf`
+-   `FIRSTNAMElastname Resume (#1) [companyname].PDF`
+-   `code_to_review.js`
+
+If you are a person who archives documents there are a number of problems with these files.
+
+-   No self-evident way to organize them into folders
+-   No common patterns to search for
+-   Dates all over the place or nonexistent
+-   No consistent casing
+-   No consistent word separators
+-   Special characters within text
+-   I could go on and on...
+
+Additionally, even if the filenames were normalized, filing documents manually is a pain.
+
+### Enter filemanager
+
+`filemanager` normalizes filenames based on your preferences. It will:
 
 -   Remove special characters
--   Trim multiple separators (`_`, `-`, ` `)
--   Replace all `.jpeg` extensions to `.jpg`
--   Lowercase extensions
--   Avoid overwriting files by adding a unique integer
-
-Additional options:
-
--   Parse the filename for a date which can be reformated as `YYYY-MM-DD` and added to the beginning of the filename, or removed
+-   Trim multiple separators (`word----word` becomes `word-word`)
+-   Normalize to `lowercase`, `uppercase`, or `titlecase`
 -   Normalize to a common word separator (`_`, `-`, ` `)
--   Normalize the filename to lowercase, uppercase, or titlecase
+-   Replace all `.jpeg` extensions to `.jpg`
+-   Remove common stopwords
+-   Parse the filename for a date in many different formats
+-   Remove or reformat the date and add it the the beginning of the filename
+-   Avoid overwriting files by adding a unique integer when renaming/moving
+-   more...
+
+`filemanager` can organize your files into folders.
+
+-   File into directory trees following the [Johnny Decimal](https://johnnydecimal.com) system
+-   Parse files and folder names looking for matching terms
+-   Uses [nltk](https://www.nltk.org) to lookup synonyms to improve matching
+-   Add `.filemanager` files to directories containing a list of words that will match files
 
 ## Install
 
@@ -36,9 +67,45 @@ pipx install git+https://github.com/natelandau/filemanager
 
 Run `filemanager --help` for usage
 
+### Configuration
+
+`filemanager` will clean filenames without needing a configuration file. To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.filemanager/filemanager.toml`
+
+```toml
+ignored_files = ['.DS_Store', '.bashrc', 'something_not_to_rename'] # If cleaning an entire directory, files in this list will be skipped
+
+[projects]                      # Define any number of different projects
+
+[projects.jd]                   # A Johnny Decimal project
+name = "test"                   # (Required)  Name of this project (used as a command line option --organize=test)
+path = "~/johnnydecimal"        # (Required) Path to the folder containing the Johnny Decimal project
+stopwords = ["stopword", "stopword"]   # List of stopwords to be cleaned from filenames within this project
+
+[projects.test2]
+name = "test2"
+path = "~/somedir/test2"
+
+[projects.work]
+name = "work"
+path = "~/work-docs/"
+```
+
+### Examples
+
+```bash
+$ filemanager --add-date --case=title "department 2023 budget 08232002.XLSX"
+"department 2023 budget 08232002.XLSX" -> "2002-08-23 Department 2023 budget.xlsx"
+
+$ filemanager --add-date --sep=space --date-format="%b, %Y" "Project_mockups(WIP)___sep92022.pdf"
+"Project_mockups(WIP)___sep92022.pdf" -> "Sep, 2022 Project mockups WIP.pdf"
+
+filemanager --organize=work --add-date --sep=underscore "John-Jane-meeting-notes.txt"
+"John-Jane-meeting-notes.txt" -> "~/work/10-19 Notes/11 John/11.01 Meetings/2022-09-01_John_Jane_meeting_notes.txt"
+```
+
 ## Caveats
 
-Built this file management application for my own personal use. It is tested on MacOS and Raspberry Pi systems. YMMV depending on your system and requirements.
+`filemanager` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
 
 ## Contributing
 
@@ -95,3 +162,7 @@ Built this file management application for my own personal use. It is tested on 
 -   Run `poetry remove {package}` from within the development environment to uninstall a run time dependency and remove it from `pyproject.toml` and `poetry.lock`.
 -   Run `poetry update` from within the development environment to upgrade all dependencies to the latest versions allowed by `pyproject.toml`.
 -   Run `cz bump` to bump the package's version, update the `CHANGELOG.md`, and create a git tag.
+
+```
+
+```
