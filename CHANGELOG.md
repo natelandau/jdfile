@@ -1,3 +1,10 @@
+## v0.1.1 (2022-09-11)
+
+### Refactor
+
+- **organize**: refactor building project folder lists
+- rename cabinets to projects
+
 ## v0.1.0 (2022-09-09)
 
 ### Feat
