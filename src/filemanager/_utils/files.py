@@ -216,6 +216,7 @@ class File:
 
         file_words.extend(self.terms)
 
+        all_matched_terms = {}
         possible_folders = []
         for folder in folders:
             if use_synonyms:
@@ -225,15 +226,19 @@ class File:
             else:
                 terms = [t for t in folder.terms if t not in stopwords]
 
+            matched_terms = []
             for term in terms:
                 if term.lower() in file_words:
+                    matched_terms.append(term.lower())
                     possible_folders.append(folder)
+
+            if len(matched_terms) > 0:
+                all_matched_terms[folder.name] = matched_terms
 
         if len(possible_folders) == 0:
             print("No matches found...")
             raise Exit(code=1)
         elif len(possible_folders) == 1:
-            print(possible_folders)
             self.new_parent = possible_folders[0].path
         else:
             choices: list[str] = []
@@ -247,6 +252,7 @@ class File:
             choice_table.add_column("Category")
             choice_table.add_column("Number", justify="center")
             choice_table.add_column("Folder", justify="left", style="dim")
+            choice_table.add_column("Matched Terms", justify="left", style="dim")
             for idx, folder in enumerate(possible_folders, start=1):
                 choices.append(str(idx))
                 if folder.level == 3:
@@ -257,14 +263,25 @@ class File:
                         folder.name,
                         folder.number,
                         f"{cat}/{sub_cat}/{folder.name}",
+                        ", ".join(set(all_matched_terms[folder.name])),
                     )
                 elif folder.level == 2:
                     cat = re.match(r"^.*/\d{2}-\d{2}[- _](.*?)/.*", str(folder.path)).group(1)  # type: ignore[union-attr]
                     choice_table.add_row(
-                        str(idx), folder.name, folder.number, f"{cat}/{folder.name}"
+                        str(idx),
+                        folder.name,
+                        folder.number,
+                        f"{cat}/{folder.name}",
+                        ", ".join(set(all_matched_terms[folder.name])),
                     )
                 else:
-                    choice_table.add_row(str(idx), folder.name, folder.number, folder.name)
+                    choice_table.add_row(
+                        str(idx),
+                        folder.name,
+                        folder.number,
+                        folder.name,
+                        ", ".join(set(all_matched_terms[folder.name])),
+                    )
 
             choices.append("0")
             choice_table.add_row("0", "Abort", style="dim")
