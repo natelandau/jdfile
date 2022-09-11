@@ -1,78 +1,96 @@
 """Utilities for moving files into folders based on their name."""
 import contextlib
-import typing
+import re
 from pathlib import Path
 
 from typer import Abort
 
 from filemanager._utils.alerts import logger as log
-from filemanager._utils.johnnyDecimal import JDProject, Project
+from filemanager._utils.johnnyDecimal import Folder
 
 
-def build_project_folder_list(config: dict, requested_name: str) -> JDProject:
-    """Populate the list of folders.
+def find_root_dir(config: dict, project_name: str) -> Path:
+    """Find a valid root directory for the specified project.
 
     Args:
         config: (dict) Configuration dictionary.
-        requested_name: (str) The folder name to index.
+        project_name: (str) The project name to index.
 
     Returns:
-        JDProject: JDProject object.
+        Path: Path to a valid root directory.
 
     Raises:
-        Abort: If the folder tree is empty.
+        Abort: If a project folder is not found.
     """
     try:
         if config["projects"]:
             for project in config["projects"]:
-                if requested_name.lower() == config["projects"][project]["name"].lower():
-                    return JDProject(
-                        root=config["projects"][project]["path"],
-                        name=config["projects"][project]["name"],
-                    )
-            log.error(f"No folders matching '{requested_name}' found in the configuration file")
-            raise Abort()  # noqa: TC301
+                if project_name.lower() == config["projects"][project]["name"].lower():
+                    project_path = Path(config["projects"][project]["path"]).expanduser().resolve()
+                    break
+
+            if project_path.exists() is False:
+                log.error(f"'Config variable 'project_path': '{project_path}' does not exist.")
+                raise Abort()
+
         else:
-            log.error("No folders found in the configuration file")
+            log.error("No projects found in the configuration file")
             raise Abort()  # noqa: TC301
     except KeyError as e:
         log.error(f"{e} is not defined in the config file.")
         raise Abort() from e
+    except UnboundLocalError as e:
+        log.error(f"'{project_name}' is not defined in the config file.")
+        raise Abort() from e
+
+    return project_path
 
 
-def populate_projects(project: JDProject) -> list[Project]:
+def populate_project_folders(config: dict, project_name: str) -> list[Folder]:
     """Populate the list of Project objects (deepest level available for filing).
 
     Args:
-        project: (JDProject) Folder object
+        config: (dict) Configuration dictionary.
+        project_name: (str) The project name to index.
 
     Returns:
         list[str]: List of Projects.
+
     """
-    # TODO: Invert from category > subcat > area to area > subcat > category
-    # TODO: Remove populate_areas() and merge functionality into populate_projects()
-    filing_projects: list[Project] = []
+    project_path = find_root_dir(config, project_name)
 
-    categories = project.category_dict
-    for category in categories:
-        subcats = categories[category]["subcategories"]
+    available_folders = []
 
-        if subcats:
-            for subcategory in subcats:  # type: ignore[union-attr]  # type: ignore[index]
-                areas = subcats[subcategory]["areas"]  # type: ignore[index]
+    areas = [
+        area
+        for area in project_path.iterdir()
+        if area.is_dir() and re.match(r"^\d{2}-\d{2}[- _]", area.name)
+    ]
 
-                if areas:
-                    for area in areas:
-                        path = typing.cast(Path, area)
-                        filing_projects.append(Project(path, 3))
-                else:
-                    path = typing.cast(Path, subcats[subcategory]["path"])  # type: ignore[index]
-                    filing_projects.append(Project(path, 2))
+    for area in areas:
+        categories = [
+            category
+            for category in area.iterdir()
+            if category.is_dir() and re.match(r"^\d{2}[- _]", category.name)
+        ]
+
+        if len(categories) == 0:
+            available_folders.append(Folder(area, 1, project_path, project_name))
         else:
-            path = typing.cast(Path, categories[category]["path"])
-            filing_projects.append(Project(path, 1))
+            for category in categories:
+                subcategories = [
+                    subcategory
+                    for subcategory in category.iterdir()
+                    if subcategory.is_dir() and re.match(r"^\d{2}\.\d{2}[- _]", subcategory.name)
+                ]
 
-    return filing_projects
+                if len(subcategories) == 0:
+                    available_folders.append(Folder(category, 2, project_path, project_name))
+                else:
+                    for subcategory in subcategories:
+                        available_folders.append(Folder(subcategory, 3, project_path, project_name))
+
+    return available_folders
 
 
 def populate_stopwords(config: dict = {}, organize_folder: str | None = None) -> list[str]:

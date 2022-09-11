@@ -11,72 +11,52 @@ from typer import Abort
 from filemanager._utils.alerts import logger as log
 
 
-@rich.repr.auto
-class JDProject:
-    """Class defining a Johnny Decimal project."""
+def show_tree(project: Path) -> None:  # pragma: no cover
+    """Print the project tree.
 
-    def __init__(
-        self,
-        root: str,
-        name: str,
-    ) -> None:
-        """Initialize JohnnyDecimalFolder object.
+    Args:
+        project: (Path) Project to print.
 
-        Args:
-            root: (Path) Root directory of the project.
-            name: (str) Name of the project.
-        """
-        self.root = Path(root).expanduser().resolve()
-        self.name = name
-        self.category_dict: dict[str, dict[str, str | Path | dict]] = _build_categories(self.root)
-
-    def __rich_repr__(
-        self,
-    ) -> Generator[tuple[str, str | Path | dict], None, None]:
-        """Rich representation of the Category object."""
-        yield "root", self.root
-        yield "name", self.name
-        yield "categories", self.category_dict
-
-    def print_tree(self) -> None:  # pragma: no cover
-        """Print the project tree.
-
-        Raises:
-            Abort: If the project tree is empty.
-        """
-        try:
-            tree = local["tree"]
-            grep = local["grep"]
-            print(str(self.root))
-            showtree = (
-                tree["-d", "-L", "3", "--noreport", self.root] | grep["--color=never", "[0-9]"]
-            )
-            showtree & FG
-        except CommandNotFound as e:
-            log.error("Nomad binary is not installed")
-            raise Abort() from e
-        except ProcessExecutionError as e:
-            log.error(e)
-            raise Abort() from e
+    Raises:
+        Abort: If the project tree is empty.
+    """
+    try:
+        tree = local["tree"]
+        grep = local["grep"]
+        print(str(project))
+        showtree = tree["-d", "-L", "3", "--noreport", project] | grep["--color=never", "[0-9]"]
+        showtree & FG
+    except CommandNotFound as e:
+        log.error("Nomad binary is not installed")
+        raise Abort() from e
+    except ProcessExecutionError as e:
+        log.error(e)
+        raise Abort() from e
 
 
 @rich.repr.auto
-class Project:
+class Folder:
     """Class defining Johnny Decimal project folder available for moving files into."""
 
     def __init__(
         self,
         path: Path,
         level: int,
+        project: Path,
+        project_name: str,
     ) -> None:
         """Initialize Project object.
 
         Args:
             path: (Path) Path to the folder.
             level: (int) Johnny decimal level of the folder. (1: top level, 2: sub-level, 3: sub-sub-level)
+            project: (Path) Path to the root of the project.
+            project_name: (str) Name of the project.
         """
         self.path: Path = path
         self.level: int = level
+        self.root: Path = project
+        self.project_name: str = project_name
 
         if self.level == 3:
             self.name: str = re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
@@ -110,57 +90,3 @@ class Project:
         yield "name", self.name
         yield "number", self.number
         yield "terms", self.terms
-
-
-def _build_categories(folder: Path) -> dict[str, dict[str, str | Path | dict]]:
-    """Build the folder tree from files matching the Johnny Decimal System.
-
-    Args:
-        folder: (Path) Root folder of the tree.
-
-    Returns:
-        dict: Dictionary of categories, subcategories, and areas.
-    """
-
-    def _build_areas(folder: Path) -> dict:
-        """Build the areas in the folder tree.
-
-        Args:
-            folder: (Path) Folder to build categories from.
-
-        Returns:
-            dict: Areas in the category.
-        """
-        areas: dict[Path, Path] = {}
-        for area in folder.iterdir():
-            if area.is_dir() and re.match(r"^\d{2}\.\d{2}[- _]", area.name):
-                areas[area] = area
-        return areas
-
-    def _build_subcategories(folder: Path) -> dict:
-        """Build the categories in the folder tree.
-
-        Args:
-            folder: (Path) Folder to build categories from.
-
-        Returns:
-            dict: Subcategories in the folder.
-        """
-        subcategories: dict[str, dict[str, Path | str | dict]] = {}
-        for subcategory in folder.iterdir():
-            if subcategory.is_dir() and re.match(r"^\d{2}[- _]", subcategory.name):
-                subcategories[subcategory.name] = {
-                    "path": subcategory,
-                    "areas": _build_areas(subcategory),
-                }
-        return subcategories
-
-    categories: dict[str, dict[str, str | Path | dict]] = {}
-    for category in folder.iterdir():
-        if category.is_dir() and re.match(r"^\d{2}-\d{2}[- _]", category.name):
-            categories[category.name] = {
-                "path": category,
-                "subcategories": _build_subcategories(category),
-            }
-
-    return categories

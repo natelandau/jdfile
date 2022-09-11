@@ -17,10 +17,10 @@ except ModuleNotFoundError:
 from filemanager._utils import (
     File,
     alerts,
-    build_project_folder_list,
     instantiate_nltk,
-    populate_projects,
+    populate_project_folders,
     populate_stopwords,
+    show_tree,
 )
 from filemanager._utils.alerts import logger as log
 
@@ -185,11 +185,18 @@ def main(  # noqa: C901
         rich_help_panel="Clean Filename Options",
         show_default=True,
     ),
-    organize: str = typer.Option(
+    project_name: str = typer.Option(
         None,
         "--organize",
         "-o",
         help="JohnnyDecimal project to organize files into.",
+        rich_help_panel="Filesystem Options",
+    ),
+    print_tree: bool = typer.Option(
+        False,
+        "--tree",
+        help="Print a tree of the files and directories.",
+        show_default=True,
         rich_help_panel="Filesystem Options",
     ),
     use_synonyms: bool = typer.Option(
@@ -255,20 +262,26 @@ def main(  # noqa: C901
                 if f.is_file() and f not in config["ignored_files"]:
                     list_of_files.append(File(f, terms))
 
-    if organize:
-        project = build_project_folder_list(config, organize)
-        projects: list = populate_projects(project)
+    if project_name:
+        folders: list = populate_project_folders(config, project_name)
         if use_synonyms:
             instantiate_nltk()
 
-    stopwords = populate_stopwords(config, organize)
+    if print_tree and project_name:
+        show_tree(folders[0].root)
+        raise typer.Exit()
+    elif print_tree:
+        alerts.error("You must specify a project name to show the tree.")
+        raise typer.Exit(1)
+
+    stopwords = populate_stopwords(config, project_name)
 
     for file in list_of_files:
         if clean:
             file.clean(separator, case, stopwords)
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
-        if organize:
-            file.organize(stopwords, projects, use_synonyms)
+        if project_name:
+            file.organize(stopwords, folders, use_synonyms)
 
         file.rename(dry_run, overwrite, separator, append_unique_integer)
