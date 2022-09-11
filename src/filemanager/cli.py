@@ -247,8 +247,6 @@ def main(  # noqa: C901
             Path.home() / ".config" / f"{__package__}.toml",
             Path.home() / f".{__package__}" / f"{__package__}.toml",
             Path.home() / f".{__package__}.toml",
-            Path.cwd() / f"{__package__}.toml",
-            Path.cwd() / f".{__package__}.toml",
         ]
 
     config = load_configuration(possible_config_locations, required=False)
