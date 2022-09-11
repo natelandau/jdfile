@@ -6,7 +6,7 @@ from pathlib import Path
 
 import rich.repr
 from rich import print
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
 from typer import Abort, Exit
 
@@ -239,7 +239,14 @@ class File:
             print("No matches found...")
             raise Exit(code=1)
         elif len(possible_folders) == 1:
-            self.new_parent = possible_folders[0].path
+            confirm_move = Confirm.ask(
+                f"Move to folder: '[tan]{str(possible_folders[0].path)}[/tan]'?"
+            )
+            if confirm_move is True:
+                self.new_parent = possible_folders[0].path
+            else:
+                raise Abort()
+
         else:
             choices: list[str] = []
             choice_table = Table(
