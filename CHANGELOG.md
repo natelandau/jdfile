@@ -1,3 +1,15 @@
+## v0.2.0 (2022-09-11)
+
+### Feat
+
+- **organize**: confirm move if single folder found
+- **organize**: print matching terms
+
+### Fix
+
+- **config**: remove non-standard config file locations
+- fix error when no ignored_files specified
+
 ## v0.1.1 (2022-09-11)
 
 ### Refactor
