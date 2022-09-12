@@ -1,3 +1,15 @@
+## v0.3.0 (2022-09-12)
+
+### Feat
+
+- **organize**: file directly to a specified --number
+- **organize**: add skip and abort to organize options
+
+### Fix
+
+- **organize**: correctly escape variable name
+- correctly filter ignored files
+
 ## v0.2.0 (2022-09-11)
 
 ### Feat
