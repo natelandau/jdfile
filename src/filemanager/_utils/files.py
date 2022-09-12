@@ -249,7 +249,7 @@ class File:
             raise Abort()
         else:
             if len(possible_folders) == 0:
-                alerts.info("[tan]{self.new_stem}[/tan]: No folders found matching the filename")
+                alerts.info(f"[tan]{self.new_stem}[/tan]: No folders found matching the filename")
             else:
                 self.new_parent = print_organize_table(possible_folders, self, all_matched_terms)
 
