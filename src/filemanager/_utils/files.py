@@ -188,7 +188,9 @@ class File:
                     alerts.error(f"{e}")
                     raise Abort() from e
 
-    def organize(self, stopwords: list[str], folders: list, use_synonyms: bool) -> None:
+    def organize(  # noqa: C901
+        self, stopwords: list[str], folders: list, use_synonyms: bool, jd_number: str
+    ) -> None:
         """Matches a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
 
         Updates self.new_parent.
@@ -197,6 +199,11 @@ class File:
             stopwords: (list[str]) List of stopwords to use.
             folders: (list[Folder]) List of Folder objects to match against.
             use_synonyms: (bool) Whether to use synonyms for matching.
+            jd_number: (str) JD number to match against.
+
+        Raises:
+            Abort: If a specified number is not found
+
         """
         filename = self.new_stem
         for stopword in stopwords:
@@ -212,7 +219,10 @@ class File:
 
         all_matched_terms = {}
         possible_folders = []
+        jd_numbers = []
         for folder in folders:
+            jd_numbers.append(folder.number)
+
             if use_synonyms:
                 terms = [t for t in folder.terms if t not in stopwords]
                 terms = sorted(dedupe_list([syn for term in terms for syn in find_synonyms(term)]))
@@ -229,10 +239,19 @@ class File:
             if len(matched_terms) > 0:
                 all_matched_terms[folder.name] = matched_terms
 
-        if len(possible_folders) == 0:
-            alerts.info("[tan]{self.new_stem}[/tan]: No folders found matching the filename")
+        if jd_number:
+            for number in jd_numbers:
+                if jd_number == number:
+                    self.new_parent = folders[jd_numbers.index(number)].path
+                    return
+
+            alerts.error(f"No folder found matching: [tan]{jd_number}[/tan]")
+            raise Abort()
         else:
-            self.new_parent = print_organize_table(possible_folders, self, all_matched_terms)
+            if len(possible_folders) == 0:
+                alerts.info("[tan]{self.new_stem}[/tan]: No folders found matching the filename")
+            else:
+                self.new_parent = print_organize_table(possible_folders, self, all_matched_terms)
 
 
 def create_unique_filename(original: Path, separator: Enum, append_integer: bool = False) -> Path:

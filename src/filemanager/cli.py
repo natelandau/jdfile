@@ -213,6 +213,13 @@ def main(  # noqa: C901
         help="Term or JohnnyDecimal numbers used to match files. Add multiple terms with multiple --term flags.",
         rich_help_panel="Filesystem Options",
     ),
+    jd_number: str = typer.Option(
+        None,
+        "--number",
+        help="JohnnyDecimal number to override term matching when using --organize.",
+        show_default=False,
+        rich_help_panel="Filesystem Options",
+    ),
 ) -> None:
     """A script which cleans and reformats filenames.
 
@@ -284,6 +291,6 @@ def main(  # noqa: C901
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
         if project_name:
-            file.organize(stopwords, folders, use_synonyms)
+            file.organize(stopwords, folders, use_synonyms, jd_number)
 
         file.rename(dry_run, overwrite, separator, append_unique_integer)
