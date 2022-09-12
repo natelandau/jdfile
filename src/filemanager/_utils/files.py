@@ -5,12 +5,12 @@ from enum import Enum
 from pathlib import Path
 
 import rich.repr
-from rich import print
-from rich.prompt import Confirm, Prompt
+from rich import box, print
+from rich.prompt import Prompt
 from rich.table import Table
-from typer import Abort, Exit
+from typer import Abort
 
-from filemanager._utils import alerts, create_date, dedupe_list, find_synonyms, parse_date
+from filemanager._utils import Folder, alerts, create_date, dedupe_list, find_synonyms, parse_date
 
 
 @rich.repr.auto
@@ -188,9 +188,7 @@ class File:
                     alerts.error(f"{e}")
                     raise Abort() from e
 
-    def organize(  # noqa: C901
-        self, stopwords: list[str], folders: list, use_synonyms: bool
-    ) -> None:
+    def organize(self, stopwords: list[str], folders: list, use_synonyms: bool) -> None:
         """Matches a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
 
         Updates self.new_parent.
@@ -199,10 +197,6 @@ class File:
             stopwords: (list[str]) List of stopwords to use.
             folders: (list[Folder]) List of Folder objects to match against.
             use_synonyms: (bool) Whether to use synonyms for matching.
-
-        Raises:
-            Abort: If the user chooses to abort after being presented a list of potential directories
-            Exit: If no folders matching the filename are found.
         """
         filename = self.new_stem
         for stopword in stopwords:
@@ -222,7 +216,6 @@ class File:
             if use_synonyms:
                 terms = [t for t in folder.terms if t not in stopwords]
                 terms = sorted(dedupe_list([syn for term in terms for syn in find_synonyms(term)]))
-
             else:
                 terms = [t for t in folder.terms if t not in stopwords]
 
@@ -230,75 +223,16 @@ class File:
             for term in terms:
                 if term.lower() in file_words:
                     matched_terms.append(term.lower())
-                    possible_folders.append(folder)
+                    if folder not in possible_folders:
+                        possible_folders.append(folder)
 
             if len(matched_terms) > 0:
                 all_matched_terms[folder.name] = matched_terms
 
         if len(possible_folders) == 0:
-            print("No matches found...")
-            raise Exit(code=1)
-        elif len(possible_folders) == 1:
-            confirm_move = Confirm.ask(
-                f"Move to folder: '[tan]{str(possible_folders[0].path)}[/tan]'?"
-            )
-            if confirm_move is True:
-                self.new_parent = possible_folders[0].path
-            else:
-                raise Abort()
-
+            alerts.info("[tan]{self.new_stem}[/tan]: No folders found matching the filename")
         else:
-            choices: list[str] = []
-            choice_table = Table(
-                title="Select a folder",
-                caption="Select the folder that best matches the file.",
-                title_style="bold reverse",
-                show_lines=True,
-            )
-            choice_table.add_column("Choice", justify="center", style="bold", min_width=4)
-            choice_table.add_column("Category")
-            choice_table.add_column("Number", justify="center")
-            choice_table.add_column("Folder", justify="left", style="dim")
-            choice_table.add_column("Matched Terms", justify="left", style="dim")
-            for idx, folder in enumerate(possible_folders, start=1):
-                choices.append(str(idx))
-                if folder.level == 3:
-                    cat = re.match(r"^.*/\d{2}-\d{2}[- _](.*?)/.*", str(folder.path)).group(1)  # type: ignore[union-attr]
-                    sub_cat = re.match(r"^.*/\d{2}[- _](.*?)/.*", str(folder.path)).group(1)  # type: ignore[union-attr]
-                    choice_table.add_row(
-                        str(idx),
-                        folder.name,
-                        folder.number,
-                        f"{cat}/{sub_cat}/{folder.name}",
-                        ", ".join(set(all_matched_terms[folder.name])),
-                    )
-                elif folder.level == 2:
-                    cat = re.match(r"^.*/\d{2}-\d{2}[- _](.*?)/.*", str(folder.path)).group(1)  # type: ignore[union-attr]
-                    choice_table.add_row(
-                        str(idx),
-                        folder.name,
-                        folder.number,
-                        f"{cat}/{folder.name}",
-                        ", ".join(set(all_matched_terms[folder.name])),
-                    )
-                else:
-                    choice_table.add_row(
-                        str(idx),
-                        folder.name,
-                        folder.number,
-                        folder.name,
-                        ", ".join(set(all_matched_terms[folder.name])),
-                    )
-
-            choices.append("0")
-            choice_table.add_row("0", "Abort", style="dim")
-            print("\n\n")
-            print(choice_table)
-            choice = Prompt.ask("Folder to use:", choices=sorted(choices))
-            if choice == "0":
-                raise Abort
-            else:
-                self.new_parent = possible_folders[int(choice) - 1].path
+            self.new_parent = print_organize_table(possible_folders, self, all_matched_terms)
 
 
 def create_unique_filename(original: Path, separator: Enum, append_integer: bool = False) -> Path:
@@ -346,3 +280,71 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
 
     else:
         return original
+
+
+def print_organize_table(
+    possible_folders: list[Folder], file: File, all_matched_terms: dict
+) -> Path:
+    """Print table to select a folder from a list of possible folders.
+
+    Args:
+        possible_folders (list[Folder]): List of possible folders to match against.
+        file (File): File object to match against.
+        all_matched_terms (dict): Dictionary of matched terms.
+
+    Returns:
+        Path: The new parent directory.
+
+    Raises:
+        Abort: If the user chooses to abort after being presented a list of potential directories.
+    """
+    choices: list[str] = []
+    choice_table = Table(
+        title=f"Select folder for '[tan]{file.new_stem}[/tan]'",
+        title_style="bold",
+        show_lines=False,
+        box=box.SQUARE,
+    )
+    choice_table.add_column("Choice", justify="center", style="bold", min_width=4)
+    choice_table.add_column("Number")
+    choice_table.add_column("Folder Name")
+    choice_table.add_column("Project Path", justify="left", style="dim")
+    choice_table.add_column("Matched Terms", justify="left", style="dim")
+
+    length = len(possible_folders)
+    for idx, folder in enumerate(possible_folders, start=1):
+        choices.append(str(idx))
+
+        if idx != length:
+            choice_table.add_row(
+                str(idx),
+                folder.number,
+                folder.name,
+                folder.tree,
+                ", ".join(set(all_matched_terms[folder.name])),
+                style="bold",
+            )
+        else:
+            choice_table.add_row(
+                str(idx),
+                folder.number,
+                folder.name,
+                folder.tree,
+                ", ".join(set(all_matched_terms[folder.name])),
+                end_section=True,
+                style="bold",
+            )
+
+    choices.append("s")
+    choice_table.add_row("s", "skip", style="cyan")
+    choices.append("a")
+    choice_table.add_row("a", "abort", style="cyan")
+    print("\n")
+    print(choice_table)
+    choice = Prompt.ask("Folder to use:", choices=sorted(choices))
+    if choice == "a":
+        raise Abort
+    elif choice == "s":
+        return file.parent
+    else:
+        return possible_folders[int(choice) - 1].path

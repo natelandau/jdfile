@@ -61,15 +61,21 @@ class Folder:
         if self.level == 3:
             self.name: str = re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
             self.number: str = re.match(r"(^\d{2}\.\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.tree: str = str(self.path).replace(str(self.root), "")
         elif self.level == 2:
             self.name = re.sub(r"^\d{2}[- _]", "", str(self.path.name)).strip()
             self.number = re.match(r"(^\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.tree = str(self.path).replace(str(self.root), "")
         elif self.level == 1:
             self.name = re.sub(r"^\d{2}-\d{2}[- _]", "", str(self.path.name)).strip()
             self.number = re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.tree = str(self.path).replace(str(self.root), "")
         else:
             self.name = "None"
             self.number = "None"
+            self.tree = "None"
+
+        self.tree = re.sub(r"/\d{2}-\d{2}[- _]|/\d{2}[- _]|/\d{2}\.\d{2}[- _]", "/", self.tree)
 
         self.terms: list[str] = [self.name]
 
