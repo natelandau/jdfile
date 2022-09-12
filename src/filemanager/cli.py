@@ -257,11 +257,11 @@ def main(  # noqa: C901
 
     list_of_files: list[File] = []
     for possible_file in files:
-        if possible_file.is_file() and possible_file not in config["ignored_files"]:
+        if possible_file.is_file() and possible_file.stem not in config["ignored_files"]:
             list_of_files.append(File(possible_file, terms))
         if possible_file.is_dir():
             for f in possible_file.iterdir():
-                if f.is_file() and f not in config["ignored_files"]:
+                if f.is_file() and f.stem not in config["ignored_files"]:
                     list_of_files.append(File(f, terms))
 
     if project_name:
