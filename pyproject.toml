@@ -40,9 +40,13 @@ rich = "^12.5.1"
 tomli = "^2.0.1"
 typer = { extras = ["all"], version = "^0.6.1" }
 
-# https://python-poetry.org/docs/master/managing-dependencies/
-# TODO: Split in `tool.poetry.group.dev` and `tool.poetry.group.test` when Poetry 1.2.0 is released.
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.test.dependencies]
+pytest = "^7.1.2"
+pytest-clarity = "*"
+pytest-mock = "^3.8.1"
+pytest-xdist = "^2.5.0"
+
+[tool.poetry.group.dev.dependencies]
 absolufy-imports = "*"
 bandit = { extras = ["toml"], version = "*" }
 black = "*"
@@ -71,10 +75,6 @@ poethepoet = "*"
 pre-commit = "*"
 pydocstyle = { extras = ["toml"], version = "*" }
 PySnooper = "*"
-pytest = "^7.1.2"
-pytest-clarity = "*"
-pytest-mock = "^3.8.1"
-pytest-xdist = "^2.5.0"
 pyupgrade = "*"
 safety = "*"
 shellcheck-py = "*"
