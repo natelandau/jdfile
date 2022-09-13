@@ -1,3 +1,5 @@
+[![Test](https://github.com/natelandau/filemanager/actions/workflows/test.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/test.yml)
+
 # filemanager
 
 A script to normalize filenames and organize files into directories.
