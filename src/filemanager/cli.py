@@ -258,9 +258,9 @@ def main(  # noqa: C901
 
     config = load_configuration(possible_config_locations, required=False)
     try:
-        config["ignored_files"]
+        config["ignored_files"].append(".filemanager")
     except KeyError:
-        config["ignored_files"] = []
+        config["ignored_files"] = [".filemanager"]
 
     list_of_files: list[File] = []
     for possible_file in files:
@@ -293,4 +293,9 @@ def main(  # noqa: C901
         if project_name:
             file.organize(stopwords, folders, use_synonyms, jd_number)
 
+    if len(list_of_files) == 1:
         file.rename(dry_run, overwrite, separator, append_unique_integer)
+    else:
+        # TODO: Show list of files to be changed and ask for confirmation
+        for file in list_of_files:
+            file.rename(dry_run, overwrite, separator, append_unique_integer)
