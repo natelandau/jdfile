@@ -105,6 +105,52 @@ filemanager --organize=work --add-date --sep=underscore "John-Jane-meeting-notes
 "John-Jane-meeting-notes.txt" -> "~/work/10-19 Notes/11 John/11.01 Meetings/2022-09-01_John_Jane_meeting_notes.txt"
 ```
 
+### Tips
+
+Adding custom functions to your `.bashrc` or `.zshrc` can save time and ensure your filename preferences are always used.
+
+```bash
+# ~/.bashrc
+if command -v filemanager &>/dev/null; then
+
+    cf() {
+        # DESC:	 Clean filenames using the filemanager package
+        if [[ $1 == "--help" || $1 == "-h" ]]; then
+            filemanager --help
+        else
+            filemanager --sep=space --case=title "$@"
+        fi
+    }
+
+    cfd() {
+        # DESC:	 Clean filenames using the filemanager package
+        if [[ $1 == "--help" || $1 == "-h" ]]; then
+            filemanager --help
+        else
+            filemanager --add-date --sep=space --case=title "$@"
+        fi
+    }
+
+    wfile() {
+        # DESC:	 File work documents using the Johnny Decimal System and the filemanager package
+        if [[ $1 == "--help" || $1 == "-h" ]]; then
+            filemanager --help
+        else
+            filemanager --add-date --sep=underscore --case=lower --organize=work "$@"
+        fi
+    }
+
+    pfile() {
+        # DESC:	 File personal documents using the Johnny Decimal System and the filemanager package
+        if [[ $1 == "--help" || $1 == "-h" ]]; then
+            filemanager --help
+        else
+            filemanager --add-date --sep=space --case=title --organize=personal "$@"
+        fi
+    }
+fi
+```
+
 ## Caveats
 
 `filemanager` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
