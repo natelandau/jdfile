@@ -25,6 +25,13 @@ def test_no_files_specified():
     assert result.output == "ERROR    | No files were specified\n"
 
 
+def test_no_changes_recommended(test_files):
+    """Test no changes recommended does not ask for input."""
+    result = runner.invoke(app, ["-n", str(test_files[24])])
+    assert result.exit_code == 0
+    assert result.output == Regex(r"INFO     \| TESTFILE\.txt -> No changes")
+
+
 def test_filenames_in_dryrun(test_files, tmp_path):
     """Test clean command."""
     result = runner.invoke(
@@ -97,7 +104,7 @@ def test_file_iteration(test_files):
     result = runner.invoke(
         app,
         ["-nr", "--sep", "dash", "--case", "upper", str(test_files[14]), str(test_files[24])],
-        input="I\nS\nC\n",
+        input="i\nS\nC\n",
     )
     assert result.exit_code == 0
     assert result.output != Regex(r"->.*MONTH-DD-YYYY-FILE\.txt", re.DOTALL | re.MULTILINE)

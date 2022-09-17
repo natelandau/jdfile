@@ -327,6 +327,7 @@ def main(  # noqa: C901
 
     stopwords = populate_stopwords(config, project_name)
 
+    num_recommended_changes = 0
     for file in list_of_files:
         if clean:
             file.clean(separator, case, stopwords)
@@ -334,12 +335,16 @@ def main(  # noqa: C901
             file.add_date(add_date, date_format, separator)
         if project_name:
             file.organize(stopwords, folders, use_synonyms, jd_number, force)
+        target = file.target()
+        if target != file.path:
+            num_recommended_changes += 1
 
-    if force:
+    if force or num_recommended_changes == 0:
         for file in list_of_files:
             commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
     else:
         show_confirmation_table(list_of_files, show_diff, project_name)
+
         if len(list_of_files) == 1:
             choices: dict[str, str] = {
                 "C": "Commit all changes",
