@@ -68,7 +68,7 @@ def test_filenames_in_dryrun(test_files, tmp_path):
     originals = Path(tmp_path / "originals")
     result = runner.invoke(app, ["-n", "--sep", "space", str(originals)], input="C\n")
     assert result.output == Regex(r"╭───────────────┬───────────────────────────────────────────╮")
-    assert result.output == Regex(r"Iterate over all 26 changes")
+    assert result.output == Regex(r"Iterate over all \d+ changes")
     assert result.output == Regex(r"DRYRUN   \| two-extensions\.TAR\.gz.*->.*extensions\.tar\.gz")
     assert result.exit_code == 0
 
