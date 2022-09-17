@@ -6,6 +6,7 @@ from typing import Optional
 
 import typer
 from rich import print
+from rich.console import Console
 
 from filemanager.__version__ import __version__
 
@@ -20,6 +21,8 @@ from filemanager._utils import (
     instantiate_nltk,
     populate_project_folders,
     populate_stopwords,
+    select_option,
+    show_confirmation_table,
     show_tree,
 )
 from filemanager._utils.alerts import logger as log
@@ -66,6 +69,28 @@ def version_callback(value: bool) -> None:
     if value:
         print(f"filemanager version: {__version__}")
         raise typer.Exit()
+
+
+def commit_a_file(
+    file: File, dry_run: bool, overwrite: bool, separator: Enum, append_unique_integer: bool
+) -> None:
+    """Commit changes to a file.
+
+    Args:
+        file: File object.
+        dry_run: If True, do not commit changes.
+        overwrite: If True, overwrite existing file.
+        separator: Separator to use when creating new file.
+        append_unique_integer: If True, append unique integer to filename.
+    """
+    original, new = file.commit(dry_run, overwrite, separator, append_unique_integer)
+
+    if new == "":
+        alerts.info(f"{original} -> No changes")
+    elif dry_run:
+        alerts.dryrun(f"{original} -> {new}")
+    else:
+        alerts.success(f"{original} -> {new}")
 
 
 class Case(str, Enum):
@@ -128,7 +153,7 @@ def main(  # noqa: C901
         exists=True,
     ),
     files: list[Path] = typer.Argument(
-        ...,
+        None,
         help="Files or directories to process",
         dir_okay=True,
         file_okay=True,
@@ -140,6 +165,12 @@ def main(  # noqa: C901
         "--clean/--no-clean",
         help="Clean the filename – remove special characters, optionally change case and word separators",
         rich_help_panel="Clean Filename Options",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force changes to files without prompting for confirmation. Use with caution!",
     ),
     overwrite: bool = typer.Option(
         False,
@@ -220,6 +251,13 @@ def main(  # noqa: C901
         show_default=False,
         rich_help_panel="Filesystem Options",
     ),
+    show_diff: bool = typer.Option(
+        False,
+        "--diff",
+        help="Show a diff of the changes that would be made.",
+        show_default=True,
+        rich_help_panel="Filesystem Options",
+    ),
 ) -> None:
     """A script which cleans and reformats filenames.
 
@@ -262,15 +300,6 @@ def main(  # noqa: C901
     except KeyError:
         config["ignored_files"] = [".filemanager"]
 
-    list_of_files: list[File] = []
-    for possible_file in files:
-        if possible_file.is_file() and possible_file.stem not in config["ignored_files"]:
-            list_of_files.append(File(possible_file, terms))
-        if possible_file.is_dir():
-            for f in possible_file.iterdir():
-                if f.is_file() and f.stem not in config["ignored_files"]:
-                    list_of_files.append(File(f, terms))
-
     if project_name:
         folders: list = populate_project_folders(config, project_name)
         if use_synonyms:
@@ -283,6 +312,19 @@ def main(  # noqa: C901
         alerts.error("You must specify a project name to show the tree.")
         raise typer.Exit(1)
 
+    if len(files) == 0:
+        alerts.error("No files were specified")
+        raise typer.Exit(1)
+
+    list_of_files: list[File] = []
+    for possible_file in files:
+        if possible_file.is_file() and possible_file.stem not in config["ignored_files"]:
+            list_of_files.append(File(possible_file, terms))
+        if possible_file.is_dir():
+            for f in possible_file.iterdir():
+                if f.is_file() and f.stem not in config["ignored_files"]:
+                    list_of_files.append(File(f, terms))
+
     stopwords = populate_stopwords(config, project_name)
 
     for file in list_of_files:
@@ -291,11 +333,56 @@ def main(  # noqa: C901
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
         if project_name:
-            file.organize(stopwords, folders, use_synonyms, jd_number)
+            file.organize(stopwords, folders, use_synonyms, jd_number, force)
 
-    if len(list_of_files) == 1:
-        file.rename(dry_run, overwrite, separator, append_unique_integer)
-    else:
-        # TODO: Show list of files to be changed and ask for confirmation
+    if force:
         for file in list_of_files:
-            file.rename(dry_run, overwrite, separator, append_unique_integer)
+            commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
+    else:
+        show_confirmation_table(list_of_files, show_diff, project_name)
+        if len(list_of_files) == 1:
+            choices: dict[str, str] = {
+                "C": "Commit all changes",
+                "Q": "Quit without making any changes",
+            }
+        else:
+            choices = {
+                "I": f"Iterate over all [tan]{len(list_of_files)}[/tan] changes",
+                "C": f"Commit all [tan]{len(list_of_files)}[/tan] changes",
+                "Q": "Quit without making any changes",
+            }
+
+        choice = select_option(choices, show_choices=True)
+        if choice.upper() == "Q":
+            raise typer.Abort()
+        elif choice.upper() == "C":
+            for file in list_of_files:
+                commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
+        elif choice.upper() == "I":
+            console = Console()
+            console.clear()
+            choices = {
+                "C": "Commit all changes",
+                "S": "Skip this file and continue",
+                "Q": "Quit without making any changes",
+            }
+            print(f"[bold]Iterating over {len(list_of_files)} changes...[/]")
+
+            files_to_commit: list[File] = []
+            for idx, file in enumerate(list_of_files, start=1):
+                show_confirmation_table(
+                    [file], show_diff, project_name, total_num=len(list_of_files), index=idx
+                )
+                choice = select_option(choices, show_choices=True)
+                if choice.upper() == "Q":
+                    raise typer.Abort()
+                elif choice.upper() == "C":
+                    files_to_commit.append(file)
+                elif choice.upper() == "S":
+                    continue
+
+            if len(files_to_commit) > 0:
+                for file in files_to_commit:
+                    commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
+            else:
+                alerts.info("No files to commit")

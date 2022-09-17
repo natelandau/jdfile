@@ -1,16 +1,24 @@
 """Utilities for working with files."""
 import re
+import sys
 from collections.abc import Generator
 from enum import Enum
 from pathlib import Path
 
 import rich.repr
 from rich import box, print
-from rich.prompt import Prompt
 from rich.table import Table
 from typer import Abort
 
-from filemanager._utils import Folder, alerts, create_date, dedupe_list, find_synonyms, parse_date
+from filemanager._utils import (
+    Folder,
+    alerts,
+    create_date,
+    dedupe_list,
+    find_synonyms,
+    parse_date,
+    select_option,
+)
 
 
 @rich.repr.auto
@@ -153,10 +161,14 @@ class File:
             else:
                 self.new_stem = f"{new_date}{sep}{self.new_stem}"
 
-    def rename(
+    def target(self) -> Path:
+        """Returns the target path for the file."""
+        return self.new_parent / f"{''.join(self.new_stem)}{''.join(self.new_suffixes)}"
+
+    def commit(
         self, dry_run: bool, overwrite: bool, separator: Enum, append_unique_integer: bool
-    ) -> None:
-        """Rename the file based on self.new_parent, self.new_stem, and self.new_suffixes.
+    ) -> tuple[str, str]:
+        """Commit changes to a file based on self.new_parent, self.new_stem, and self.new_suffixes.
 
         Args:
             dry_run: (bool) Whether to perform a dry run.
@@ -164,42 +176,50 @@ class File:
             separator: (Enum) Separator to use.
             append_unique_integer: (bool) Whether to append a unique integer after the extensions or place it before the extension (default).
 
+        Returns:
+            tuple[str, str]: (old file name, string to print in confirmation)
+
         Raises:
             Abort: If the writing the file with the new name fails.
         """
-        target = Path(self.new_parent, f"{self.new_stem}{''.join(self.new_suffixes)}")
+        original_name = self.stem + "".join(self.suffixes)
+        target: Path = self.target()
         if target == self.path:
-            alerts.info(f"{self.stem}{''.join(self.suffixes)} -> No change")
+            return original_name, ""
         else:
             if not overwrite:
                 target = create_unique_filename(target, separator, append_unique_integer)
 
-            if dry_run:
-                if self.parent == target.parent:
-                    alerts.dryrun(f"{self.stem}{''.join(self.suffixes)} -> {target.name}")
-                else:
-                    alerts.dryrun(f"{self.stem}{''.join(self.suffixes)} -> {target}")
-
-            else:
+            if not dry_run:
                 try:
-                    alerts.success(f"{self.stem}{''.join(self.suffixes)} -> {target.name}")
                     self.path.rename(target)
                 except Exception as e:
                     alerts.error(f"{e}")
                     raise Abort() from e
 
+            if self.parent == target.parent:
+                return original_name, target.name
+            else:
+                return original_name, str(target)
+
     def organize(  # noqa: C901
-        self, stopwords: list[str], folders: list, use_synonyms: bool, jd_number: str
+        self,
+        stopwords: list[str],
+        folders: list,
+        use_synonyms: bool,
+        jd_number: str,
+        force: bool,
     ) -> None:
         """Matches a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
 
-        Updates self.new_parent.
+        Updates self.new_parent
 
         Args:
             stopwords: (list[str]) List of stopwords to use.
             folders: (list[Folder]) List of Folder objects to match against.
             use_synonyms: (bool) Whether to use synonyms for matching.
             jd_number: (str) JD number to match against.
+            force: (bool) Whether to avoid prompting the user. Selects the first match.
 
         Raises:
             Abort: If a specified number is not found
@@ -248,10 +268,10 @@ class File:
             alerts.error(f"No folder found matching: [tan]{jd_number}[/tan]")
             raise Abort()
         else:
-            if len(possible_folders) == 0:
-                alerts.info(f"[tan]{self.new_stem}[/tan]: No folders found matching the filename")
-            else:
-                self.new_parent = print_organize_table(possible_folders, self, all_matched_terms)
+            if len(possible_folders) == 1 or force:
+                self.new_parent = possible_folders[0].path
+            elif len(possible_folders) > 1:
+                self.new_parent = select_new_folder(possible_folders, self, all_matched_terms)
 
 
 def create_unique_filename(original: Path, separator: Enum, append_integer: bool = False) -> Path:
@@ -301,10 +321,8 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
         return original
 
 
-def print_organize_table(
-    possible_folders: list[Folder], file: File, all_matched_terms: dict
-) -> Path:
-    """Print table to select a folder from a list of possible folders.
+def select_new_folder(possible_folders: list[Folder], file: File, all_matched_terms: dict) -> Path:
+    """Select a folder for a file from a list of possible folders.
 
     Args:
         possible_folders (list[Folder]): List of possible folders to match against.
@@ -317,53 +335,53 @@ def print_organize_table(
     Raises:
         Abort: If the user chooses to abort after being presented a list of potential directories.
     """
-    choices: list[str] = []
+    choices: dict[str, str] = {}
     choice_table = Table(
-        title=f"Select folder for '[tan]{file.new_stem}[/tan]'",
+        title=f" Select folder for '[cyan]{file.path.name}[/]'",
         title_style="bold",
         show_lines=False,
-        box=box.SQUARE,
+        box=box.SIMPLE,
+        title_justify="left",
+        collapse_padding=True,
+        pad_edge=False,
+        padding=(0, 0, 0, 0),
     )
-    choice_table.add_column("Choice", justify="center", style="bold", min_width=4)
-    choice_table.add_column("Number")
+    choice_table.add_column("Opt", justify="center", style="bold reverse")
     choice_table.add_column("Folder Name")
-    choice_table.add_column("Project Path", justify="left", style="dim")
+    choice_table.add_column("JD Number")
+    choice_table.add_column("Path within project", justify="left", style="dim")
     choice_table.add_column("Matched Terms", justify="left", style="dim")
 
-    length = len(possible_folders)
     for idx, folder in enumerate(possible_folders, start=1):
-        choices.append(str(idx))
+        choices[
+            str(idx)
+        ] = f"{folder.tree} | [dim]Matched Terms: {', '.join(all_matched_terms[folder.name])}[/dim]"
 
-        if idx != length:
-            choice_table.add_row(
-                str(idx),
-                folder.number,
-                folder.name,
-                folder.tree,
-                ", ".join(set(all_matched_terms[folder.name])),
-                style="bold",
-            )
-        else:
-            choice_table.add_row(
-                str(idx),
-                folder.number,
-                folder.name,
-                folder.tree,
-                ", ".join(set(all_matched_terms[folder.name])),
-                end_section=True,
-                style="bold",
-            )
+        choice_table.add_row(
+            str(idx),
+            folder.name,
+            folder.number,
+            folder.tree,
+            ", ".join(set(all_matched_terms[folder.name])),
+            style="bold",
+        )
 
-    choices.append("s")
-    choice_table.add_row("s", "skip", style="cyan")
-    choices.append("a")
-    choice_table.add_row("a", "abort", style="cyan")
-    print("\n")
+    choices["N"] = "None of the above"
+    choice_table.add_row("N", "None of the above", style="cyan")
+    choices["Q"] = "Quit"
+    choice_table.add_row("Q", "Quit", style="cyan")
+
     print(choice_table)
-    choice = Prompt.ask("Folder to use:", choices=sorted(choices))
-    if choice == "a":
+    num_lines = len(possible_folders) + 11
+
+    choice = select_option(choices, "Select an option", same_line=True, show_choices=False)
+    if choice == "q" or choice == "Q":
         raise Abort
-    elif choice == "s":
+    elif choice == "n" or choice == "N":
+        sys.stdout.write(f"\033[{num_lines}A")
+        sys.stdout.write("\033[J")
         return file.parent
     else:
+        sys.stdout.write(f"\033[{num_lines}A")
+        sys.stdout.write("\033[J")
         return possible_folders[int(choice) - 1].path

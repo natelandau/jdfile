@@ -241,5 +241,5 @@ class LoggerManager:
             if msg:
                 print(msg)
             return True
-        else:
+        else:  # pragma: no cover
             return False

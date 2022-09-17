@@ -6,7 +6,7 @@ import nltk
 from filemanager._utils import dedupe_list
 
 
-def instantiate_nltk() -> None:
+def instantiate_nltk() -> None:  # pragma: no cover
     """Instantiate nltk package."""
     ntlk_data_path = Path(Path.home() / ".filemanager" / "nltk_data")
     nltk.data.path.append(ntlk_data_path)
@@ -18,7 +18,7 @@ def instantiate_nltk() -> None:
         nltk.download("omw-1.4", download_dir=ntlk_data_path)
 
 
-def find_synonyms(word: str) -> list[str]:
+def find_synonyms(word: str) -> list[str]:  # pragma: no cover
     """Find synonyms for a word.
 
     Args:
