@@ -75,6 +75,7 @@ Run `filemanager --help` for usage
 
 ```toml
 ignored_files = ['.DS_Store', '.bashrc', 'something_not_to_rename'] # If cleaning an entire directory, files in this list will be skipped
+match_case = ["OKR", "OKRs", "KPI", "KPIs"]  # Force the casing of certain words. Great for acronyms or proper nouns.
 
 [projects]                      # Define any number of different projects
 

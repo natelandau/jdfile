@@ -310,6 +310,7 @@ def main(  # noqa: C901
     for file in list_of_files:
         if clean:
             file.clean(separator, case, stopwords)
+            file.match_case(config)
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
         if project_name:

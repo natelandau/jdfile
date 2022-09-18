@@ -20,6 +20,7 @@ from filemanager._utils import (
     parse_date,
     select_option,
 )
+from filemanager._utils.alerts import logger as log
 
 
 @rich.repr.auto
@@ -125,6 +126,22 @@ class File:
 
         new_suffixes = [ext.lower() for ext in self.new_suffixes]
         self.new_suffixes = [".jpg" if ext == ".jpeg" else ext for ext in new_suffixes]
+
+    def match_case(self, config: dict) -> None:
+        """Ensure user specified words always match case."""
+        try:
+            if type(config["match_case"]) == list:
+                terms = config["match_case"]
+            else:
+                log.error("Expected 'match_case' to be a list.")
+                raise Abort()  # noqa: TC301
+        except KeyError:
+            pass
+        else:
+            for term in terms:
+                self.new_stem = re.sub(
+                    rf"(^|[-_ ]){term}([-_ ]|$)", rf"\1{term}\2", self.new_stem, flags=re.I
+                )
 
     def add_date(self, add_date: bool, date_format: str, separator: Enum) -> None:
         """Add and/or remove a date in a filename. Updates instance variables for 'stem'.
