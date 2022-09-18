@@ -173,7 +173,7 @@ def parse_date(  # noqa: C901
     )
 
     if yyyy_mm_dd:
-        log.info("Found yyyy_mm_dd")
+        log.trace("Found yyyy_mm_dd")
         year = yyyy_mm_dd.group("year")
         month = yyyy_mm_dd.group("month")
         day = yyyy_mm_dd.group("day")
@@ -181,7 +181,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif yyyy_dd_mm:
-        log.info("Found yyyy_dd_mm")
+        log.trace("Found yyyy_dd_mm")
         year = yyyy_dd_mm.group("year")
         month = yyyy_dd_mm.group("month")
         day = yyyy_dd_mm.group("day")
@@ -189,7 +189,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif month_dd_yyyy:
-        log.info("Found month_dd_yyyy")
+        log.trace("Found month_dd_yyyy")
         year = month_dd_yyyy.group("year")
         month = month_to_number(month_dd_yyyy.group("month"))
         day = month_dd_yyyy.group("day")
@@ -197,7 +197,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif dd_month_yyyy:
-        log.info("Found dd_month_yyyy")
+        log.trace("Found dd_month_yyyy")
         year = dd_month_yyyy.group("year")
         month = month_to_number(dd_month_yyyy.group("month"))
         day = dd_month_yyyy.group("day")
@@ -205,7 +205,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif month_yyyy:
-        log.info("Found month_yyyy")
+        log.trace("Found month_yyyy")
         year = month_yyyy.group("year")
         month = month_to_number(month_yyyy.group("month"))
         day = "01"
@@ -213,7 +213,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif yyyy_month:
-        log.info("Found yyyy_month")
+        log.trace("Found yyyy_month")
         year = yyyy_month.group("year")
         month = month_to_number(yyyy_month.group("month"))
         day = "01"
@@ -221,7 +221,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif mmddyyyy:
-        log.info("Found mmddyyyy")
+        log.trace("Found mmddyyyy")
         year = mmddyyyy.group("year")
         month = mmddyyyy.group("month")
         day = mmddyyyy.group("day")
@@ -229,7 +229,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif ddmmyyyy:
-        log.info("Found ddmmyyyy")
+        log.trace("Found ddmmyyyy")
         year = ddmmyyyy.group("year")
         month = ddmmyyyy.group("month")
         day = ddmmyyyy.group("day")
@@ -237,7 +237,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif mm_dd:
-        log.info("Found mm_dd")
+        log.trace("Found mm_dd")
         year = date.today().year
         month = mm_dd.group("month")
         day = mm_dd.group("day")
@@ -245,7 +245,7 @@ def parse_date(  # noqa: C901
         constructed_date = f"{month}/{day}/{year}"
 
     elif dd_mm:
-        log.info("Found dd_mm")
+        log.trace("Found dd_mm")
         year = date.today().year
         month = dd_mm.group("month")
         day = dd_mm.group("day")
