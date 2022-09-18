@@ -237,6 +237,13 @@ def main(  # noqa: C901
         show_default=True,
         rich_help_panel="Organization Options",
     ),
+    depth: int = typer.Option(
+        1,
+        "--depth",
+        help="How many levels deep to search for files when specifying a directory",
+        show_default=True,
+        rich_help_panel="Organization Options",
+    ),
 ) -> None:
     """[bold]filemanager[/bold] normalizes filenames based on your preferences.
 
@@ -319,9 +326,14 @@ def main(  # noqa: C901
         if possible_file.is_file() and possible_file.stem not in config["ignored_files"]:
             list_of_files.append(File(possible_file, terms))
         if possible_file.is_dir():
-            for f in possible_file.iterdir():
-                if f.is_file() and f.stem not in config["ignored_files"]:
+            for f in possible_file.rglob("*"):
+                depth_of_file = len(f.relative_to(possible_file).parts)
+                if depth_of_file <= depth and f.is_file() and f.stem not in config["ignored_files"]:
                     list_of_files.append(File(f, terms))
+
+    if len(list_of_files) == 0:
+        alerts.error("No files were found")
+        raise typer.Exit(1)
 
     stopwords = populate_stopwords(config, project_name)
 
@@ -350,7 +362,7 @@ def main(  # noqa: C901
             }
         else:
             choices = {
-                "C": f"Commit all [tan]{len(list_of_files)}[/tan] changes",
+                "C": f"Commit all [tan]{num_recommended_changes}[/tan] changes",
                 "I": f"Iterate over all [tan]{num_recommended_changes}[/tan] files with changes",
                 "Q": "Quit without making any changes",
             }
