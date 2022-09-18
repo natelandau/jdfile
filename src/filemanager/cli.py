@@ -71,28 +71,6 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def commit_a_file(
-    file: File, dry_run: bool, overwrite: bool, separator: Enum, append_unique_integer: bool
-) -> None:
-    """Commit changes to a file.
-
-    Args:
-        file: File object.
-        dry_run: If True, do not commit changes.
-        overwrite: If True, overwrite existing file.
-        separator: Separator to use when creating new file.
-        append_unique_integer: If True, append unique integer to filename.
-    """
-    original, new = file.commit(dry_run, overwrite, separator, append_unique_integer)
-
-    if new == "":
-        alerts.info(f"{original} -> No changes")
-    elif dry_run:
-        alerts.dryrun(f"{original} -> {new}")
-    else:
-        alerts.success(f"{original} -> {new}")
-
-
 class Case(str, Enum):
     """Define choices for case transformation."""
 
@@ -279,6 +257,7 @@ def main(  # noqa: C901
 
 
     """
+    console = Console()
     alerts.LoggerManager(  # pragma: no cover
         log_file,
         verbosity,
@@ -335,13 +314,12 @@ def main(  # noqa: C901
             file.add_date(add_date, date_format, separator)
         if project_name:
             file.organize(stopwords, folders, use_synonyms, jd_number, force)
-        target = file.target()
-        if target != file.path:
+        if file.has_change():
             num_recommended_changes += 1
 
     if force or num_recommended_changes == 0:
         for file in list_of_files:
-            commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
+            file.commit(dry_run, overwrite, separator, append_unique_integer)
     else:
         show_confirmation_table(list_of_files, show_diff, project_name)
 
@@ -352,8 +330,8 @@ def main(  # noqa: C901
             }
         else:
             choices = {
-                "I": f"Iterate over all [tan]{len(list_of_files)}[/tan] changes",
                 "C": f"Commit all [tan]{len(list_of_files)}[/tan] changes",
+                "I": f"Iterate over all [tan]{num_recommended_changes}[/tan] files with changes",
                 "Q": "Quit without making any changes",
             }
 
@@ -361,33 +339,35 @@ def main(  # noqa: C901
         if choice.upper() == "Q":
             raise typer.Abort()
         elif choice.upper() == "C":
+            console.clear()
+            print(f"[bold underline]{len(list_of_files)} files processed[/]\n")
             for file in list_of_files:
-                commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
+                file.commit(dry_run, overwrite, separator, append_unique_integer)
         elif choice.upper() == "I":
-            console = Console()
+
             console.clear()
             choices = {
                 "C": "Commit all changes",
                 "S": "Skip this file and continue",
                 "Q": "Quit without making any changes",
             }
-            print(f"[bold]Iterating over {len(list_of_files)} changes...[/]")
 
-            files_to_commit: list[File] = []
             for idx, file in enumerate(list_of_files, start=1):
-                show_confirmation_table(
-                    [file], show_diff, project_name, total_num=len(list_of_files), index=idx
-                )
-                choice = select_option(choices, show_choices=True)
-                if choice.upper() == "Q":
-                    raise typer.Abort()
-                elif choice.upper() == "C":
-                    files_to_commit.append(file)
-                elif choice.upper() == "S":
-                    continue
+                if file.has_change():
+                    show_confirmation_table(
+                        [file], show_diff, project_name, total_num=len(list_of_files), index=idx
+                    )
+                    choice = select_option(choices, show_choices=True)
+                    if choice.upper() == "Q":
+                        raise typer.Abort()
+                    elif choice.upper() == "S":
+                        file.new_parent = file.parent
+                        file.new_stem = file.stem
+                        file.new_path = file.path
+                        file.new_stem = file.stem
+                        file.new_suffixes = file.suffixes
 
-            if len(files_to_commit) > 0:
-                for file in files_to_commit:
-                    commit_a_file(file, dry_run, overwrite, separator, append_unique_integer)
-            else:
-                alerts.info("No files to commit")
+            console.clear()
+            print(f"[bold underline]{len(list_of_files)} files processed[/]\n")
+            for file in list_of_files:
+                file.commit(dry_run, overwrite, separator, append_unique_integer)

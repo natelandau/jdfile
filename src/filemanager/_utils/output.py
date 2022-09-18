@@ -44,19 +44,18 @@ def show_confirmation_table(
 
     with Live(confirmation_table, refresh_per_second=6):
         for file in list_of_files:
-            time.sleep(0.2)
-            target = file.target()
+            time.sleep(0.1)
 
             confirmation_table.add_row("File:", f"{file.path.name}", style="bold")
             confirmation_table.add_row(
                 "New Filename:",
-                "[green]NO CHANGES[/green]" if target.name == file.path.name else target.name,
+                file.target().name if file.has_change() else "[green]NO CHANGES[/green]",
                 end_section=bool(not project_name and not show_diff),
             )
             if show_diff:
                 confirmation_table.add_row(
                     "Diff:",
-                    diff_strings(file.path.name, target.name),
+                    diff_strings(file.path.name, file.target().name),
                     end_section=bool(not project_name and show_diff),
                 )
 
@@ -64,8 +63,8 @@ def show_confirmation_table(
                 confirmation_table.add_row(
                     "Path:",
                     "[dim]No new folder found[/]"
-                    if target.parent == file.parent
-                    else str(target.parent),
+                    if file.target().parent == file.parent
+                    else str(file.target().parent),
                     end_section=True,
                 )
     print("\n")

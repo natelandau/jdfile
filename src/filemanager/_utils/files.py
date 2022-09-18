@@ -1,4 +1,5 @@
 """Utilities for working with files."""
+import fnmatch
 import re
 import sys
 from collections.abc import Generator
@@ -167,7 +168,7 @@ class File:
 
     def commit(
         self, dry_run: bool, overwrite: bool, separator: Enum, append_unique_integer: bool
-    ) -> tuple[str, str]:
+    ) -> bool:
         """Commit changes to a file based on self.new_parent, self.new_stem, and self.new_suffixes.
 
         Args:
@@ -177,30 +178,44 @@ class File:
             append_unique_integer: (bool) Whether to append a unique integer after the extensions or place it before the extension (default).
 
         Returns:
-            tuple[str, str]: (old file name, string to print in confirmation)
+            True if the file was renamed or had no changes, False otherwise.
 
         Raises:
             Abort: If the writing the file with the new name fails.
         """
         original_name = self.stem + "".join(self.suffixes)
+
         target: Path = self.target()
-        if target == self.path:
-            return original_name, ""
+
+        if not self.has_change():
+            alerts.info(f"{original_name} -> No changes")
+            return True
+
+        target_regex = fnmatch.translate(str(target))
+        if not overwrite and not re.match(target_regex, str(self.path), re.I):
+            target = create_unique_filename(target, separator, append_unique_integer)
+
+        if dry_run and self.parent == target.parent:
+            alerts.dryrun(f"{original_name} -> {target.name}")
+            return True
+        elif dry_run and self.parent != target.parent:
+            alerts.dryrun(f"{original_name} -> {str(target)}")
+            return True
         else:
-            if not overwrite:
-                target = create_unique_filename(target, separator, append_unique_integer)
-
-            if not dry_run:
-                try:
-                    self.path.rename(target)
-                except Exception as e:
-                    alerts.error(f"{e}")
-                    raise Abort() from e
-
-            if self.parent == target.parent:
-                return original_name, target.name
+            try:
+                self.path.rename(target)
+            except Exception as e:
+                alerts.error(f"{e}")
+                raise Abort() from e
             else:
-                return original_name, str(target)
+                if self.parent == target.parent:
+                    alerts.success(f"{original_name} -> {target.name}")
+                    return True
+                elif self.parent != target.parent:
+                    alerts.success(f"{original_name} -> {str(target)}")
+                    return True
+
+        return False
 
     def organize(  # noqa: C901
         self,
@@ -273,6 +288,14 @@ class File:
             elif len(possible_folders) > 1:
                 self.new_parent = select_new_folder(possible_folders, self, all_matched_terms)
 
+    def has_change(self) -> bool:
+        """Returns whether the file has a change.
+
+        Returns:
+            True if the file has a change, False otherwise.
+        """
+        return self.target() != self.path
+
 
 def create_unique_filename(original: Path, separator: Enum, append_integer: bool = False) -> Path:
     """Create a unique filename by creating a unique integer and adding it to the filename.
@@ -296,6 +319,7 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
         sep = "-"
 
     if original.exists():
+
         parent: Path = original.parent
         stem: str = str(original)[: str(original).rfind("".join(original.suffixes))].replace(
             f"{str(parent)}/", ""

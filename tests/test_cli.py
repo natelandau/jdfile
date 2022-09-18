@@ -68,7 +68,7 @@ def test_filenames_in_dryrun(test_files, tmp_path):
     originals = Path(tmp_path / "originals")
     result = runner.invoke(app, ["-n", "--sep", "space", str(originals)], input="C\n")
     assert result.output == Regex(r"╭───────────────┬───────────────────────────────────────────╮")
-    assert result.output == Regex(r"Iterate over all \d+ changes")
+    assert result.output == Regex(r"Iterate over all \d+ files")
     assert result.output == Regex(r"DRYRUN   \| two-extensions\.TAR\.gz.*->.*extensions\.tar\.gz")
     assert result.exit_code == 0
 
@@ -120,12 +120,12 @@ def test_file_iteration(test_files):
         input="I\ns\ns\n",
     )
     assert result.exit_code == 0
-    assert result.output != Regex(r"->.*MONTH-DD-YYYY-FILE\.txt", re.DOTALL | re.MULTILINE)
-    assert result.output != Regex(
-        r"INFO     \| TESTFILE\.txt.*->.*No changes",
-        re.DOTALL,
+    assert result.output == Regex(
+        r"month-DD-YYYY file january.*01.*2016\.txt.*->.*No.*changes", re.DOTALL | re.MULTILINE
     )
-    assert result.output == Regex(r"INFO     \| No files to commit")
+    assert result.output == Regex(
+        r"INFO     \| TESTFILE\.txt.*->.*No changes", re.DOTALL | re.MULTILINE
+    )
 
 
 def test_clean_permutations(test_files):
@@ -164,10 +164,3 @@ def test_writing_files(test_files, tmp_path):
     assert result.exit_code == 0
     assert result.output == Regex(r"testfile\.txt -> No change")
     assert Path(tmp_path / "originals" / "testfile.txt").exists()
-
-    result = runner.invoke(
-        app, ["--case", "lower", "--sep", "space", str(test_files[24])], input="C\n"
-    )
-    assert result.exit_code == 0
-    assert result.output == Regex(r"TESTFILE\.txt -> testfile 2\.txt")
-    assert Path(tmp_path / "originals" / "testfile 2.txt").exists()
