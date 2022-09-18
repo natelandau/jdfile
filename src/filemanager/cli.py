@@ -148,19 +148,19 @@ def main(  # noqa: C901
         False,
         "--force",
         "-f",
-        help="Force changes to files without prompting for confirmation. Use with caution!",
+        help="Force changes without prompting for confirmation. Use with caution!",
     ),
     overwrite: bool = typer.Option(
         False,
         help="Overwrite existing files when renaming.  If false, will create a numbered version of the file.",
         show_default=True,
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
     ),
     append_unique_integer: bool = typer.Option(
         False,
         "--append",
         help="When renaming, if the file already exists, append a unique integer after the file extension. [dim]Default places the unique integer before the file extension.[/dim]",
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
         show_default=True,
     ),
     add_date: bool = typer.Option(
@@ -190,7 +190,7 @@ def main(  # noqa: C901
     date_format: str = typer.Option(
         "%Y-%m-%d",
         "--date-format",
-        help="Specify a date format.",
+        help="Specify a date format",
         rich_help_panel="Clean Filename Options",
         show_default=True,
     ),
@@ -198,63 +198,82 @@ def main(  # noqa: C901
         None,
         "--organize",
         "-o",
-        help="JohnnyDecimal project to organize files into.",
-        rich_help_panel="Filesystem Options",
+        help="JohnnyDecimal project to organize files into",
+        rich_help_panel="Organization Options",
     ),
     print_tree: bool = typer.Option(
         False,
         "--tree",
-        help="Print a tree of the files and directories.",
+        help="Print a tree representation of the directories within a project and exit",
         show_default=True,
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
     ),
     use_synonyms: bool = typer.Option(
         True,
         "--syns/--no-syns",
         help="Use synonyms to match words.",
         show_default=True,
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
     ),
     terms: list[str] = typer.Option(
         None,
         "--term",
         "-t",
-        help="Term or JohnnyDecimal numbers used to match files. Add multiple terms with multiple --term flags.",
-        rich_help_panel="Filesystem Options",
+        help="Term or used to match files. Add multiple terms with multiple --term flags",
+        rich_help_panel="Organization Options",
     ),
     jd_number: str = typer.Option(
         None,
         "--number",
-        help="JohnnyDecimal number to override term matching when using --organize.",
+        "--num",
+        help="Move file directly to Johnny Decimal folder matching number (overrides term matching)",
         show_default=False,
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
     ),
     show_diff: bool = typer.Option(
         False,
         "--diff",
         help="Show a diff of the changes that would be made.",
         show_default=True,
-        rich_help_panel="Filesystem Options",
+        rich_help_panel="Organization Options",
     ),
 ) -> None:
-    """A script which cleans and reformats filenames.
+    """[bold]filemanager[/bold] normalizes filenames based on your preferences.
 
-    Run in [blue]--dry-run[/blue] mode to see what changes would be made.
+    -   Remove special characters
+    -   Trim multiple separators ([reverse #999999] word____word [/] becomes [reverse #999999] word_word [/])
+    -   Normalize to [reverse #999999]lowercase[/], [reverse #999999]uppercase[/], or [reverse #999999]titlecase[/]
+    -   Normalize to a common word separator ([reverse #999999]_[/], [reverse #999999]-[/], [reverse #999999] [/])
+    -   Replace all [reverse #999999].jpeg[/] extensions to [reverse #999999].jpg[/]
+    -   Remove common stopwords
+    -   Parse the filename for a date in many different formats
+    -   Remove or reformat the date and add it the the beginning of the filename
+    -   Avoid overwriting files by adding a unique integer when renaming/moving
+    -   more...
 
-    Default behavior is to rename a file with the following options:
+    [bold]filemanager[/] can organize your files into folders when --organize is specified.
 
-    • Remove special characters
-    • Trim multiple separators ([blue]_[/blue], [blue]-[/blue], [reverse blue] [/reverse blue])
-    • Replace all [blue].jpeg[/blue] extensions to [blue].jpg[/blue]
-    • Lowercase extensions
-    • Avoid overwriting files by adding a unique integer
+    -   File into directory trees following the [link=https://johnnydecimal.com]Johnny Decimal system[/link]
+    -   Parse files and folder names looking for matching terms
+    -   Uses [link=https://www.nltk.org]nltk[/link] to lookup synonyms to improve matching
+    -   Add [reverse #999999].filemanager[/] files to directories containing a list of words that will match files
 
-    Additional options:
+    [bold underline]Example usage:[/]
 
-    • Parse the filename for a date which can be reformated as [blue]YYYY-MM-DD[/blue] and added to the beginning of the filename, or removed
-    • Normalize to a common word separator ([blue]_[/blue], [blue]-[/blue], [reverse blue] [/reverse blue])
-    • Normalize the filename to lowercase, uppercase, or titlecase
+    [dim]# Normalize all files in a directory to lowercase, with underscore separators[/dim]
+    $ filemanager --case=lower --separator=underscore /path/to/directory
 
+    [dim]# Organize files into a specified Johnny Decimal folder and add a date[/dim]
+    $ filemanager --organize=project --add-date --number=23.01 some_file.jpg
+
+    [dim]# Print a tree representation of a Johnny Decimal project[/dim]
+    $ filemanager --organize=project --tree
+
+    [dim]# Organize files into a Johnny Decimal project with specified terms with title casing[/dim]
+    $ filemanager --case=title --organize=project --term=term1 --term=term2 some_file.jpg
+
+    [dim]# Run in --dry_run mode to avoid making permanent changes[/dim]
+    $ filemanager --dry-run --diff /path/to/directory
 
     """
     console = Console()
