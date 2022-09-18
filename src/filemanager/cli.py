@@ -147,8 +147,8 @@ def main(  # noqa: C901
     force: bool = typer.Option(
         False,
         "--force",
-        "-f",
         help="Force changes without prompting for confirmation. Use with caution!",
+        show_default=True,
     ),
     overwrite: bool = typer.Option(
         False,
@@ -191,6 +191,14 @@ def main(  # noqa: C901
         "%Y-%m-%d",
         "--date-format",
         help="Specify a date format",
+        rich_help_panel="Clean Filename Options",
+        show_default=True,
+    ),
+    filter_correct: bool = typer.Option(
+        False,
+        "--filter-correct",
+        "-f",
+        help="Filter correct files from output",
         rich_help_panel="Clean Filename Options",
         show_default=True,
     ),
@@ -342,14 +350,25 @@ def main(  # noqa: C901
         if clean:
             file.clean(separator, case, stopwords)
             file.match_case(config)
+
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
+
         if project_name:
             file.organize(stopwords, folders, use_synonyms, jd_number, force)
+
         if file.has_change():
             num_recommended_changes += 1
 
+    if filter_correct:
+        log.debug("Filtering out files that don't need to be changed")
+        list_of_files = [f for f in list_of_files if f.has_change()]
+
     if force or num_recommended_changes == 0:
+        if len(list_of_files) == 0:
+            alerts.notice("All files are already correct")
+            raise typer.Exit()
+
         for file in list_of_files:
             file.commit(dry_run, overwrite, separator, append_unique_integer)
     else:
@@ -379,7 +398,7 @@ def main(  # noqa: C901
 
             console.clear()
             choices = {
-                "C": "Commit all changes",
+                "C": "Commit changes",
                 "S": "Skip this file and continue",
                 "Q": "Quit without making any changes",
             }

@@ -953,8 +953,6 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "right",
         "ring",
         "ro",
-        "room",
-        "rooms",
         "round",
         "ru",
         "run",
