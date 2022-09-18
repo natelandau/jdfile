@@ -50,9 +50,9 @@ def show_confirmation_table(
             confirmation_table.add_row(
                 "New Filename:",
                 file.target().name if file.has_change() else "[green]NO CHANGES[/green]",
-                end_section=bool(not project_name and not show_diff),
+                end_section=bool(not project_name and (not show_diff or not file.has_change())),
             )
-            if show_diff:
+            if show_diff and file.has_change():
                 confirmation_table.add_row(
                     "Diff:",
                     diff_strings(file.path.name, file.target().name),
