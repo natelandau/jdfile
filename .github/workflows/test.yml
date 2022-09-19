@@ -94,7 +94,6 @@ jobs:
           poe test
       # ----------------------------------------------
       #             upload coverage stats
-      # (requires CODECOV_TOKEN in repository secrets)
       # ----------------------------------------------
       - name: Upload coverage
         uses: codecov/codecov-action@v3

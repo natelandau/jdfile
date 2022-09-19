@@ -1,4 +1,4 @@
-[![Test](https://github.com/natelandau/filemanager/actions/workflows/test.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/test.yml)
+[![Test](https://github.com/natelandau/filemanager/actions/workflows/test.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
 
 # filemanager
 
