@@ -1,5 +1,10 @@
 """Shared utilities."""
-from filemanager._utils.utilities import dedupe_list, diff_strings, select_option  # isort:skip
+from filemanager._utils.utilities import (  # isort:skip
+    dedupe_list,
+    diff_strings,
+    from_camel_case,
+    select_option,
+)
 from filemanager._utils.synonyms import find_synonyms, instantiate_nltk  # isort: skip
 from filemanager._utils.johnnyDecimal import show_tree, Folder  # isort: skip
 from filemanager._utils import alerts
@@ -18,6 +23,7 @@ __all__ = [
     "File",
     "find_synonyms",
     "Folder",
+    "from_camel_case",
     "instantiate_nltk",
     "LoggerManager",
     "parse_date",

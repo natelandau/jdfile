@@ -2,7 +2,9 @@
 """Test utility helpers."""
 from io import StringIO
 
-from filemanager._utils.utilities import dedupe_list, diff_strings, select_option
+import pytest
+
+from filemanager._utils.utilities import dedupe_list, diff_strings, from_camel_case, select_option
 
 
 def test_dedupe_list():
@@ -59,3 +61,20 @@ def test_select_option(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert "Invalid option: N\n" in captured.out
     assert "Invalid option: X\n" in captured.out
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("OneWord", "One Word"),
+        ("I_have_MultipleWords", "I_have_ Multiple Words"),
+        ("I have no camelcase", "I have no camelcase"),
+        (
+            "2019-03-31 SummaryDocument NDA with9someNumbers",
+            "2019-03-31  Summary Document NDA with9some Numbers",
+        ),
+    ],
+)
+def test_from_camel_case(string, expected):
+    """Test splitting camel case strings."""
+    assert from_camel_case(string) == expected

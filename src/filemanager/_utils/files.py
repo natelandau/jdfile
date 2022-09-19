@@ -17,6 +17,7 @@ from filemanager._utils import (
     create_date,
     dedupe_list,
     find_synonyms,
+    from_camel_case,
     parse_date,
     select_option,
 )
@@ -80,14 +81,24 @@ class File:
         yield "new_suffixes", self.new_suffixes
         yield "dotfile", self.dotfile
 
-    def clean(self, separator: Enum, case: Enum, stopwords: list[str]) -> None:
+    def clean(  # noqa: C901
+        self,
+        separator: Enum,
+        case: Enum,
+        split_words: bool,
+        stopwords: list[str],
+    ) -> None:
         """Cleans the filename and updates instance variables for 'stem' and 'suffixes'.
 
         Args:
             separator: (Enum) Separator to use.
             case: (Enum) Case to use.
+            split_words: (bool) Whether to split camel case words.
             stopwords: (list[str]) List of stopwords to remove (optional).
         """
+        if split_words:
+            self.new_stem = from_camel_case(self.new_stem)
+
         self.new_stem = re.sub(r"[^\w\d\-_ ]", " ", self.new_stem)
 
         for stopword in stopwords:

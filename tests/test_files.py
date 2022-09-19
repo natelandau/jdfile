@@ -48,11 +48,11 @@ def test_file_creation(test_files):
     assert file.dotfile is False
     assert file.terms == terms
 
-    file.clean(separator="dash", case="upper", stopwords=stopwords)
+    file.clean(separator="dash", case="upper", split_words=False, stopwords=stopwords)
     assert file.stem == test_files[3].stem
     assert file.new_stem == "2022-08-28-FINE-FILENAME"
 
-    file.clean(separator="space", case="lower", stopwords=stopwords)
+    file.clean(separator="space", case="lower", split_words=False, stopwords=stopwords)
     assert file.new_stem == "2022 08 28 fine filename"
 
     file.add_date(
@@ -78,7 +78,7 @@ def test_file_creation(test_files):
 
     file = File(test_files[26], terms)
     assert file.dotfile is True
-    file.clean(separator="underscore", case="upper", stopwords=stopwords)
+    file.clean(separator="underscore", case="upper", split_words=False, stopwords=stopwords)
     assert file.new_stem == ".DOTFILE"
     assert file.new_suffixes == [".jpg", ".zip", ".gzip"]
     file.add_date(
@@ -89,5 +89,15 @@ def test_file_creation(test_files):
     assert file.new_stem == Regex(r"^\.\d{4}-\d{2}-\d{2}_dotfile")
 
     file = File(test_files[15], [])
-    file.clean("underscore", "title", stopwords)
+    file.clean("underscore", "title", False, stopwords)
     assert file.new_stem == "Multiple_Separators_Stripped"
+
+
+def test_split_words(test_files):
+    """Test splitting words."""
+    stopwords = populate_stopwords()
+    terms = ["term1", "term2", "term3"]
+    file = File(test_files[19], terms)
+
+    file.clean(separator="space", case="lower", split_words=True, stopwords=stopwords)
+    assert file.new_stem == "special chars"

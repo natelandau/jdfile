@@ -202,6 +202,13 @@ def main(  # noqa: C901
         rich_help_panel="Clean Filename Options",
         show_default=True,
     ),
+    split_words: bool = typer.Option(
+        False,
+        "--split-words",
+        help="Split words on capital letters. [cyan]Ex: SomeFilename -> Some Filename[/cyan]",
+        rich_help_panel="Clean Filename Options",
+        show_default=True,
+    ),
     project_name: str = typer.Option(
         None,
         "--organize",
@@ -348,7 +355,7 @@ def main(  # noqa: C901
     num_recommended_changes = 0
     for file in list_of_files:
         if clean:
-            file.clean(separator, case, stopwords)
+            file.clean(separator, case, split_words, stopwords)
             file.match_case(config)
 
         if add_date is not None:

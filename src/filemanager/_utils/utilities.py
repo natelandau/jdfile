@@ -1,5 +1,6 @@
 """Small utility functions."""
 import difflib
+import re
 import sys
 
 from rich import print
@@ -91,3 +92,16 @@ def diff_strings(a: str, b: str) -> str:
             output.append(f"{red}{a[a0:a1]}{endred}")
 
     return "".join(output)
+
+
+def from_camel_case(string: str) -> str:
+    """Converts a string from camelCase to separate words.
+
+    Args:
+        string (str): String to convert.
+
+    Returns:
+        str: Converted string.
+    """
+    words = [word for word in re.split(r"(?=[A-Z][a-z])", string) if word]
+    return " ".join(words)
