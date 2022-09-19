@@ -77,7 +77,7 @@ class Folder:
 
         self.tree = re.sub(r"/\d{2}-\d{2}[- _]|/\d{2}[- _]|/\d{2}\.\d{2}[- _]", "/", self.tree)
 
-        self.terms: list[str] = [self.name]
+        self.terms: list[str] = [word for word in re.split(r"[- _]", self.name) if word]
 
         if Path(self.path, ".filemanager").exists():
             content = Path(self.path, ".filemanager").read_text().splitlines()
