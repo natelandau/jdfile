@@ -4,6 +4,7 @@ from pathlib import Path
 import nltk
 
 from filemanager._utils import dedupe_list
+from filemanager._utils.alerts import logger as log
 
 
 def instantiate_nltk() -> None:  # pragma: no cover
@@ -16,6 +17,8 @@ def instantiate_nltk() -> None:  # pragma: no cover
 
     if Path(ntlk_data_path / "corpora" / "omw-1.4.zip").exists() is False:
         nltk.download("omw-1.4", download_dir=ntlk_data_path)
+
+    log.trace("NLTK instantiated")
 
 
 def find_synonyms(word: str) -> list[str]:  # pragma: no cover

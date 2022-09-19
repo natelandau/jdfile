@@ -96,47 +96,61 @@ class File:
             split_words: (bool) Whether to split camel case words.
             stopwords: (list[str]) List of stopwords to remove (optional).
         """
+        log.trace(f"Begin cleaning: {self.path.name}")
         if split_words:
             self.new_stem = from_camel_case(self.new_stem)
+            log.trace(f"Split words: {self.new_stem}")
 
         self.new_stem = re.sub(r"[^\w\d\-_ ]", " ", self.new_stem)
+        log.trace(f"Remove special characters: {self.new_stem}")
 
         for stopword in stopwords:
             self.new_stem = re.sub(rf"(^|[-_ ]){stopword}([-_ ]|$)", " ", self.new_stem, flags=re.I)
+        log.trace(f"Remove stopwords: {self.new_stem}")
 
         if re.match(r"^.$", self.new_stem):
             self.new_stem = self.stem
+            log.trace(f"File name is a single character, reverting to original: {self.new_stem}")
 
         if case == "lower":
             self.new_stem = self.new_stem.lower()
+            log.trace(f"Lowercase: {self.new_stem}")
         elif case == "upper":
             self.new_stem = self.new_stem.upper()
+            log.trace(f"Uppercase: {self.new_stem}")
         elif case == "title":
             self.new_stem = self.new_stem.title()
+            log.trace(f"Titlecase: {self.new_stem}")
 
         if separator == "underscore":
             self.new_stem = re.sub(r"[-_ \.]", "_", self.new_stem)
             self.new_stem = re.sub(r"_+", "_", self.new_stem)
+            log.trace(f"Underscore: {self.new_stem}")
         elif separator == "dash":
             self.new_stem = re.sub(r"[-_ \.]", "-", self.new_stem)
             self.new_stem = re.sub(r"-+", "-", self.new_stem)
+            log.trace(f"Dash: {self.new_stem}")
         elif separator == "space":
             self.new_stem = re.sub(r"[-_ \.]", " ", self.new_stem)
             self.new_stem = re.sub(r" +", " ", self.new_stem)
+            log.trace(f"Space: {self.new_stem}")
         else:
             self.new_stem = re.sub(r"_+", "_", self.new_stem)
             self.new_stem = re.sub(r"-+", "-", self.new_stem)
             self.new_stem = re.sub(r" +", " ", self.new_stem)
+            log.trace(f"ignore separator: {self.new_stem}")
 
         self.new_stem = self.new_stem.strip(" -_")
 
         if self.dotfile is True:
             self.new_stem = f".{self.new_stem}"
+            log.trace(f"Dotfile: {self.new_stem}")
         else:
             self.new_stem = self.new_stem
 
         new_suffixes = [ext.lower() for ext in self.new_suffixes]
         self.new_suffixes = [".jpg" if ext == ".jpeg" else ext for ext in new_suffixes]
+        log.trace(f"Suffixes: {self.new_suffixes}")
 
     def match_case(self, config: dict) -> None:
         """Ensure user specified words always match case."""
@@ -153,6 +167,7 @@ class File:
                 self.new_stem = re.sub(
                     rf"(^|[-_ ]){term}([-_ ]|$)", rf"\1{term}\2", self.new_stem, flags=re.I
                 )
+            log.trace(f"Match case: {self.new_stem}")
 
     def add_date(self, add_date: bool, date_format: str, separator: Enum) -> None:
         """Add and/or remove a date in a filename. Updates instance variables for 'stem'.
@@ -169,9 +184,11 @@ class File:
         if date_string is None:
             date_string = ""
             new_date = create_date(self.new_path, date_format)
+            log.trace(f"Date not found in filename. Using metadata: {new_date}")
         else:
             self.new_stem = self.new_stem.replace(date_string, "")
             self.new_stem = self.new_stem.strip(" -_")
+            log.trace(f"Removed date: {self.new_stem}")
 
         if add_date is True:
             if separator == "underscore":
@@ -189,6 +206,8 @@ class File:
                 self.new_stem = f".{new_date}{sep}{self.new_stem}"
             else:
                 self.new_stem = f"{new_date}{sep}{self.new_stem}"
+
+            log.trace(f"Added date: {self.new_stem}")
 
     def target(self) -> Path:
         """Returns the target path for the file."""
@@ -216,7 +235,7 @@ class File:
         target: Path = self.target()
 
         if not self.has_change():
-            alerts.info(f"{original_name} -> No changes")
+            log.info(f"{original_name} -> No changes")
             return True
 
         target_regex = fnmatch.translate(str(target))
@@ -237,10 +256,10 @@ class File:
                 raise Abort() from e
             else:
                 if self.parent == target.parent:
-                    alerts.success(f"{original_name} -> {target.name}")
+                    log.success(f"{original_name} -> {target.name}")
                     return True
                 elif self.parent != target.parent:
-                    alerts.success(f"{original_name} -> {str(target)}")
+                    log.success(f"{original_name} -> {str(target)}")
                     return True
 
         return False
@@ -296,6 +315,7 @@ class File:
             for term in terms:
                 if term.lower() in file_words:
                     matched_terms.append(term.lower())
+                    log.trace(f"Organize matched term: '{term}' to '{folder.number}'")
                     if folder not in possible_folders:
                         possible_folders.append(folder)
 
@@ -306,6 +326,7 @@ class File:
             for number in jd_numbers:
                 if jd_number == number:
                     self.new_parent = folders[jd_numbers.index(number)].path
+                    log.trace(f"Organize force folder: {number}")
                     return
 
             alerts.error(f"No folder found matching: [tan]{jd_number}[/tan]")

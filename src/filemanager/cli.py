@@ -92,7 +92,7 @@ class Separator(str, Enum):
 @app.command()
 def main(  # noqa: C901
     verbosity: int = typer.Option(
-        0,
+        1,
         "-v",
         "--verbose",
         show_default=False,
@@ -294,8 +294,8 @@ def main(  # noqa: C901
     [dim]# Organize files into a Johnny Decimal project with specified terms with title casing[/dim]
     $ filemanager --case=title --organize=project --term=term1 --term=term2 some_file.jpg
 
-    [dim]# Run in --dry_run mode to avoid making permanent changes[/dim]
-    $ filemanager --dry-run --diff /path/to/directory
+    [dim]# Run in --dry_run mode to avoid making permanent changes on all files within two levels[/dim]
+    $ filemanager --dry-run --diff --depth 2 /path/to/directory
 
     """
     console = Console()

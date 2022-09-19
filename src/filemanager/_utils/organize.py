@@ -90,6 +90,7 @@ def populate_project_folders(config: dict, project_name: str) -> list[Folder]:
                     for subcategory in subcategories:
                         available_folders.append(Folder(subcategory, 3, project_path, project_name))
 
+    log.trace("Populated project folders")
     return available_folders
 
 
@@ -353,7 +354,6 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "doubtful",
         "down",
         "downed",
-        "downing",
         "downs",
         "downwards",
         "due",
@@ -590,11 +590,9 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "inc",
         "inc.",
         "indeed",
-        "index",
         "indicate",
         "indicated",
         "indicates",
-        "information",
         "inner",
         "inside",
         "insofar",
@@ -605,7 +603,6 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "interesting",
         "interests",
         "into",
-        "invention",
         "inward",
         "io",
         "iq",
@@ -797,7 +794,6 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "no",
         "no-one",
         "nobody",
-        "non",
         "none",
         "nonetheless",
         "noone",
@@ -827,7 +823,6 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "oh",
         "ok",
         "okay",
-        "old",
         "older",
         "oldest",
         "om",
