@@ -214,9 +214,6 @@ verbose = false
   help = "Test this package"
 
     [[tool.poe.tasks.test.sequence]]
-    cmd = "clear"
-
-    [[tool.poe.tasks.test.sequence]]
     cmd = "coverage run"
 
     [[tool.poe.tasks.test.sequence]]
