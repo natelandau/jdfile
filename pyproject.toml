@@ -76,7 +76,6 @@ pre-commit = "*"
 pydocstyle = { extras = ["toml"], version = "*" }
 PySnooper = "*"
 pyupgrade = "*"
-safety = "*"
 shellcheck-py = "*"
 tryceratops = "^1.1.0"
 typeguard = "^2.13.3"
@@ -210,9 +209,6 @@ verbose = false
         --all-files
         --color always
       """
-
-    [[tool.poe.tasks.lint.sequence]]
-    shell = "safety check --continue-on-error --full-report"
 
   [tool.poe.tasks.test]
   help = "Test this package"
