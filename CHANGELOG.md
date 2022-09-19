@@ -1,3 +1,27 @@
+## v0.4.0 (2022-09-19)
+
+### Feat
+
+- **cli**: add -split-words to split camelCase into separate words
+- **cli**: add --filter-correct option
+- add --depth option
+- **clean**: matching casing for specified words
+- display output in tables, allow iterating over multiple files
+
+### Fix
+
+- **logging**: add trace level logs
+- break folder names into individual words
+- **stopwords**: remove 'org', 'points', 'sr', and 'project'
+- don't show diff if no changes
+- don't ask for user input when no changes
+- **clean**: ignore files named .filemanager
+
+### Refactor
+
+- **logging**: date matching to TRACE
+- remove unnessary functions
+
 ## v0.3.0 (2022-09-12)
 
 ### Feat
