@@ -47,14 +47,12 @@ jobs:
       #       check-out repo and set-up python
       #----------------------------------------------
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: "${{ matrix.python-version }}"
-      - uses: actions/cache@v3
-        id: poetry-cache
-        with:
-          path: ~/.local
-          key: ${{ matrix.python-version }}-1
+          python-version: ${{ matrix.python-version }}
+
       #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
