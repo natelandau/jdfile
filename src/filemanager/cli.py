@@ -7,6 +7,7 @@ from typing import Optional
 import typer
 from rich import print
 from rich.console import Console
+from rich.progress import track
 
 from filemanager.__version__ import __version__
 
@@ -353,7 +354,7 @@ def main(  # noqa: C901
     stopwords = populate_stopwords(config, project_name)
 
     num_recommended_changes = 0
-    for file in list_of_files:
+    for file in track(list_of_files, description="Processing files...", transient=True):
         if clean:
             if split_words:
                 file.split_words(config)

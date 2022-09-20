@@ -29,7 +29,7 @@ def test_no_changes_recommended(test_files):
     """Test no changes recommended does not ask for input."""
     result = runner.invoke(app, ["-n", str(test_files[24])])
     assert result.exit_code == 0
-    assert result.output == Regex(r"INFO     \| TESTFILE\.txt -> No changes")
+    assert result.output == Regex(r"INFO     \| TESTFILE\.txt.*->.*No.*changes", re.DOTALL)
 
 
 def test_filenames_in_dryrun(test_files, tmp_path):
@@ -39,9 +39,9 @@ def test_filenames_in_dryrun(test_files, tmp_path):
         ["-n", "--force", str(test_files[3])],
     )
     assert result.exit_code == 0
-    assert (
-        result.output
-        == "DRYRUN   | 2022-08-28 a_FIne &(filename).txt -> 2022-08-28 FIne filename.txt\n"
+    assert result.output == Regex(
+        r"DRYRUN   \|.*2022-08-28.*a_FIne.*&\(filename\)\.txt.*->.*2022-08-28.*FIne.*filename\.txt",
+        re.DOTALL,
     )
 
     # Test abort on selecting Quit
