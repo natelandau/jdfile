@@ -1,3 +1,10 @@
+## v0.4.1 (2022-09-20)
+
+### Fix
+
+- **clean**: add progress bar
+- **clean**: retain camelcase words specified in config file 'match_case'
+
 ## v0.4.0 (2022-09-19)
 
 ### Feat
