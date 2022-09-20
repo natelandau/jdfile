@@ -81,11 +81,46 @@ class File:
         yield "new_suffixes", self.new_suffixes
         yield "dotfile", self.dotfile
 
-    def clean(  # noqa: C901
+    def split_words(self, config: dict) -> None:
+        """Split words in the filename.
+
+        If camelcase words exist within config file match_case list, they will be retained.
+
+        Args:
+            config: (dict) Configuration dictionary
+
+        Raises:
+            Abort: If config file is not formatted correctly.
+        """
+        log.trace(f"Begin splitting words: {self.path.name}")
+
+        self.new_stem = from_camel_case(self.new_stem)
+
+        try:
+            if type(config["match_case"]) == list:
+                terms = config["match_case"]
+            else:
+                log.error("Expected 'match_case' to be a list.")
+                raise Abort()  # noqa: TC301
+        except KeyError:
+            pass
+        else:
+            match_case_terms = {}
+            for term in terms:
+                split_term = from_camel_case(term)
+                match_case_terms[term] = split_term
+
+            for term, split_term in match_case_terms.items():
+                self.new_stem = re.sub(
+                    rf"(^|[-_ ]){split_term}([-_ ]|$)", rf"\1{term}\2", self.new_stem, flags=re.I
+                )
+
+        log.trace(f"Split words: {self.new_stem}")
+
+    def clean(
         self,
         separator: Enum,
         case: Enum,
-        split_words: bool,
         stopwords: list[str],
     ) -> None:
         """Cleans the filename and updates instance variables for 'stem' and 'suffixes'.
@@ -93,14 +128,9 @@ class File:
         Args:
             separator: (Enum) Separator to use.
             case: (Enum) Case to use.
-            split_words: (bool) Whether to split camel case words.
             stopwords: (list[str]) List of stopwords to remove (optional).
         """
         log.trace(f"Begin cleaning: {self.path.name}")
-        if split_words:
-            self.new_stem = from_camel_case(self.new_stem)
-            log.trace(f"Split words: {self.new_stem}")
-
         self.new_stem = re.sub(r"[^\w\d\-_ ]", " ", self.new_stem)
         log.trace(f"Remove special characters: {self.new_stem}")
 

@@ -355,7 +355,9 @@ def main(  # noqa: C901
     num_recommended_changes = 0
     for file in list_of_files:
         if clean:
-            file.clean(separator, case, split_words, stopwords)
+            if split_words:
+                file.split_words(config)
+            file.clean(separator, case, stopwords)
             file.match_case(config)
 
         if add_date is not None:
