@@ -28,7 +28,7 @@ def test_help():
     """Test printing helo and then exiting."""
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert result.output == Regex(r"Usage: \w+ \[OPTIONS\] \[FILES\]\.\.")
+    assert result.output == Regex(r".*\[OPTIONS\] \[FILES\]\.\..*", re.DOTALL)
 
 
 def test_project_not_found(
