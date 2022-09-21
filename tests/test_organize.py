@@ -97,7 +97,7 @@ def test_find_multiple_folders(test_project, test_files):
     )
     assert result.exit_code == 0
     assert result.stdout == Regex(
-        r".*/.*/project/10-19.*area1/11.*category1/11.01.*subcategory1/quick.*brown.*fruit\.txt",
+        r".*/.*/project/10-19.*area1/11.*category1/11.0\d.*subcategory\d/quick.*brown.*fruit\.txt",
         re.DOTALL,
     )
 
@@ -163,7 +163,7 @@ def test_find_multiple_folders(test_project, test_files):
     )
     assert result.exit_code == 0
     assert result.stdout == Regex(
-        r"DRYRUN +\| quick.*brown.*apricot.*and.*fruit\.txt.*->.*/.*/project/10-19.*area1/11.*category1/11.02.*subcategory2/quick.*brown.*fruit\.txt",
+        r"DRYRUN +\| quick.*brown.*apricot.*and.*fruit\.txt.*->.*/.*/project/10-19.*area1/11.*category\d/11.0\d.*subcategory\d/quick.*brown.*fruit\.txt",
         re.DOTALL,
     )
 
