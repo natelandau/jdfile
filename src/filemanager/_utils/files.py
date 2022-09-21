@@ -301,7 +301,7 @@ class File:
         use_synonyms: bool,
         jd_number: str,
         force: bool,
-    ) -> None:
+    ) -> bool:
         """Matches a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
 
         Updates self.new_parent
@@ -312,6 +312,9 @@ class File:
             use_synonyms: (bool) Whether to use synonyms for matching.
             jd_number: (str) JD number to match against.
             force: (bool) Whether to avoid prompting the user. Selects the first match.
+
+        Returns:
+            True if a new file was found.  False otherwise.
 
         Raises:
             Abort: If a specified number is not found
@@ -341,13 +344,16 @@ class File:
             else:
                 terms = [t for t in folder.terms if t not in stopwords]
 
-            matched_terms = []
-            for term in terms:
-                if term.lower() in file_words:
-                    matched_terms.append(term.lower())
-                    log.trace(f"Organize matched term: '{term}' to '{folder.number}'")
-                    if folder not in possible_folders:
-                        possible_folders.append(folder)
+            if len(terms) == 0:
+                continue
+            else:
+                matched_terms = []
+                for term in terms:
+                    if term.lower() in file_words:
+                        matched_terms.append(term.lower())
+                        log.trace(f"Organize matched term: '{term}' to '{folder.number}'")
+                        if folder not in possible_folders:
+                            possible_folders.append(folder)
 
             if len(matched_terms) > 0:
                 all_matched_terms[folder.name] = matched_terms
@@ -357,15 +363,22 @@ class File:
                 if jd_number == number:
                     self.new_parent = folders[jd_numbers.index(number)].path
                     log.trace(f"Organize force folder: {number}")
-                    return
+                    return True
 
             alerts.error(f"No folder found matching: [tan]{jd_number}[/tan]")
             raise Abort()
         else:
-            if len(possible_folders) == 1 or force:
+            if len(possible_folders) == 0 and force:
+                alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folders matched)")
+                return False
+            elif len(possible_folders) == 1 or force:
                 self.new_parent = possible_folders[0].path
+                return True
             elif len(possible_folders) > 1:
                 self.new_parent = select_new_folder(possible_folders, self, all_matched_terms)
+                return True
+
+        return False
 
     def has_change(self) -> bool:
         """Returns whether the file has a change.
@@ -374,6 +387,12 @@ class File:
             True if the file has a change, False otherwise.
         """
         return self.target() != self.path
+
+    def reset(self) -> None:
+        """Resets the file to its original state."""
+        self.new_parent = self.parent
+        self.new_stem = self.stem
+        self.new_suffixes = self.suffixes
 
 
 def create_unique_filename(original: Path, separator: Enum, append_integer: bool = False) -> Path:

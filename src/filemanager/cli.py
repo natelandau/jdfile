@@ -364,8 +364,9 @@ def main(  # noqa: C901
         if add_date is not None:
             file.add_date(add_date, date_format, separator)
 
-        if project_name:
-            file.organize(stopwords, folders, use_synonyms, jd_number, force)
+        if project_name:  # noqa: SIM102
+            if not file.organize(stopwords, folders, use_synonyms, jd_number, force):
+                file.reset()
 
         if file.has_change():
             num_recommended_changes += 1
