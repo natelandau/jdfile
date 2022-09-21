@@ -86,7 +86,7 @@ def create_file(tmp_path, filename):
         (  # splitting words
             27,
             ["-n", "--force", "--case=title", "--split-words"],
-            r"->.*Quick.*Brown.*Fox.*Camel\.txt",
+            r"->.*Quick.*Brown.*Fox.*Camel.*Case.*Words\.txt",
         ),
         (  # dotfiles stay dotfiles, suffixes are cleaned
             26,
