@@ -2,7 +2,7 @@
 
 # filemanager
 
-A script to normalize filenames and organize files into directories.
+A script to normalize filenames and (optionally) organize files into directories following the [Johnny Decimal](https://johnnydecimal.com) system.
 
 ## Summary
 
