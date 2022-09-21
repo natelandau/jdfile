@@ -2,46 +2,90 @@
 """Fixtures for tests."""
 
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 
 
 @pytest.fixture()
-def test_jd(tmp_path):
-    """Fixture for creating a test johnny decimal file structure.
+def test_project(tmp_path):
+    """Fixture for creating a test config file.
 
     Args:
-        tmp_path: (Path) Temporary path to create the test structure.
+        tmp_path: (Path) Temporary path to create the test config file.
 
     Returns:
-        root: (Path) Root directory of the test structure.
+        root: (Path) Root directory of the test config file.
     """
-    paths = [
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "11 subcategory1" / "11.01 area1",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "11 subcategory1" / "11.02 area2",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "11 subcategory1" / "11.03 area3",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "12 subcategory2" / "12.01 area1",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "12 subcategory2" / "12.01 area2",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "12 subcategory2" / "12.01 area3",
-        Path(tmp_path) / "johnnydecimal" / "10-19 category_1" / "13 subcategory3" / "13.01 area1",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "20 subcategory1" / "20.01 area1",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "20 subcategory1" / "20.02 area2",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "21 subcategory1" / "21.01 area1",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "21 subcategory1" / "21.02 area2",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "21 subcategory1" / "not_a_jd_dir",
-        Path(tmp_path) / "johnnydecimal" / "20-29 category_2" / "not_a_jd_dir",
-        Path(tmp_path) / "johnnydecimal" / "not_a_jd_dir",
+    project = Path(tmp_path) / "project"
+    project.mkdir(parents=True, exist_ok=True)
+
+    folders = [
+        Path(project, "10-19 area1"),
+        Path(project, "10-19 area1/11 category1"),
+        Path(project, "10-19 area1/11 category1/11.01 subcategory1"),
+        Path(project, "10-19 area1/11 category1/11.02 subcategory2"),
+        Path(project, "10-19 area1/11 category1/11.03 subcategory3"),
+        Path(project, "10-19 area1/12 category2"),
+        Path(project, "10-19 area1/12 category2/12.01 subcategory1"),
+        Path(project, "10-19 area1/12 category2/12.02 subcategory2"),
+        Path(project, "10-19 area1/12 category2/12.03 subcategory3"),
+        Path(project, "20-29 area2"),
+        Path(project, "20-29 area2/20 category1"),
+        Path(project, "20-29 area2/20 category1/20.01 subcategory1"),
+        Path(project, "20-29 area2/20 category1/20.02 subcategory2"),
+        Path(project, "20-29 area2/21 category2"),
+        Path(project, "30-39 project plans"),
     ]
+    for folder in folders:
+        folder.mkdir(parents=True, exist_ok=True)
 
-    for path in paths:
-        path.mkdir(parents=True, exist_ok=True)
+    term_file1 = Path(project, "10-19 area1/11 category1/11.01 subcategory1/.filemanager")
+    term_file2 = Path(project, "10-19 area1/11 category1/11.02 subcategory2/.filemanager")
 
-    return Path(tmp_path) / "johnnydecimal"
+    term_file1.write_text(
+        dedent(
+            """\
+            # words to match
+            fruit
+            apple
+            orange
+            """
+        )
+    )
+    term_file2.write_text(
+        dedent(
+            """\
+            fruit
+            apple
+            banana
+            """
+        )
+    )
+
+    config = Path(tmp_path) / "filemanager.toml"
+    config_text = f"""\
+        match_case = [
+            "PEAR",
+            "KiWi"
+        ]
+
+        [projects]
+
+        [projects.jd]
+        name = "test"
+        path = "{project}"
+        stopwords = ["apricot"]
+        """
+
+    config.write_text(dedent(config_text))
+
+    return str(config), str(project)
 
 
 @pytest.fixture()
-def test_files(tmp_path):
-    """Create testfiles for test.
+def test_files(tmp_path) -> Path:
+    """Create testfiles for testing filename.
 
     Args:
         tmp_path (Path): Path to tmpdir created by tmp_path builtin fixture.
@@ -77,6 +121,13 @@ def test_files(tmp_path):
         "TESTFILE.txt",  # 24
         ".dotfile.txt",  # 25
         ".dotfile.JPEG.ZIP.gzip",  # 26
+        "QuickBrownFox has camelCase words.txt",  # 27
+        "quick brown apples and fruit.txt",  # 28
+        "quick_project_and_foxes.txt",  # 29
+        "quick brown apricot and fruit.txt",  # 30
+        "quick brown banana.txt",  # 31
+        "category1 and subcategory1.txt",  # 32
+        "quick brown area3 and fruit.txt",  # 33
     ]
 
     originals = tmp_path / "originals"

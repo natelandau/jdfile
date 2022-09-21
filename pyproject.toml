@@ -101,6 +101,8 @@ exclude_lines = [
     'pragma: no cover',
     'def __repr__',
     'raise typer\.Exit',
+    'raise Exit',
+    'raise Abort',
     'except [\w\s\._]+ as .*:',
     'log\.trace',
     'log\.debug',

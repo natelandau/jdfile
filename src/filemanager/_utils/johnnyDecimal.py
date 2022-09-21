@@ -70,7 +70,7 @@ class Folder:
             self.name = re.sub(r"^\d{2}-\d{2}[- _]", "", str(self.path.name)).strip()
             self.number = re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
             self.tree = str(self.path).replace(str(self.root), "")
-        else:
+        else:  # pragma: no cover
             self.name = "None"
             self.number = "None"
             self.tree = "None"
@@ -89,7 +89,7 @@ class Folder:
 
     def __rich_repr__(
         self,
-    ) -> Generator[tuple[str, str | Path | list | int], None, None]:
+    ) -> Generator[tuple[str, str | Path | list | int], None, None]:  # pragma: no cover
         """Rich representation of the Category object."""
         yield "path", self.path
         yield "level", self.level

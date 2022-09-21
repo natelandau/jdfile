@@ -323,15 +323,11 @@ def main(  # noqa: C901
 
     if project_name:
         folders: list = populate_project_folders(config, project_name)
-        if use_synonyms:
+        if print_tree:
+            show_tree(folders[0].root)
+            raise typer.Exit()
+        elif use_synonyms:  # pragma: no cover
             instantiate_nltk()
-
-    if print_tree and project_name:
-        show_tree(folders[0].root)
-        raise typer.Exit()
-    elif print_tree:
-        alerts.error("You must specify a project name to show the tree.")
-        raise typer.Exit(1)
 
     if len(files) == 0:
         alerts.error("No files were specified")
@@ -372,7 +368,7 @@ def main(  # noqa: C901
             num_recommended_changes += 1
 
     if filter_correct:
-        log.debug("Filtering out files that don't need to be changed")
+        log.debug("Filtering out files that don't have changes")
         list_of_files = [f for f in list_of_files if f.has_change()]
 
     if force or num_recommended_changes == 0:

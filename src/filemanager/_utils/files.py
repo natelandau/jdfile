@@ -69,7 +69,9 @@ class File:
         else:
             self.dotfile = False
 
-    def __rich_repr__(self) -> Generator[tuple[str, str | Path | bool | list[str]], None, None]:
+    def __rich_repr__(
+        self,
+    ) -> Generator[tuple[str, str | Path | bool | list[str]], None, None]:  # pragma: no cover
         """Rich representation of the File object."""
         yield "path", self.path
         yield "new_path", self.new_path
@@ -190,7 +192,7 @@ class File:
             else:
                 log.error("Expected 'match_case' to be a list.")
                 raise Abort()  # noqa: TC301
-        except KeyError:
+        except KeyError:  # pragma: no cover
             pass
         else:
             for term in terms:
@@ -338,7 +340,7 @@ class File:
         for folder in folders:
             jd_numbers.append(folder.number)
 
-            if use_synonyms:
+            if use_synonyms:  # pragma: no cover
                 terms = [t for t in folder.terms if t not in stopwords]
                 terms = sorted(dedupe_list([syn for term in terms for syn in find_synonyms(term)]))
             else:
@@ -376,7 +378,11 @@ class File:
                 return True
             elif len(possible_folders) > 1:
                 self.new_parent = select_new_folder(possible_folders, self, all_matched_terms)
-                return True
+                if self.new_parent == self.parent:
+                    alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folder selected)")
+                    return False
+                else:
+                    return True
 
         return False
 
