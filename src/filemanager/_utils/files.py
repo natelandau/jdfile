@@ -382,6 +382,9 @@ class File:
                     alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folder selected)")
                     return False
                 else:
+                    alerts.info(
+                        f"Moving [green bold]{self.path.name}[/] to [tan]{self.new_parent}[/]"
+                    )
                     return True
 
         return False
@@ -463,6 +466,7 @@ def select_new_folder(possible_folders: list[Folder], file: File, all_matched_te
     Raises:
         Abort: If the user chooses to abort after being presented a list of potential directories.
     """
+    print("")
     choices: dict[str, str] = {}
     choice_table = Table(
         title=f" Select folder for '[cyan]{file.path.name}[/]'",
@@ -500,7 +504,7 @@ def select_new_folder(possible_folders: list[Folder], file: File, all_matched_te
     choice_table.add_row("Q", "Quit", style="cyan")
 
     print(choice_table)
-    num_lines = len(possible_folders) + 11
+    num_lines = len(possible_folders) + 10
 
     choice = select_option(choices, "Select an option", same_line=True, show_choices=False)
     if choice == "q" or choice == "Q":
