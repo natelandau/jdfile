@@ -3,8 +3,7 @@
 
 from pathlib import Path
 
-from filemanager._utils.files import File, create_unique_filename
-from filemanager._utils.organize import populate_stopwords
+from filemanager._utils import File, create_unique_filename, populate_stopwords
 from tests.helpers import Regex
 
 

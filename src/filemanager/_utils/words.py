@@ -1,97 +1,53 @@
-"""Utilities for moving files into folders based on their name."""
+"""Gather synonyms from NLTK."""
 import contextlib
-import re
 from pathlib import Path
 
+import nltk
 from typer import Abort
 
+from filemanager._utils import dedupe_list
 from filemanager._utils.alerts import logger as log
-from filemanager._utils.johnnyDecimal import Folder
 
 
-def find_root_dir(config: dict, project_name: str) -> Path:
-    """Find a valid root directory for the specified project.
+def instantiate_nltk() -> None:  # pragma: no cover
+    """Instantiate nltk package."""
+    ntlk_data_path = Path(Path.home() / ".filemanager" / "nltk_data")
+    nltk.data.path.append(ntlk_data_path)
 
-    Args:
-        config: (dict) Configuration dictionary.
-        project_name: (str) The project name to index.
+    if Path(ntlk_data_path / "corpora" / "wordnet.zip").exists() is False:
+        nltk.download("wordnet", download_dir=ntlk_data_path)
 
-    Returns:
-        Path: Path to a valid root directory.
+    if Path(ntlk_data_path / "corpora" / "omw-1.4.zip").exists() is False:
+        nltk.download("omw-1.4", download_dir=ntlk_data_path)
 
-    Raises:
-        Abort: If a project folder is not found.
-    """
-    try:
-        if config["projects"]:
-            for project in config["projects"]:
-                if project_name.lower() == config["projects"][project]["name"].lower():
-                    project_path = Path(config["projects"][project]["path"]).expanduser().resolve()
-                    break
-
-            if project_path.exists() is False:
-                log.error(f"'Config variable 'project_path': '{project_path}' does not exist.")
-                raise Abort()
-
-        else:
-            log.error("No projects found in the configuration file")
-            raise Abort()  # noqa: TC301
-    except KeyError as e:
-        log.error(f"{e} is not defined in the config file.")
-        raise Abort() from e
-    except UnboundLocalError as e:
-        log.error(f"'{project_name}' is not defined in the config file.")
-        raise Abort() from e
-
-    return project_path
+    log.trace("NLTK instantiated")
 
 
-def populate_project_folders(config: dict, project_name: str) -> list[Folder]:
-    """Populate the list of Project objects (deepest level available for filing).
+def find_synonyms(word: str) -> list[str]:  # pragma: no cover
+    """Find synonyms for a word.
 
     Args:
-        config: (dict) Configuration dictionary.
-        project_name: (str) The project name to index.
+        word (str): The word to find synonyms for.
 
     Returns:
-        list[str]: List of Projects.
-
+        list[str]: List of synonyms.
     """
-    project_path = find_root_dir(config, project_name)
+    from nltk.corpus import wordnet
 
-    available_folders = []
+    synonyms = [word]
 
-    areas = [
-        area
-        for area in project_path.iterdir()
-        if area.is_dir() and re.match(r"^\d{2}-\d{2}[- _]", area.name)
-    ]
+    if len(wordnet.synsets(word)) > 0:
+        for syn in wordnet.synsets(word):
+            for lm in syn.lemmas():
+                synonyms.append(lm.name())
 
-    for area in areas:
-        categories = [
-            category
-            for category in area.iterdir()
-            if category.is_dir() and re.match(r"^\d{2}[- _]", category.name)
-        ]
+        for w in wordnet.synsets(word)[0].also_sees():
+            synonyms.append(w.lemmas()[0].name())
 
-        if len(categories) == 0:
-            available_folders.append(Folder(area, 1, project_path, project_name))
-        else:
-            for category in categories:
-                subcategories = [
-                    subcategory
-                    for subcategory in category.iterdir()
-                    if subcategory.is_dir() and re.match(r"^\d{2}\.\d{2}[- _]", subcategory.name)
-                ]
+        for w in wordnet.synsets(word)[0].similar_tos():
+            synonyms.append(w.lemmas()[0].name())
 
-                if len(subcategories) == 0:
-                    available_folders.append(Folder(category, 2, project_path, project_name))
-                else:
-                    for subcategory in subcategories:
-                        available_folders.append(Folder(subcategory, 3, project_path, project_name))
-
-    log.trace("Populated project folders")
-    return available_folders
+    return dedupe_list(synonyms)
 
 
 def populate_stopwords(config: dict = {}, organize_folder: str | None = None) -> list[str]:
