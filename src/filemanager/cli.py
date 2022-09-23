@@ -349,7 +349,6 @@ def main(  # noqa: C901
 
     stopwords = populate_stopwords(config, project_name)
 
-    num_recommended_changes = 0
     for file in track(list_of_files, description="Processing files...", transient=True):
         if clean:
             if split_words:
@@ -365,18 +364,12 @@ def main(  # noqa: C901
             if not file.organize(stopwords, folders, use_synonyms, jd_number, force):
                 file.reset()
 
-            if file.has_change():
-                num_recommended_changes += 1
-    else:
-        for file in list_of_files:
-            if file.has_change():
-                num_recommended_changes += 1
-
+    files_with_changes = [f for f in list_of_files if f.has_change()]
     if filter_correct:
         log.debug("Filtering out files that don't have changes")
-        list_of_files = [f for f in list_of_files if f.has_change()]
+        list_of_files = files_with_changes
 
-    if force or num_recommended_changes == 0:
+    if force or len(files_with_changes) == 0:
         if len(list_of_files) == 0:
             alerts.notice("All files are already correct")
             raise typer.Exit()
@@ -393,8 +386,8 @@ def main(  # noqa: C901
             }
         else:
             choices = {
-                "C": f"Commit all [tan]{num_recommended_changes}[/tan] changes",
-                "I": f"Iterate over all [tan]{num_recommended_changes}[/tan] files with changes",
+                "C": f"Commit all [tan]{len(files_with_changes)}[/tan] changes",
+                "I": f"Iterate over all [tan]{len(files_with_changes)}[/tan] files with changes",
                 "Q": "Quit without making any changes",
             }
 
