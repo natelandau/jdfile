@@ -1,3 +1,18 @@
+## v0.4.2 (2022-09-23)
+
+### Fix
+
+- **stopwords**: remove numbers from stopwords list
+- **clean**: specify a date for a file with --date
+- **organize**: fix display of progress bar when selecting multiple folders
+- **stopwords**: make less restrictive
+- **organize**: don't clean files without a matching folder
+
+### Refactor
+
+- simplify coutning files with changes
+- refactor filenames and function locations
+
 ## v0.4.1 (2022-09-20)
 
 ### Fix
