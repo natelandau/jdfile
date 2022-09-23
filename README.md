@@ -4,7 +4,29 @@
 
 A script to normalize filenames and (optionally) organize files into directories following the [Johnny Decimal](https://johnnydecimal.com) system.
 
-## Summary
+`filemanager` normalizes filenames based on your preferences.
+
+-   Remove special characters
+-   Trim multiple separators (`word----word` becomes `word-word`)
+-   Normalize to `lowercase`, `uppercase`, or `titlecase`
+-   Normalize to a common word separator (`_`, `-`, ` `)
+-   Replace all `.jpeg` extensions to `.jpg`
+-   Remove common stopwords
+-   Parse the filename for a date in many different formats
+-   Remove or reformat the date and add it to the the beginning of the filename
+-   Avoid overwriting files by adding a unique integer when renaming/moving
+-   Clean entire directory trees
+-   Shows previews of changes to be made before commiting
+-   Ignore files listed in config
+-   Specify casing for words which should never be changed
+-   more...
+
+`filemanager` can organize your files into folders.
+
+-   Move files into directory trees following the [Johnny Decimal](https://johnnydecimal.com) system
+-   Parse files and folder names looking for matching terms
+-   Uses [nltk](https://www.nltk.org) to lookup synonyms to improve matching
+-   Add `.filemanager` files to directories containing a list of words that will match files
 
 ### Why build this?
 
@@ -28,28 +50,6 @@ If you are a person who archives documents there are a number of problems with t
 -   I could go on and on...
 
 Additionally, even if the filenames were normalized, filing documents manually is a pain.
-
-### Enter filemanager
-
-`filemanager` normalizes filenames based on your preferences. It will:
-
--   Remove special characters
--   Trim multiple separators (`word----word` becomes `word-word`)
--   Normalize to `lowercase`, `uppercase`, or `titlecase`
--   Normalize to a common word separator (`_`, `-`, ` `)
--   Replace all `.jpeg` extensions to `.jpg`
--   Remove common stopwords
--   Parse the filename for a date in many different formats
--   Remove or reformat the date and add it the the beginning of the filename
--   Avoid overwriting files by adding a unique integer when renaming/moving
--   more...
-
-`filemanager` can organize your files into folders.
-
--   File into directory trees following the [Johnny Decimal](https://johnnydecimal.com) system
--   Parse files and folder names looking for matching terms
--   Uses [nltk](https://www.nltk.org) to lookup synonyms to improve matching
--   Add `.filemanager` files to directories containing a list of words that will match files
 
 ## Install
 
@@ -96,14 +96,26 @@ path = "~/work-docs/"
 ### Examples
 
 ```bash
-$ filemanager --add-date --case=title "department 2023 budget 08232002.XLSX"
-"department 2023 budget 08232002.XLSX" -> "2002-08-23 Department 2023 budget.xlsx"
+# Normalize all files in a directory to lowercase, with underscore separators
+$ filemanager --case=lower --separator=underscore /path/to/directory
 
-$ filemanager --add-date --sep=space --date-format="%b, %Y" "Project_mockups(WIP)___sep92022.pdf"
-"Project_mockups(WIP)___sep92022.pdf" -> "Sep, 2022 Project mockups WIP.pdf"
+# Organize files into a specified Johnny Decimal folder and add a date
+$ filemanager --organize=project --add-date --number=23.01 some_file.jpg
 
-filemanager --organize=work --add-date --sep=underscore "John-Jane-meeting-notes.txt"
-"John-Jane-meeting-notes.txt" -> "~/work/10-19 Notes/11 John/11.01 Meetings/2022-09-01_John_Jane_meeting_notes.txt"
+# Print a tree representation of a Johnny Decimal project
+$ filemanager --organize=project --tree
+
+# Organize files into a Johnny Decimal project with specified terms with title casing
+$ filemanager --case=title --organize=project --term=term1 --term=term2 some_file.jpg
+
+# Run in --dry_run mode to avoid making permanent changes on all files within two levels
+$ filemanager --dry-run --diff --depth 2 /path/to/directory
+
+# Run on a whole directory and filter out files that are already correct from the output
+$ filemanager --filter-correct /path/to/directory
+
+# Run on a whole directory and accept the first option for all prompts
+$ filemanager --force /path/to/**directory**
 ```
 
 ### Tips

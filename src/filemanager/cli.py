@@ -92,6 +92,62 @@ class Separator(str, Enum):
 
 @app.command()
 def main(  # noqa: C901
+    # Arguments
+    files: list[Path] = typer.Argument(
+        None,
+        help="Files or directories to process",
+        dir_okay=True,
+        file_okay=True,
+        exists=True,
+        resolve_path=True,
+    ),
+    # Options
+    config_file: Path = typer.Option(
+        None,
+        help="Specify a custom path to configuration file.",
+        show_default=False,
+        dir_okay=False,
+        file_okay=True,
+        exists=True,
+    ),
+    depth: int = typer.Option(
+        1,
+        "--depth",
+        help="How many levels deep to search for files when specifying a directory",
+        show_default=True,
+    ),
+    show_diff: bool = typer.Option(
+        False,
+        "--diff",
+        help="Show a diff of the changes that would be made.",
+        show_default=True,
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        "-n",
+        help="Dry run – don't actually change anything",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force changes without prompting for confirmation. Use with caution!",
+        show_default=True,
+    ),
+    log_file: Path = typer.Option(
+        Path(Path.home() / "logs" / "halp.log"),
+        help="Path to log file",
+        show_default=True,
+        dir_okay=False,
+        file_okay=True,
+        exists=False,
+    ),
+    log_to_file: bool = typer.Option(
+        False,
+        "--log-to-file",
+        help="Log to file",
+        show_default=True,
+    ),
     verbosity: int = typer.Option(
         1,
         "-v",
@@ -103,81 +159,49 @@ def main(  # noqa: C901
     version: Optional[bool] = typer.Option(
         None, "--version", callback=version_callback, is_eager=True
     ),
-    dry_run: bool = typer.Option(
-        False,
-        "--dry-run",
-        "-n",
-        help="Dry run – don't actually change anything",
-    ),
-    log_to_file: bool = typer.Option(
-        False,
-        "--log-to-file",
-        help="Log to file",
-        show_default=True,
-    ),
-    log_file: Path = typer.Option(
-        Path(Path.home() / "logs" / "halp.log"),
-        help="Path to log file",
-        show_default=True,
-        dir_okay=False,
-        file_okay=True,
-        exists=False,
-    ),
-    config_file: Path = typer.Option(
-        None,
-        help="Specify a custom path to configuration file.",
-        show_default=False,
-        dir_okay=False,
-        file_okay=True,
-        exists=True,
-    ),
-    files: list[Path] = typer.Argument(
-        None,
-        help="Files or directories to process",
-        dir_okay=True,
-        file_okay=True,
-        exists=True,
-        resolve_path=True,
-    ),
-    clean: bool = typer.Option(
-        True,
-        "--clean/--no-clean",
-        help="Clean the filename – remove special characters, optionally change case and word separators",
-        rich_help_panel="Clean Filename Options",
-    ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force changes without prompting for confirmation. Use with caution!",
-        show_default=True,
-    ),
-    overwrite: bool = typer.Option(
-        False,
-        help="Overwrite existing files when renaming.  If false, will create a numbered version of the file.",
-        show_default=True,
-        rich_help_panel="Organization Options",
-    ),
-    append_unique_integer: bool = typer.Option(
-        False,
-        "--append",
-        help="When renaming, if the file already exists, append a unique integer after the file extension. [dim]Default places the unique integer before the file extension.[/dim]",
-        rich_help_panel="Organization Options",
-        show_default=True,
-    ),
+    # Filename Cleaning Options
     add_date: bool = typer.Option(
         None,
         "--add-date/--remove-date",
         "-d/-r",
         help="Add or remove a formatted date to beginning of filename. [dim]Default does nothing with dates.[/dim]",
-        rich_help_panel="Clean Filename Options",
+        rich_help_panel="Filename Cleaning Options",
         show_default=False,
     ),
     case: Case = typer.Option(
         Case.ignore,
         case_sensitive=False,
         help="Case transformation. [dim](default: ignore)[/dim]",
-        rich_help_panel="Clean Filename Options",
+        rich_help_panel="Filename Cleaning Options",
         show_default=False,
+    ),
+    clean: bool = typer.Option(
+        True,
+        "--clean/--no-clean",
+        help="Clean the filename – remove special characters, optionally change case and word separators",
+        rich_help_panel="Filename Cleaning Options",
+    ),
+    date: str = typer.Option(
+        None,
+        "--date",
+        help="Specify a date to use for renaming",
+        rich_help_panel="Filename Cleaning Options",
+        show_default=False,
+    ),
+    date_format: str = typer.Option(
+        "%Y-%m-%d",
+        "--date-format",
+        help="Specify a date format",
+        rich_help_panel="Filename Cleaning Options",
+        show_default=True,
+    ),
+    filter_correct: bool = typer.Option(
+        False,
+        "--filter-correct",
+        "-f",
+        help="Filter correct files from output",
+        rich_help_panel="Filename Cleaning Options",
+        show_default=True,
     ),
     separator: Separator = typer.Option(
         Separator.ignore,
@@ -185,65 +209,23 @@ def main(  # noqa: C901
         "--sep",
         case_sensitive=False,
         help="Word separator. [dim](default: ignore)[/dim]",
-        rich_help_panel="Clean Filename Options",
+        rich_help_panel="Filename Cleaning Options",
         show_default=False,
-    ),
-    date_format: str = typer.Option(
-        "%Y-%m-%d",
-        "--date-format",
-        help="Specify a date format",
-        rich_help_panel="Clean Filename Options",
-        show_default=True,
-    ),
-    date: str = typer.Option(
-        None,
-        "--date",
-        help="Specify a date to use for renaming",
-        rich_help_panel="Clean Filename Options",
-        show_default=False,
-    ),
-    filter_correct: bool = typer.Option(
-        False,
-        "--filter-correct",
-        "-f",
-        help="Filter correct files from output",
-        rich_help_panel="Clean Filename Options",
-        show_default=True,
     ),
     split_words: bool = typer.Option(
         False,
         "--split-words",
         help="Split words on capital letters. [cyan]Ex: SomeFilename -> Some Filename[/cyan]",
-        rich_help_panel="Clean Filename Options",
+        rich_help_panel="Filename Cleaning Options",
         show_default=True,
     ),
-    project_name: str = typer.Option(
-        None,
-        "--organize",
-        "-o",
-        help="JohnnyDecimal project to organize files into",
-        rich_help_panel="Organization Options",
-    ),
-    print_tree: bool = typer.Option(
+    # File Organization Options
+    append_unique_integer: bool = typer.Option(
         False,
-        "--tree",
-        help="Print a tree representation of the directories within a project and exit",
+        "--append",
+        help="When renaming, if the file already exists, append a unique integer after the file extension. [dim]Default places the unique integer before the file extension.[/dim]",
+        rich_help_panel="File Organization Options",
         show_default=True,
-        rich_help_panel="Organization Options",
-    ),
-    use_synonyms: bool = typer.Option(
-        True,
-        "--syns/--no-syns",
-        help="Use synonyms to match words.",
-        show_default=True,
-        rich_help_panel="Organization Options",
-    ),
-    terms: list[str] = typer.Option(
-        None,
-        "--term",
-        "-t",
-        help="Term or used to match files. Add multiple terms with multiple --term flags",
-        rich_help_panel="Organization Options",
     ),
     jd_number: str = typer.Option(
         None,
@@ -251,21 +233,41 @@ def main(  # noqa: C901
         "--num",
         help="Move file directly to Johnny Decimal folder matching number (overrides term matching)",
         show_default=False,
-        rich_help_panel="Organization Options",
+        rich_help_panel="File Organization Options",
     ),
-    show_diff: bool = typer.Option(
+    project_name: str = typer.Option(
+        None,
+        "--organize",
+        "-o",
+        help="JohnnyDecimal project to organize files into",
+        rich_help_panel="File Organization Options",
+    ),
+    overwrite: bool = typer.Option(
         False,
-        "--diff",
-        help="Show a diff of the changes that would be made.",
+        help="Overwrite existing files when renaming.  If false, will create a numbered version of the file.",
         show_default=True,
-        rich_help_panel="Organization Options",
+        rich_help_panel="File Organization Options",
     ),
-    depth: int = typer.Option(
-        1,
-        "--depth",
-        help="How many levels deep to search for files when specifying a directory",
+    terms: list[str] = typer.Option(
+        None,
+        "--term",
+        "-t",
+        help="Term or used to match files. Add multiple terms with multiple --term flags",
+        rich_help_panel="File Organization Options",
+    ),
+    print_tree: bool = typer.Option(
+        False,
+        "--tree",
+        help="Print a tree representation of the directories within a project and exit",
         show_default=True,
-        rich_help_panel="Organization Options",
+        rich_help_panel="File Organization Options",
+    ),
+    use_synonyms: bool = typer.Option(
+        True,
+        "--syns/--no-syns",
+        help="Use synonyms to match words.",
+        show_default=True,
+        rich_help_panel="File Organization Options",
     ),
 ) -> None:
     """[bold]filemanager[/bold] normalizes filenames based on your preferences.
@@ -277,13 +279,17 @@ def main(  # noqa: C901
     -   Replace all [reverse #999999].jpeg[/] extensions to [reverse #999999].jpg[/]
     -   Remove common stopwords
     -   Parse the filename for a date in many different formats
-    -   Remove or reformat the date and add it the the beginning of the filename
+    -   Remove or reformat the date and add it to the the beginning of the filename
     -   Avoid overwriting files by adding a unique integer when renaming/moving
+    -   Clean entire directory trees
+    -   Shows previews of changes to be made before commiting
+    -   Ignore files listed in config
+    -   Specify casing for words which should never be changed
     -   more...
 
     [bold]filemanager[/] can organize your files into folders when --organize is specified.
 
-    -   File into directory trees following the [link=https://johnnydecimal.com]Johnny Decimal system[/link]
+    -   Move files into directory trees following the [link=https://johnnydecimal.com]Johnny Decimal system[/link]
     -   Parse files and folder names looking for matching terms
     -   Uses [link=https://www.nltk.org]nltk[/link] to lookup synonyms to improve matching
     -   Add [reverse #999999].filemanager[/] files to directories containing a list of words that will match files
@@ -304,6 +310,12 @@ def main(  # noqa: C901
 
     [dim]# Run in --dry_run mode to avoid making permanent changes on all files within two levels[/dim]
     $ filemanager --dry-run --diff --depth 2 /path/to/directory
+
+    [dim]# Run on a whole directory and filter out files that are already correct from the output[/dim]
+    $ filemanager --filter-correct /path/to/directory
+
+    [dim]# Run on a whole directory and accept the first option for all prompts[/dim]
+    $ filemanager --force /path/to/directory
 
     """
     console = Console()
