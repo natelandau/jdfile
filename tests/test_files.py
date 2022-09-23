@@ -57,6 +57,7 @@ def test_file_creation(test_files):
     file.add_date(
         add_date=True,
         date_format="%Y-%m-%d",
+        specific_date=None,
         separator="space",
     )
     assert file.new_stem == "2022-08-28 fine filename"
@@ -64,6 +65,7 @@ def test_file_creation(test_files):
     file.add_date(
         add_date=True,
         date_format="%Y/%m/%d",
+        specific_date=None,
         separator="underscore",
     )
     assert file.new_stem == "2022/08/28_fine filename"
@@ -71,6 +73,7 @@ def test_file_creation(test_files):
     file.add_date(
         add_date=False,
         date_format="%Y-%m-%d",
+        specific_date=None,
         separator="space",
     )
     assert file.new_stem == "fine filename"
@@ -83,6 +86,7 @@ def test_file_creation(test_files):
     file.add_date(
         add_date=True,
         date_format="%Y-%m-%d",
+        specific_date="Today",
         separator="underscore",
     )
     assert file.new_stem == Regex(r"^\.\d{4}-\d{2}-\d{2}_dotfile")

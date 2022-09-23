@@ -195,6 +195,13 @@ def main(  # noqa: C901
         rich_help_panel="Clean Filename Options",
         show_default=True,
     ),
+    date: str = typer.Option(
+        None,
+        "--date",
+        help="Specify a date to use for renaming",
+        rich_help_panel="Clean Filename Options",
+        show_default=False,
+    ),
     filter_correct: bool = typer.Option(
         False,
         "--filter-correct",
@@ -357,7 +364,7 @@ def main(  # noqa: C901
             file.match_case(config)
 
         if add_date is not None:
-            file.add_date(add_date, date_format, separator)
+            file.add_date(add_date, date_format, date, separator)
 
     if project_name:
         for file in list_of_files:

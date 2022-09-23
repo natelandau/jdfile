@@ -1,14 +1,15 @@
 """Work with dates."""
 import re
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from filemanager._utils.alerts import logger as log
 
 
 def parse_date(  # noqa: C901
-    string: str, date_format: str = "%Y-%m-%d"
-) -> tuple[None, None] | tuple[str, str]:
+    string: str,
+    date_format: str = "%Y-%m-%d",
+) -> tuple[None, None] | tuple[str | None, str]:
     """Parse date from string.
 
     Args:
@@ -82,6 +83,19 @@ def parse_date(  # noqa: C901
         )
         (?:[^0-9].*|$) # text after date (7)
     """,
+        string,
+        re.X | re.I,
+    )
+
+    month_dd = re.search(
+        r"""
+        (?P<complete>
+            (?P<month>january|jan|ja|february|feb|fe|march|mar|ma|april|apr|ap|may|june|jun|july|jul|ju|august|aug|september|sep|october|oct|november|nov|december|dec)
+            [-\./_, ]*?
+            (?P<day>0?[1-9]|[12][0-9]|3[01])(?:nd|rd|th|st)
+        )
+        ([^0-9].*|$) # End of string from end of date)
+        """,
         string,
         re.X | re.I,
     )
@@ -204,6 +218,14 @@ def parse_date(  # noqa: C901
         date_string = dd_month_yyyy.group("complete")
         constructed_date = f"{month}/{day}/{year}"
 
+    elif month_dd:
+        log.trace("Found month_dd")
+        year = date.today().year
+        month = month_to_number(month_dd.group("month"))
+        day = month_dd.group("day")
+        date_string = month_dd.group("complete")
+        constructed_date = f"{month}/{day}/{year}"
+
     elif month_yyyy:
         log.trace("Found month_yyyy")
         year = month_yyyy.group("year")
@@ -252,12 +274,32 @@ def parse_date(  # noqa: C901
         date_string = dd_mm.group("complete")
         constructed_date = f"{month}/{day}/{year}"
 
+    elif string.lower() == "today" or string.lower() == "now":
+        date_string = None
+        constructed_date = date.today().strftime("%m/%d/%Y")
+    elif string.lower() == "yesterday":
+        date_string = None
+        yesterday = date.today() - timedelta(days=1)
+        constructed_date = yesterday.strftime("%m/%d/%Y")
+    elif string.lower() == "tomorrow":
+        date_string = None
+        tomorrow = date.today() + timedelta(days=1)
+        constructed_date = tomorrow.strftime("%m/%d/%Y")
+    elif string.lower() == "last week":
+        date_string = None
+        last_week = date.today() - timedelta(days=7)
+        constructed_date = last_week.strftime("%m/%d/%Y")
+    elif string.lower() == "last month":
+        date_string = None
+        last_month = date.today() - timedelta(days=30)
+        constructed_date = last_month.strftime("%m/%d/%Y")
+
     else:
         return None, None
 
     try:
         return date_string, datetime.strptime(constructed_date, "%m/%d/%Y").strftime(date_format)
-    except ValueError:
+    except ValueError:  # pragma: no cover
         log.error(f"{constructed_date} is not a valid date")
         return None, None
 

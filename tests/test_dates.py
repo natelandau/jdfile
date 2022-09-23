@@ -1,11 +1,11 @@
 # type: ignore
 """Test date utilities."""
-
 from pathlib import Path
 
 import pytest
 
 from filemanager._utils.dates import create_date, month_to_number, parse_date
+from tests.helpers import Regex
 
 
 def test_create_date(mocker):
@@ -64,6 +64,12 @@ def test_create_date(mocker):
         # ddmm
         ("just a day and a month 31 03", "03-31", "31 03", "%m-%d"),
         ("just a day and a month 24 11", "11-24", "24 11", "%m-%d"),
+        # specified dates
+        ("today", Regex(r"\d{4}-\d{2}-\d{2}"), None, "%Y-%m-%d"),
+        ("yesterday", Regex(r"\d{4}-\d{2}-\d{2}"), None, "%Y-%m-%d"),
+        ("last week", Regex(r"\d{4}-\d{2}-\d{2}"), None, "%Y-%m-%d"),
+        ("last month", Regex(r"\d{4}-\d{2}-\d{2}"), None, "%Y-%m-%d"),
+        ("tomorrow", Regex(r"\d{4}-\d{2}-\d{2}"), None, "%Y-%m-%d"),
     ],
 )
 def test_parse_date(full_string, expected_date, expected_string, date_format):

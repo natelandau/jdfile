@@ -201,26 +201,33 @@ class File:
                 )
             log.trace(f"Match case: {self.new_stem}")
 
-    def add_date(self, add_date: bool, date_format: str, separator: Enum) -> None:
+    def add_date(
+        self, add_date: bool, date_format: str, specific_date: str, separator: Enum
+    ) -> None:
         """Add and/or remove a date in a filename. Updates instance variables for 'stem'.
 
         Args:
             add_date: (bool) Whether to add date to the filename.
             date_format: (str) Format of the date.
+            specific_date: (str) Specific date to use.
             separator: (Enum) Separator to use.
 
         """
         date_string: str | None = None
         new_date: str | None = None
-        date_string, new_date = parse_date(self.new_stem, date_format)
-        if date_string is None:
-            date_string = ""
-            new_date = create_date(self.new_path, date_format)
-            log.trace(f"Date not found in filename. Using metadata: {new_date}")
+        if specific_date:
+            date_string, new_date = parse_date(specific_date, date_format)
         else:
-            self.new_stem = self.new_stem.replace(date_string, "")
-            self.new_stem = self.new_stem.strip(" -_")
-            log.trace(f"Removed date: {self.new_stem}")
+            date_string, new_date = parse_date(self.new_stem, date_format)
+
+            if date_string is None:
+                date_string = ""
+                new_date = create_date(self.new_path, date_format)
+                log.trace(f"Date not found in filename. Using metadata: {new_date}")
+            else:
+                self.new_stem = self.new_stem.replace(date_string, "")
+                self.new_stem = self.new_stem.strip(" -_")
+                log.trace(f"Removed date: {self.new_stem}")
 
         if add_date is True:
             if separator == "underscore":
