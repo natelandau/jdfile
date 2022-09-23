@@ -64,7 +64,7 @@ def show_confirmation_table(
                     "Path:",
                     "[dim]No new folder found[/]"
                     if file.target().parent == file.parent
-                    else str(file.target().parent),
+                    else str(file.relative_parent),
                     end_section=True,
                 )
     print("\n")

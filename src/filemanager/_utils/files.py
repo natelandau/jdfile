@@ -63,6 +63,7 @@ class File:
         self.new_stem: str = self.stem
         self.suffixes: list[str] = self.path.suffixes
         self.new_suffixes: list[str] = self.suffixes
+        self.relative_parent: str = ""
 
         if re.match(r"^\.", self.stem):
             self.dotfile: bool = True
@@ -384,7 +385,9 @@ class File:
                 self.new_parent = possible_folders[0].path
                 return True
             elif len(possible_folders) > 1:
-                self.new_parent = select_new_folder(possible_folders, self, all_matched_terms)
+                self.new_parent, self.relative_parent = select_new_folder(
+                    possible_folders, self, all_matched_terms
+                )
                 if self.new_parent == self.parent:
                     alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folder selected)")
                     return False
@@ -459,7 +462,9 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
         return original
 
 
-def select_new_folder(possible_folders: list[Folder], file: File, all_matched_terms: dict) -> Path:
+def select_new_folder(
+    possible_folders: list[Folder], file: File, all_matched_terms: dict
+) -> tuple[Path, str]:
     """Select a folder for a file from a list of possible folders.
 
     Args:
@@ -486,8 +491,8 @@ def select_new_folder(possible_folders: list[Folder], file: File, all_matched_te
         padding=(0, 0, 0, 0),
     )
     choice_table.add_column("Opt", justify="center", style="bold reverse")
+
     choice_table.add_column("Folder Name")
-    choice_table.add_column("JD Number")
     choice_table.add_column("Path within project", justify="left", style="dim")
     choice_table.add_column("Matched Terms", justify="left", style="dim")
 
@@ -498,17 +503,16 @@ def select_new_folder(possible_folders: list[Folder], file: File, all_matched_te
 
         choice_table.add_row(
             str(idx),
-            folder.name,
-            folder.number,
-            folder.tree,
+            f" {folder.path.name} ",
+            folder.relative,
             ", ".join(set(all_matched_terms[folder.name])),
             style="bold",
         )
 
     choices["N"] = "None of the above"
-    choice_table.add_row("N", "None of the above", style="cyan")
+    choice_table.add_row("N", " None of the above", style="cyan")
     choices["Q"] = "Quit"
-    choice_table.add_row("Q", "Quit", style="cyan")
+    choice_table.add_row("Q", " Quit", style="cyan")
 
     print(choice_table)
     num_lines = len(possible_folders) + 10
@@ -519,8 +523,11 @@ def select_new_folder(possible_folders: list[Folder], file: File, all_matched_te
     elif choice == "n" or choice == "N":
         sys.stdout.write(f"\033[{num_lines}A")
         sys.stdout.write("\033[J")
-        return file.parent
+        return file.parent, folder.relative
     else:
         sys.stdout.write(f"\033[{num_lines}A")
         sys.stdout.write("\033[J")
-        return possible_folders[int(choice) - 1].path
+        return (
+            possible_folders[int(choice) - 1].path,
+            folder.relative,
+        )

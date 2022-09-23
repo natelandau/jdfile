@@ -115,13 +115,10 @@ def test_find_multiple_folders(test_project, test_files):
     )
     assert result.exit_code == 1
     assert result.stdout == Regex(
-        r"\d.*subcategory1.*11.01.*/area1/category1/subcategory1.*fruit",
+        r"project/\d{2}-\d{2} area1/\d{2} category\d/\d{2}\.\d{2}",
         re.DOTALL,
     )
-    assert result.stdout == Regex(
-        r"\d.*subcategory2.*11.02.*/area1/category1/subcategory2.*fruit",
-        re.DOTALL,
-    )
+
     assert result.stdout == Regex(
         r"Aborted",
         re.DOTALL,

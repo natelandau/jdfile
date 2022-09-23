@@ -34,6 +34,7 @@ class Folder:
         self.level: int = level
         self.root: Path = project
         self.project_name: str = project_name
+        self.relative = f"{self.path.relative_to(self.root.parents[0])}"
 
         if self.level == 3:
             self.name: str = re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
