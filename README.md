@@ -51,6 +51,8 @@ If you are a person who archives documents there are a number of problems with t
 
 Additionally, even if the filenames were normalized, filing documents manually is a pain.
 
+`Filemanager` is created to solve for these problems by providing an easy CLI to normalize the filename and organize it into an appropriate directory on your computer.
+
 ## Install
 
 Pip
