@@ -1,3 +1,9 @@
+## v0.4.3 (2022-09-25)
+
+### Fix
+
+- **organize**: show paths relative to project root
+
 ## v0.4.2 (2022-09-23)
 
 ### Fix
