@@ -1,3 +1,9 @@
+## v0.4.4 (2022-09-26)
+
+### Fix
+
+- **organize**: fix for not showing relative path to target folder
+
 ## v0.4.3 (2022-09-25)
 
 ### Fix
