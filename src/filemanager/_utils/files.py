@@ -105,7 +105,7 @@ class File:
             else:
                 log.error("Expected 'match_case' to be a list.")
                 raise Abort()  # noqa: TC301
-        except KeyError:
+        except KeyError:  # pragma: no cover
             pass
         else:
             match_case_terms = {}
@@ -372,6 +372,7 @@ class File:
             for number in jd_numbers:
                 if jd_number == number:
                     self.new_parent = folders[jd_numbers.index(number)].path
+                    self.relative_parent = folders[jd_numbers.index(number)].relative
                     log.trace(f"Organize force folder: {number}")
                     return True
 
@@ -383,6 +384,7 @@ class File:
                 return False
             elif len(possible_folders) == 1 or force:
                 self.new_parent = possible_folders[0].path
+                self.relative_parent = possible_folders[0].relative
                 return True
             elif len(possible_folders) > 1:
                 self.new_parent, self.relative_parent = select_new_folder(
@@ -529,5 +531,5 @@ def select_new_folder(
         sys.stdout.write("\033[J")
         return (
             possible_folders[int(choice) - 1].path,
-            folder.relative,
+            possible_folders[int(choice) - 1].relative,
         )

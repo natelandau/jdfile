@@ -68,3 +68,4 @@ def show_confirmation_table(
                     end_section=True,
                 )
     print("\n")
+    print(f"relative parent: {file.relative_parent}")

@@ -342,7 +342,7 @@ def main(  # noqa: C901
 
     if project_name:
         folders: list = populate_project_folders(config, project_name)
-        if print_tree:
+        if print_tree:  # pragma: no cover
             show_tree(folders[0].root)
             raise typer.Exit()
         elif use_synonyms:  # pragma: no cover
