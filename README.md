@@ -81,10 +81,10 @@ match_case = ["OKR", "OKRs", "KPI", "KPIs"]  # Force the casing of certain words
 
 [projects]                      # Define any number of different projects
 
-[projects.jd]                   # A Johnny Decimal project
+[projects.jd_folder]            # A Johnny Decimal project
 name = "test"                   # (Required)  Name of this project (used as a command line option --organize=test)
 path = "~/johnnydecimal"        # (Required) Path to the folder containing the Johnny Decimal project
-stopwords = ["stopword", "stopword"]   # List of stopwords to be cleaned from filenames within this project
+stopwords = ["stopword", "stopword"]   # Optional list of project specific stopwords
 
 [projects.test2]
 name = "test2"
