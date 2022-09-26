@@ -74,7 +74,6 @@ pep8-naming = "*"
 poethepoet = "*"
 pre-commit = "*"
 pydocstyle = { extras = ["toml"], version = "*" }
-PySnooper = "*"
 pyupgrade = "*"
 shellcheck-py = "*"
 tryceratops = "^1.1.0"
