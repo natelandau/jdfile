@@ -120,7 +120,7 @@ class File:
 
         log.trace(f"Split words: {self.new_stem}")
 
-    def clean(
+    def clean(  # noqa: C901
         self,
         separator: Enum,
         case: Enum,
@@ -134,6 +134,17 @@ class File:
             stopwords: (list[str]) List of stopwords to remove (optional).
         """
         log.trace(f"Begin cleaning: {self.path.name}")
+        yyyy_mm_dd = re.search(
+            r"^(19|20)[0-2][0-9][-\./_, :](0[1-9]|1[0-2])[-\./_, :](0[1-9]|[12][0-9]|3[01])",
+            self.new_stem,
+        )
+
+        if yyyy_mm_dd:
+            existing_date = yyyy_mm_dd.group()
+            self.new_stem = self.new_stem.replace(existing_date, "")
+        else:
+            existing_date = None
+
         self.new_stem = re.sub(r"[^\w\d\-_ ]", " ", self.new_stem)
         log.trace(f"Remove special characters: {self.new_stem}")
 
@@ -141,7 +152,7 @@ class File:
             self.new_stem = re.sub(rf"(^|[-_ ]){stopword}([-_ ]|$)", " ", self.new_stem, flags=re.I)
         log.trace(f"Remove stopwords: {self.new_stem}")
 
-        if re.match(r"^.$", self.new_stem):
+        if re.match(r"^.$|^$", self.new_stem):
             self.new_stem = self.stem
             log.trace(f"File name is a single character, reverting to original: {self.new_stem}")
 
@@ -157,17 +168,25 @@ class File:
 
         if separator == "underscore":
             self.new_stem = re.sub(r"[-_ \.]", "_", self.new_stem)
+            if existing_date:
+                self.new_stem = f"{existing_date}_{self.new_stem}"
             self.new_stem = re.sub(r"_+", "_", self.new_stem)
             log.trace(f"Underscore: {self.new_stem}")
         elif separator == "dash":
             self.new_stem = re.sub(r"[-_ \.]", "-", self.new_stem)
+            if existing_date:
+                self.new_stem = f"{existing_date}-{self.new_stem}"
             self.new_stem = re.sub(r"-+", "-", self.new_stem)
             log.trace(f"Dash: {self.new_stem}")
         elif separator == "space":
             self.new_stem = re.sub(r"[-_ \.]", " ", self.new_stem)
+            if existing_date:
+                self.new_stem = f"{existing_date} {self.new_stem}"
             self.new_stem = re.sub(r" +", " ", self.new_stem)
             log.trace(f"Space: {self.new_stem}")
         else:
+            if existing_date:
+                self.new_stem = f"{existing_date} {self.new_stem}"
             self.new_stem = re.sub(r"_+", "_", self.new_stem)
             self.new_stem = re.sub(r"-+", "-", self.new_stem)
             self.new_stem = re.sub(r" +", " ", self.new_stem)

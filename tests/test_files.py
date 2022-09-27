@@ -52,7 +52,7 @@ def test_file_creation(test_files):
     assert file.new_stem == "2022-08-28-FINE-FILENAME"
 
     file.clean(separator="space", case="lower", stopwords=stopwords)
-    assert file.new_stem == "2022 08 28 fine filename"
+    assert file.new_stem == "2022-08-28 fine filename"
 
     file.add_date(
         add_date=True,
