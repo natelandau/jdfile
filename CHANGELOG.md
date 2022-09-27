@@ -1,3 +1,9 @@
+## v0.4.5 (2022-09-27)
+
+### Fix
+
+- **clean**: do not strip separators from dates in YYYY-MM-DD at beginning of filename
+
 ## v0.4.4 (2022-09-26)
 
 ### Fix
