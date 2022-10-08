@@ -36,7 +36,6 @@ def test_project_not_found(
 ):
     """Test not finding a specified project."""
     config, project_root = test_project
-
     result = runner.invoke(
         app,
         [f"--config-file={config}", "--organize=no_project", "--tree"],
@@ -57,5 +56,5 @@ def test_config_not_found(
         app,
         ["--config-file=no-config", "--organize=no_project", "--tree"],
     )
-    assert result.exit_code == 2
-    assert result.stdout == Regex(r"File 'no-config' does not exist", re.DOTALL)
+    assert result.exit_code == 1
+    assert result.stdout == Regex(r"Config file not found at", re.DOTALL)

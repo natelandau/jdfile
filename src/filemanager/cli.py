@@ -106,9 +106,6 @@ def main(  # noqa: C901
         None,
         help="Specify a custom path to configuration file.",
         show_default=False,
-        dir_okay=False,
-        file_okay=True,
-        exists=True,
     ),
     depth: int = typer.Option(
         1,
@@ -326,7 +323,15 @@ def main(  # noqa: C901
     )
 
     if config_file:  # pragma: no cover
-        possible_config_locations = [config_file]
+        config_file = config_file.expanduser().resolve()
+        if config_file.exists() and config_file.is_file():
+            possible_config_locations = [config_file]
+        elif config_file.is_dir():
+            alerts.error(f"Please pass a valid configuration file, not a directory: {config_file}")
+            raise typer.Exit(code=1)
+        else:
+            alerts.error(f"Config file not found at '{config_file}'")
+            raise typer.Exit(code=1)
     else:
         possible_config_locations = [
             Path.home() / ".config" / f"{__package__}.toml",
