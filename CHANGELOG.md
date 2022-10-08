@@ -1,3 +1,9 @@
+## v0.4.6 (2022-10-08)
+
+### Fix
+
+- **cli**: Bypass Typer when validating specified configuration files
+
 ## v0.4.5 (2022-09-27)
 
 ### Fix
