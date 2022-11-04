@@ -334,27 +334,27 @@ def month_to_number(month: str) -> str:  # noqa: C901
     """
     if re.match(r"^ja.*", month, re.I):
         return "01"
-    elif re.match(r"^fe.*", month, re.I):
+    if re.match(r"^fe.*", month, re.I):
         return "02"
-    elif re.match(r"^mar.*", month, re.I):
+    if re.match(r"^mar.*", month, re.I):
         return "03"
-    elif re.match(r"^ap.*", month, re.I):
+    if re.match(r"^ap.*", month, re.I):
         return "04"
-    elif re.match(r"^may.*", month, re.I):
+    if re.match(r"^may.*", month, re.I):
         return "05"
-    elif re.match(r"^jun.*", month, re.I):
+    if re.match(r"^jun.*", month, re.I):
         return "06"
-    elif re.match(r"^jul.*", month, re.I):
+    if re.match(r"^jul.*", month, re.I):
         return "07"
-    elif re.match(r"^au.*", month, re.I):
+    if re.match(r"^au.*", month, re.I):
         return "08"
-    elif re.match(r"^se.*", month, re.I):
+    if re.match(r"^se.*", month, re.I):
         return "09"
-    elif re.match(r"^oc.*", month, re.I):
+    if re.match(r"^oc.*", month, re.I):
         return "10"
-    elif re.match(r"^no.*", month, re.I):
+    if re.match(r"^no.*", month, re.I):
         return "11"
-    elif re.match(r"^de.*", month, re.I):
+    if re.match(r"^de.*", month, re.I):
         return "12"
 
     return ""

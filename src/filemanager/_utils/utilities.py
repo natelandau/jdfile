@@ -37,15 +37,15 @@ def select_option(
         result = Prompt.ask(prompt)
         if result.lower() in (option.lower() for option in options):
             return result
-        else:
-            if same_line:
-                sys.stdout.write("\033[1A")
-                sys.stdout.write("\033[2K")
-                sys.stdout.write("\033[1A")
-                sys.stdout.write("\033[2K")
 
-            print(f"[red]Invalid option: {result}[/red]")
-            False
+        if same_line:
+            sys.stdout.write("\033[1A")
+            sys.stdout.write("\033[2K")
+            sys.stdout.write("\033[1A")
+            sys.stdout.write("\033[2K")
+
+        print(f"[red]Invalid option: {result}[/red]")
+        False
 
 
 def dedupe_list(original: list) -> list:

@@ -62,8 +62,7 @@ class Folder:
             for line in content:
                 if line.startswith("#"):
                     continue
-                else:
-                    self.terms.append(line)
+                self.terms.append(line)
 
     def __rich_repr__(
         self,

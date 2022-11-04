@@ -61,8 +61,7 @@ def load_configuration(paths: list[Path], required: bool = False) -> dict:
     if not config and required:
         log.error("No configuration found. Please create a config file.")
         raise typer.Exit(code=1)
-    else:
-        return config
+    return config
 
 
 def version_callback(value: bool) -> None:
@@ -326,7 +325,7 @@ def main(  # noqa: C901
         config_file = config_file.expanduser().resolve()
         if config_file.exists() and config_file.is_file():
             possible_config_locations = [config_file]
-        elif config_file.is_dir():
+        elif config_file.is_dir():  # noqa: R506
             alerts.error(f"Please pass a valid configuration file, not a directory: {config_file}")
             raise typer.Exit(code=1)
         else:
@@ -350,7 +349,8 @@ def main(  # noqa: C901
         if print_tree:  # pragma: no cover
             show_tree(folders[0].root)
             raise typer.Exit()
-        elif use_synonyms:  # pragma: no cover
+
+        if use_synonyms:  # pragma: no cover
             instantiate_nltk()
 
     if len(files) == 0:
@@ -418,7 +418,8 @@ def main(  # noqa: C901
         choice = select_option(choices, show_choices=True)
         if choice.upper() == "Q":
             raise typer.Abort()
-        elif choice.upper() == "C":
+
+        if choice.upper() == "C":
             console.clear()
             print(f"[bold underline]{len(list_of_files)} files processed[/]\n")
             for file in list_of_files:
@@ -440,7 +441,8 @@ def main(  # noqa: C901
                     choice = select_option(choices, show_choices=True)
                     if choice.upper() == "Q":
                         raise typer.Abort()
-                    elif choice.upper() == "S":
+
+                    if choice.upper() == "S":
                         file.new_parent = file.parent
                         file.new_stem = file.stem
                         file.new_path = file.path

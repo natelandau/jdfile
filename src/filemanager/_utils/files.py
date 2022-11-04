@@ -304,24 +304,23 @@ class File:
         if dry_run and self.parent == target.parent:
             alerts.dryrun(f"{original_name} -> {target.name}")
             return True
-        elif dry_run and self.parent != target.parent:
+
+        if dry_run and self.parent != target.parent:
             alerts.dryrun(f"{original_name} -> {str(target)}")
             return True
-        else:
-            try:
-                self.path.rename(target)
-            except Exception as e:
-                alerts.error(f"{e}")
-                raise Abort() from e
-            else:
-                if self.parent == target.parent:
-                    log.success(f"{original_name} -> {target.name}")
-                    return True
-                elif self.parent != target.parent:
-                    log.success(f"{original_name} -> {str(target)}")
-                    return True
 
-        return False
+        try:
+            self.path.rename(target)
+        except Exception as e:
+            alerts.error(f"{e}")
+            raise Abort() from e
+        else:
+            if self.parent == target.parent:
+                log.success(f"{original_name} -> {target.name}")
+                return True
+
+            log.success(f"{original_name} -> {str(target)}")
+            return True
 
     def organize(  # noqa: C901
         self,
@@ -375,14 +374,14 @@ class File:
 
             if len(terms) == 0:
                 continue
-            else:
-                matched_terms = []
-                for term in terms:
-                    if term.lower() in file_words:
-                        matched_terms.append(term.lower())
-                        log.trace(f"Organize matched term: '{term}' to '{folder.number}'")
-                        if folder not in possible_folders:
-                            possible_folders.append(folder)
+
+            matched_terms = []
+            for term in terms:
+                if term.lower() in file_words:
+                    matched_terms.append(term.lower())
+                    log.trace(f"Organize matched term: '{term}' to '{folder.number}'")
+                    if folder not in possible_folders:
+                        possible_folders.append(folder)
 
             if len(matched_terms) > 0:
                 all_matched_terms[folder.name] = matched_terms
@@ -397,26 +396,26 @@ class File:
 
             alerts.error(f"No folder found matching: [tan]{jd_number}[/tan]")
             raise Abort()
-        else:
-            if len(possible_folders) == 0 and force:
-                alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folders matched)")
+
+        if len(possible_folders) == 0 and force:
+            alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folders matched)")
+            return False
+
+        if len(possible_folders) == 1 or force:
+            self.new_parent = possible_folders[0].path
+            self.relative_parent = possible_folders[0].relative
+            return True
+
+        if len(possible_folders) > 1:
+            self.new_parent, self.relative_parent = select_new_folder(
+                possible_folders, self, all_matched_terms
+            )
+            if self.new_parent == self.parent:
+                alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folder selected)")
                 return False
-            elif len(possible_folders) == 1 or force:
-                self.new_parent = possible_folders[0].path
-                self.relative_parent = possible_folders[0].relative
-                return True
-            elif len(possible_folders) > 1:
-                self.new_parent, self.relative_parent = select_new_folder(
-                    possible_folders, self, all_matched_terms
-                )
-                if self.new_parent == self.parent:
-                    alerts.warning(f"Skipping [green bold]{self.path.name}[/] (No folder selected)")
-                    return False
-                else:
-                    alerts.info(
-                        f"Moving [green bold]{self.path.name}[/] to [tan]{self.new_parent}[/]"
-                    )
-                    return True
+
+            alerts.info(f"Moving [green bold]{self.path.name}[/] to [tan]{self.new_parent}[/]")
+            return True
 
         return False
 
@@ -479,8 +478,7 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
 
         return new_path
 
-    else:
-        return original
+    return original
 
 
 def select_new_folder(
@@ -541,14 +539,14 @@ def select_new_folder(
     choice = select_option(choices, "Select an option", same_line=True, show_choices=False)
     if choice == "q" or choice == "Q":
         raise Abort
-    elif choice == "n" or choice == "N":
+    if choice == "n" or choice == "N":
         sys.stdout.write(f"\033[{num_lines}A")
         sys.stdout.write("\033[J")
         return file.parent, folder.relative
-    else:
-        sys.stdout.write(f"\033[{num_lines}A")
-        sys.stdout.write("\033[J")
-        return (
-            possible_folders[int(choice) - 1].path,
-            possible_folders[int(choice) - 1].relative,
-        )
+
+    sys.stdout.write(f"\033[{num_lines}A")
+    sys.stdout.write("\033[J")
+    return (
+        possible_folders[int(choice) - 1].path,
+        possible_folders[int(choice) - 1].relative,
+    )

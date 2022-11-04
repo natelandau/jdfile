@@ -78,8 +78,8 @@ def _log_formatter(record: dict) -> str:
         or record["level"].name == "WARNING"
     ):
         return "<level>{level: <8}</level> | <level>{message}</level>\n{exception}"
-    else:
-        return "<level>{level: <8}</level> | <level>{message}</level> <fg #c5c5c5>({name}:{function}:{line})</fg #c5c5c5>\n{exception}"
+
+    return "<level>{level: <8}</level> | <level>{message}</level> <fg #c5c5c5>({name}:{function}:{line})</fg #c5c5c5>\n{exception}"
 
 
 @rich.repr.auto
@@ -193,8 +193,7 @@ class LoggerManager:
             if msg:
                 print(msg)
             return True
-        else:
-            return False
+        return False
 
     def is_debug(self, msg: str | None = None) -> bool:
         """Check if the current log level is DEBUG.
@@ -209,8 +208,7 @@ class LoggerManager:
             if msg:
                 print(msg)
             return True
-        else:
-            return False
+        return False
 
     def is_info(self, msg: str | None = None) -> bool:
         """Check if the current log level is INFO.
@@ -225,8 +223,7 @@ class LoggerManager:
             if msg:
                 print(msg)
             return True
-        else:
-            return False
+        return False
 
     def is_default(self, msg: str | None = None) -> bool:
         """Check if the current log level is default level (SUCCESS or WARNING).
@@ -241,5 +238,4 @@ class LoggerManager:
             if msg:
                 print(msg)
             return True
-        else:  # pragma: no cover
-            return False
+        return False  # pragma: no cover
