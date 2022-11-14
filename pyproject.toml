@@ -183,7 +183,7 @@ verbose = false
     pdoc
       --docformat $docformat
       --output-directory $outputdirectory
-      nd
+      filemanager
     """
 
     [[tool.poe.tasks.docs.args]]
