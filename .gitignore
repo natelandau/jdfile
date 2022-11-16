@@ -2,6 +2,7 @@
 scratch/
 filemanager.toml
 testfiles/
+bin/act
 
 # Coverage.py
 htmlcov/
@@ -60,6 +61,3 @@ __pycache__/
 
 # Terraform
 .terraform/
-
-# VS Code
-.vscode/

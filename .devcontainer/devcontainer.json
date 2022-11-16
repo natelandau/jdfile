@@ -1,52 +1,110 @@
 {
-    "name": "filemanager",
-    "dockerComposeFile": "../docker-compose.yml",
-    "service": "dev",
-    "workspaceFolder": "/app/",
-    "overrideCommand": true,
-    "postStartCommand": "cp --update /opt/build/poetry/poetry.lock /app/ && mkdir -p /app/.git/hooks/ && cp --update /opt/build/git/* /app/.git/hooks/",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "bungcip.better-toml",
-                "eamodio.gitlens",
-                "ms-azuretools.vscode-docker",
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                "ryanluker.vscode-coverage-gutters",
-                "visualstudioexptteam.vscodeintellicode"
-            ],
-            "settings": {
-                "coverage-gutters.coverageFileNames": [
-                    "reports/coverage.xml"
-                ],
-                "editor.codeActionsOnSave": {
-                    "source.organizeImports": true
-                },
-                "editor.formatOnSave": true,
-                "editor.rulers": [
-                    100
-                ],
-                "files.autoSave": "onFocusChange",
-                "python.defaultInterpreterPath": "/opt/app-env/bin/python",
-                "python.formatting.provider": "black",
-                "python.linting.banditArgs": [
-                    "--configfile",
-                    "pyproject.toml"
-                ],
-                "python.linting.banditEnabled": true,
-                "python.linting.flake8Enabled": true,
-                "python.linting.mypyEnabled": true,
-                "python.linting.pydocstyleEnabled": true,
-                "python.terminal.activateEnvironment": false,
-                "python.testing.pytestEnabled": true,
-                "terminal.integrated.defaultProfile.linux": "zsh",
-                "terminal.integrated.profiles.linux": {
-                    "zsh": {
-                        "path": "/usr/bin/zsh"
-                    }
-                }
+    "name": "Python 3",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        "args": {
+            // Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
+            // Append -bullseye or -buster to pin to an OS version.
+            // Use -bullseye variants on local on arm64/Apple Silicon.
+            "VARIANT": "3.10-bullseye",
+            "POETRY_VERSION": "1.2.2"
+        }
+    },
+    // Set *default* container specific settings.json values on container create.
+    "settings": {
+        "autoDocstring.startOnNewLine": true,
+        "coverage-gutters.coverageFileNames": ["reports/coverage.xml"],
+        "coverage-gutters.showGutterCoverage": false,
+        "coverage-gutters.showLineCoverage": true,
+        "coverage-gutters.showRulerCoverage": true,
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "isort.args": ["--profile black"],
+        "python.analysis.completeFunctionParens": true,
+        "python.formatting.provider": "black",
+        "python.linting.banditArgs": ["--configfile", "pyproject.toml"],
+        "python.linting.banditEnabled": true,
+        "python.linting.enabled": true,
+        "python.linting.flake8Enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.linting.pydocstyleEnabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.activateEnvironment": false,
+        "python.testing.pytestEnabled": true,
+        "python.linting.mypyArgs": [
+            "--no-pretty",
+            "--follow-imports=silent",
+            "--ignore-missing-imports",
+            "--show-column-numbers",
+            "--warn-redundant-casts"
+        ],
+        "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
+        "shellformat.path": "/home/vscode/.local/bin/shfmt",
+        "terminal.integrated.defaultProfile.linux": "zsh",
+
+        "terminal.integrated.profiles.linux": {
+            "zsh": {
+                "path": "/usr/bin/zsh"
             }
         }
-    }
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "aaron-bond.better-comments",
+        "bierner.markdown-preview-github-styles",
+        "bungcip.better-toml",
+        "christian-kohler.path-intellisense",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "fcrespo82.markdown-table-formatter",
+        "foxundermoon.shell-format",
+        "github.copilot",
+        "GitHub.vscode-pull-request-github",
+        "gruntfuggly.todo-tree",
+        "mhutchie.git-graph",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        "njpwerner.autodocstring",
+        "oderwat.indent-rainbow",
+        "redhat.vscode-yaml",
+        "richie5um2.vscode-sort-json",
+        "ryanluker.vscode-coverage-gutters",
+        "samuelcolvin.jinjahtml",
+        "shardulm94.trailing-spaces",
+        "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck",
+        "tuxtina.json2yaml",
+        "tyriar.sort-lines",
+        "usernamehw.errorlens",
+        "visualstudioexptteam.vscodeintellicode",
+        "wwm.better-align",
+        "yzhang.markdown-all-in-one"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "none"
+        },
+        "ghcr.io/devcontainers/features/common-utils:1": {},
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers-contrib/features/yamllint:1": {},
+        "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
+    },
+    "remoteUser": "vscode",
+    "postCreateCommand": "bash ./.devcontainer/post-install.sh",
+    "mounts": [
+        // Re-use local Git configuration. Don't commit this line
+        //"source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind,consistency=cached"
+    ]
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
 }
