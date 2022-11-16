@@ -4,13 +4,11 @@ name: "Test Dev Container"
 on:
     workflow_dispatch:
     pull_request:
-        types: [opened, reopened, edited]
+        types: [opened, reopened]
         paths:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
     push:
-        branches:
-            - "main"
         paths:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
