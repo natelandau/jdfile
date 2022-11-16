@@ -35,7 +35,7 @@ runs:
               steps.pipx-env-vars.outputs.pipx-home != ''
               && steps.pipx-env-vars.outputs.pipx-bin-dir != ''
           id: pipx-cache
-          uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # tag=v3.0.11
+          uses: actions/cache@v3
           with:
               path: |
                   ${{ steps.pipx-env-vars.outputs.pipx-home }}/venvs/poetry
@@ -52,7 +52,7 @@ runs:
           shell: bash
           run: pipx install poetry
         - name: Load poetry cache
-          uses: actions/setup-python@4
+          uses: actions/setup-python@v4
           id: setup-python
           with:
               python-version: ${{ inputs.python-version }}
