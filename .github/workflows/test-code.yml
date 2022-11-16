@@ -5,7 +5,7 @@ on:
     push:
         paths:
             - ".github/workflows/test-code.yml"
-            - ".github/workflows/actions/**"
+            - ".github/actions/**"
             - "src/**"
             - "tests/**"
             - pyproject.toml
@@ -15,7 +15,7 @@ on:
         types: [opened, reopened]
         paths-ignore:
             - ".github/workflows/test-code.yml"
-            - ".github/workflows/actions/**"
+            - ".github/actions/**"
             - "src/**"
             - "tests/**"
             - pyproject.toml
