@@ -4,7 +4,8 @@ on:
     workflow_dispatch:
     push:
         paths:
-            - "workflows/test-code.yml"
+            - ".github/workflows/test-code.yml"
+            - ".github/workflows/actions/**"
             - "src/**"
             - "tests/**"
             - pyproject.toml
@@ -13,7 +14,8 @@ on:
     pull_request:
         types: [opened, reopened]
         paths-ignore:
-            - "workflows/test-code.yml"
+            - ".github/workflows/test-code.yml"
+            - ".github/workflows/actions/**"
             - "src/**"
             - "tests/**"
             - pyproject.toml
@@ -21,7 +23,7 @@ on:
             - .flake8
 
 concurrency:
-    group: test-${{ github.ref }}
+    group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:

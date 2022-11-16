@@ -15,6 +15,10 @@ on:
             - ".devcontainer/**/*"
             - ".github/workflows/test-devcontainer.yml"
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     test-dev-container:
         runs-on: ubuntu-latest
