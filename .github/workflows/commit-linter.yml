@@ -3,8 +3,7 @@ name: Commit Linter
 
 on:
     pull_request:
-        branches:
-            - main
+        types: [opened, reopened]
     push:
         branches:
             - main

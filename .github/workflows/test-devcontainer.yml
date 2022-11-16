@@ -9,6 +9,8 @@ on:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
     push:
+        branches:
+            - "main"
         paths:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
@@ -28,7 +30,6 @@ jobs:
             - name: Build and run dev container task
               uses: devcontainers/ci@v0.2
               with:
-                  # Change this to be your CI task/script
                   runCmd: |
                       poe lint
                       poe test
