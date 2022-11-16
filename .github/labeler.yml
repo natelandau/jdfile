@@ -1,10 +1,8 @@
 ---
 actions:
-    - .github/*
-    - .github/**/*
+    - .github/**
 devcontainer:
-    - .devcontainer/*
-    - .devcontainer/**/*
+    - .devcontainer/**
 config:
     - .cz.toml
     - .gitignore
@@ -14,10 +12,8 @@ docs:
     - "*.md"
     - LICENSE
 source:
-    - "src/*"
-    - "src/**/*"
+    - "src/**"
 tests:
-    - "tests/*"
-    - "tests/**/*"
-deps:
+    - "tests/**"
+dependencies:
     - "poetry.lock"
