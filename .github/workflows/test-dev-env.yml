@@ -1,0 +1,30 @@
+---
+name: "Test Dev Container"
+
+on:
+    workflow_dispatch:
+    pull_request:
+        types: [opened, reopened]
+        paths:
+            - ".devcontainer/*"
+            - ".devcontainer/**/*"
+    push:
+        paths:
+            - ".devcontainer/*"
+            - ".devcontainer/**/*"
+
+jobs:
+    test-dev-container:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Build and run dev container task
+              uses: devcontainers/ci@v0.2
+              with:
+                  # Change this to be your CI task/script
+                  runCmd: |
+                      poe lint
+                      poe test
