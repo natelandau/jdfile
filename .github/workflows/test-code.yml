@@ -8,19 +8,11 @@ on:
             - ".github/actions/**"
             - "src/**"
             - "tests/**"
-            - pyproject.toml
-            - poetry.lock
-            - .flake8
+            - "pyproject.toml"
+            - "poetry.lock"
+            - ".flake8"
     pull_request:
         types: [opened, reopened]
-        paths-ignore:
-            - ".github/workflows/test-code.yml"
-            - ".github/actions/**"
-            - "src/**"
-            - "tests/**"
-            - pyproject.toml
-            - poetry.lock
-            - .flake8
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
