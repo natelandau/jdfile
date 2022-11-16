@@ -8,10 +8,12 @@ on:
         paths:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
+            - ".github/workflows/test-devcontainer.yml"
     push:
         paths:
             - ".devcontainer/*"
             - ".devcontainer/**/*"
+            - ".github/workflows/test-devcontainer.yml"
 
 jobs:
     test-dev-container:
