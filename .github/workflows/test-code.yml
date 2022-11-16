@@ -13,6 +13,14 @@ on:
             - ".flake8"
     pull_request:
         types: [opened, reopened]
+        paths:
+            - ".github/workflows/test-code.yml"
+            - ".github/actions/**"
+            - "src/**"
+            - "tests/**"
+            - "pyproject.toml"
+            - "poetry.lock"
+            - ".flake8"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,16 +36,16 @@ jobs:
         steps:
             - uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
               with:
-                  disable-sudo: true
-                  egress-policy: block
-                  allowed-endpoints: >
-                      codecov.io:443
-                      files.pythonhosted.org:443
-                      github.com:443
-                      install.python-poetry.org:443
-                      pypi.org:443
-                      storage.googleapis.com:443
-                      uploader.codecov.io:443
+                  egress-policy: audit
+                  #   disable-sudo: true
+                  #   allowed-endpoints: >
+                  #       codecov.io:443
+                  #       files.pythonhosted.org:443
+                  #       github.com:443
+                  #       install.python-poetry.org:443
+                  #       pypi.org:443
+                  #       storage.googleapis.com:443
+                  #       uploader.codecov.io:443
 
             #----------------------------------------------
             #       check-out repo and set-up python
