@@ -1,0 +1,23 @@
+---
+actions:
+    - .github/*
+    - .github/**/*
+devcontainer:
+    - .devcontainer/*
+    - .devcontainer/**/*
+config:
+    - .cz.toml
+    - .gitignore
+    - .pre-commit-config.yaml
+    - pyproject.toml
+docs:
+    - "*.md"
+    - LICENSE
+source:
+    - "src/*"
+    - "src/**/*"
+tests:
+    - "tests/*"
+    - "tests/**/*"
+deps:
+    - "poetry.lock"

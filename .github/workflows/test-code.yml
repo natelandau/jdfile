@@ -1,24 +1,46 @@
-name: Run Pytest
+name: Test Code
 
 on:
     workflow_dispatch:
     push:
-        paths:
-            - "src/*"
-            - "src/**/*"
+        paths-ignore:
+            - ".cz.yaml"
+            - ".devcontainer/**"
+            - ".gitignore"
+            - ".pre-commit-config.yaml"
+            - ".vscode/**"
+            - "CHANGELOG.md"
+            - "README.md"
+            - "docs/**"
+            - "LICENSE"
+            - "cruft.json"
+            - "reports/**"
     pull_request:
-        paths:
-            - "src/*"
-            - "src/**/*"
+        paths-ignore:
+            - ".cz.yaml"
+            - ".devcontainer/**"
+            - ".gitignore"
+            - ".pre-commit-config.yaml"
+            - ".vscode/**"
+            - "CHANGELOG.md"
+            - "README.md"
+            - "docs/**"
+            - "LICENSE"
+            - "cruft.json"
+            - "reports/**"
 
 jobs:
-    test-dev-local:
+    test-code:
         runs-on: ubuntu-latest
         strategy:
-            fail-fast: false
+            fail-fast: true
             matrix:
                 python-version: ["3.10"]
         steps:
+            - uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
+              with:
+                  egress-policy: audit
+
             #----------------------------------------------
             #       check-out repo and set-up python
             #----------------------------------------------
@@ -58,14 +80,55 @@ jobs:
             #----------------------------------------------
             - name: Install library
               run: poetry install --no-interaction
+
+            #----------------------------------------------
+            #    run linters
+            #----------------------------------------------
+            - name: Lint with Mypy
+              run: |
+                  source .venv/bin/activate
+                  mypy src/
+            - name: lint with flake8
+              run: |
+                  source .venv/bin/activate
+                  flake8 src/
+            - name: lint with pydocstyle
+              run: |
+                  source .venv/bin/activate
+                  pydocstyle src/
+            - name: check pyproject.toml
+              run: |
+                  source .venv/bin/activate
+                  poetry check
+            - name: lint with bandit
+              run: |
+                  source .venv/bin/activate
+                  bandit -r --configfile pyproject.toml src/
+            - name: lint with black
+              run: |
+                  source .venv/bin/activate
+                  black --check src/
+            - name: lint with isort
+              run: |
+                  source .venv/bin/activate
+                  isort -c src/
+            - name: run vulture
+              run: |
+                  source .venv/bin/activate
+                  vulture src/
+            - name: run interrogate
+              run: |
+                  source .venv/bin/activate
+                  interrogate -c pyproject.toml .
             #----------------------------------------------
             #    run test suite
             #----------------------------------------------
-            - name: Run tests
+            - name: Run tests with pytest
               run: |
                   source .venv/bin/activate
-                  poe lint
-                  poe test
+                  coverage run
+                  coverage report
+                  coverage xml
             # ----------------------------------------------
             #             upload coverage stats
             # ----------------------------------------------
