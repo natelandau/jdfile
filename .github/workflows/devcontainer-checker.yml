@@ -6,13 +6,11 @@ on:
     pull_request:
         types: [opened, reopened]
         paths:
-            - ".devcontainer/*"
-            - ".devcontainer/**/*"
+            - ".devcontainer/**"
             - ".github/workflows/devcontainer-checker.yml"
     push:
         paths:
-            - ".devcontainer/*"
-            - ".devcontainer/**/*"
+            - ".devcontainer/**"
             - ".github/workflows/devcontainer-checker.yml"
 
 concurrency:
@@ -26,10 +24,12 @@ jobs:
         steps:
             - uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
               with:
-                  disable-sudo: true
                   egress-policy: block
                   allowed-endpoints: >
+                      api.snapcraft.io:443
                       auth.docker.io:443
+                      centralus.data.mcr.microsoft.com:443
+                      deb.debian.org:443
                       deb.debian.org:80
                       dl.yarnpkg.com:443
                       eastus.data.mcr.microsoft.com:443
@@ -46,6 +46,7 @@ jobs:
                       registry-1.docker.io:443
                       registry.npmjs.org:443
                       webi.sh:443
+                      westcentralus.data.mcr.microsoft.com:443
 
             - name: Checkout
               uses: actions/checkout@v3
