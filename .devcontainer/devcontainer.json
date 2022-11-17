@@ -52,11 +52,8 @@
     },
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
         "aaron-bond.better-comments",
         "bierner.markdown-preview-github-styles",
-        "bungcip.better-toml",
         "christian-kohler.path-intellisense",
         "donjayamanne.githistory",
         "eamodio.gitlens",
@@ -67,6 +64,8 @@
         "GitHub.vscode-pull-request-github",
         "gruntfuggly.todo-tree",
         "mhutchie.git-graph",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
         "ms-toolsai.jupyter-keymap",
         "ms-toolsai.jupyter-renderers",
         "ms-toolsai.jupyter",
@@ -80,6 +79,7 @@
         "samuelcolvin.jinjahtml",
         "shardulm94.trailing-spaces",
         "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
         "timonwong.shellcheck",
         "tuxtina.json2yaml",
         "tyriar.sort-lines",
