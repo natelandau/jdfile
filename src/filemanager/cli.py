@@ -33,37 +33,6 @@ app = typer.Typer(add_completion=False, no_args_is_help=True, rich_markup_mode="
 typer.rich_utils.STYLE_HELPTEXT = ""
 
 
-def load_configuration(paths: list[Path], required: bool = False) -> dict:
-    """Load configuration data from toml file. If not found, return default config.
-
-    Args:
-        paths: List of possible config locations.
-        required: If True, raise exception if config not found.
-
-    Returns:
-        dict: Configuration data.
-
-    Raises:
-        Exit: If config file is malformed or not found
-    """
-    config = {}
-    for config_file in paths:
-        if config_file.exists():
-            log.debug(f"Loading configuration from {config_file}")
-            with open(config_file, mode="rb") as fp:
-                try:
-                    config = tomllib.load(fp)
-                except tomllib.TOMLDecodeError as e:
-                    log.exception(f"Could not parse '{config_file}'")
-                    raise typer.Exit(code=1) from e
-            break
-
-    if not config and required:
-        log.error("No configuration found. Please create a config file.")
-        raise typer.Exit(code=1)
-    return config
-
-
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
@@ -453,3 +422,34 @@ def main(  # noqa: C901
             print(f"[bold underline]{len(list_of_files)} files processed[/]\n")
             for file in list_of_files:
                 file.commit(dry_run, overwrite, separator, append_unique_integer)
+
+
+def load_configuration(paths: list[Path], required: bool = False) -> dict:
+    """Load configuration data from toml file. If not found, return default config.
+
+    Args:
+        paths: List of possible config locations.
+        required: If True, raise exception if config not found.
+
+    Returns:
+        dict: Configuration data.
+
+    Raises:
+        Exit: If config file is malformed or not found
+    """
+    config = {}
+    for config_file in paths:
+        if config_file.exists():
+            log.debug(f"Loading configuration from {config_file}")
+            with config_file.open("rb") as f:
+                try:
+                    config = tomllib.load(f)
+                except tomllib.TOMLDecodeError as e:
+                    log.exception(f"Could not parse '{config_file}'")
+                    raise typer.Exit(code=1) from e
+            break
+
+    if not config and required:
+        log.error("No configuration found. Please create a config file.")
+        raise typer.Exit(code=1)
+    return config
