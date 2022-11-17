@@ -1,7 +1,7 @@
 ---
-actions:
+github_actions:
     - ".github/**"
-devcontainer:
+dev_container:
     - ".devcontainer/**"
 config:
     - ".*"
@@ -10,13 +10,12 @@ config:
     - "*.toml"
     - "*.yaml"
     - "*.yml"
-docs:
+documentation:
     - "**.md"
     - "docs/**"
     - LICENSE
-source:
+python:
     - "src/**"
-tests:
     - "tests/**"
 dependencies:
     - "*.lock"
