@@ -6,13 +6,11 @@ on:
     pull_request:
         types: [opened, reopened]
         paths:
-            - ".devcontainer/*"
-            - ".devcontainer/**/*"
+            - ".devcontainer/**"
             - ".github/workflows/devcontainer-checker.yml"
     push:
         paths:
-            - ".devcontainer/*"
-            - ".devcontainer/**/*"
+            - ".devcontainer/**"
             - ".github/workflows/devcontainer-checker.yml"
 
 concurrency:
