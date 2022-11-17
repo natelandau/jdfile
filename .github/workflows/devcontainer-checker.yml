@@ -46,6 +46,7 @@ jobs:
                   # registry.npmjs.org:443
                   # webi.sh:443
                   # westcentralus.data.mcr.microsoft.com:443
+                  # windows.net:443
 
             - name: Checkout
               uses: actions/checkout@v3
