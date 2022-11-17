@@ -24,7 +24,7 @@ jobs:
         steps:
             - uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
               with:
-                  egress-policy: audit
+                  egress-policy: block
                   allowed-endpoints: >
                       api.snapcraft.io:443
                       auth.docker.io:443
