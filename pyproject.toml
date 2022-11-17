@@ -1,242 +1,229 @@
 # https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+    build-backend = "poetry.core.masonry.api"
+    requires      = ["poetry-core>=1.0.0"]
 
 # https://python-poetry.org/docs/pyproject/
 [tool.poetry]
-name = "filemanager"
-version = "0.4.6"
-description = "A cli for personalized file management"
-authors = ["Nate Landau <github@natenate.org>"]
-readme = "README.md"
-repository = "https://github.com/natelandau/filemanager"
+    authors     = ["Nate Landau <github@natenate.org>"]
+    description = "A cli for personalized file management"
+    name        = "filemanager"
+    readme      = "README.md"
+    repository  = "https://github.com/natelandau/filemanager"
+    version     = "0.4.6"
 
 # https://commitizen-tools.github.io/commitizen/config/
 [tool.commitizen]
-bump_message = "bump(release): v$current_version → v$new_version"
-tag_format = "v$version"
-update_changelog_on_bump = true
-version = "0.4.6"
-version_files = [
-  "pyproject.toml:version",
-  "src/filemanager/__version__.py:__version__"
-  ]
+    bump_message = "bump(release): v$current_version → v$new_version"
+    tag_format = "v$version"
+    update_changelog_on_bump = true
+    version = "0.4.6"
+    version_files = [
+        "pyproject.toml:version",
+        "src/filemanager/__version__.py:__version__",
+    ]
 
 # https://python-poetry.org/docs/pyproject/#scripts
 [tool.poetry.scripts]
-filemanager = "filemanager.cli:app"
+    filemanager = "filemanager.cli:app"
 
-# https://python-poetry.org/docs/dependency-specification/
+    # https://python-poetry.org/docs/dependency-specification/
 
 # https://python-poetry.org/docs/dependency-specification/
 [tool.poetry.dependencies]
-arrow = "^1.2.2"
-loguru = "^0.6.0"
-nltk = "^3.7"
-plumbum = "^1.7.2"
-python = "^3.10"
-rich = "^12.5.1"
-tomli = "^2.0.1"
-typer = { extras = ["all"], version = "^0.6.1" }
+    arrow       = "^1.2.2"
+    loguru      = "^0.6.0"
+    nltk        = "^3.7"
+    plumbum     = "^1.7.2"
+    python      = "^3.10"
+    rich        = "^12.5.1"
+    shellingham = "^1.4.0"
+    tomli       = "^2.0.1"
+    typer       = { extras = ["all"], version = "^0.7.0" }
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.1.2"
-pytest-clarity = "*"
-pytest-mock = "^3.8.1"
-pytest-xdist = "^2.5.0"
+    pytest                 = "^7.1.2"
+    pytest-clarity         = "^1.0.1"
+    pytest-mock            = "^3.8.1"
+    pytest-pretty-terminal = "^1.1.0"
+    pytest-xdist           = "^2.5.0"
 
 [tool.poetry.group.dev.dependencies]
-absolufy-imports = "*"
-bandit = { extras = ["toml"], version = "*" }
-black = "*"
-commitizen = "*"
-coverage = { extras = ["toml"], version = "*" }
-cruft = "^2.11.0"
-darglint = "*"
-flake8 = "*"
-flake8-bugbear = "*"
-flake8-builtins = "*"
-flake8-comprehensions = "*"
-flake8-docstrings = "*"
-flake8-eradicate = "*"
-flake8-mutable = "*"
-flake8-noqa = "*"
-flake8-pytest-style = "*"
-flake8-return = "*"
-flake8-rst-docstrings = "*"
-flake8-simplify = "*"
-flake8-tidy-imports = "*"
-isort = "*"
-mypy = "*"
-pdoc = "*"
-pep8-naming = "*"
-poethepoet = "*"
-pre-commit = "*"
-pydocstyle = { extras = ["toml"], version = "*" }
-pyupgrade = "*"
-shellcheck-py = "*"
-tryceratops = "^1.1.0"
-typeguard = "^2.13.3"
-types-python-dateutil = "^2.8.19"
-vulture = "*"
-yesqa = "*"
-interrogate = "^1.5.0"
+    absolufy-imports       = "^0.3.1"
+    bandit                 = { extras = ["toml"], version = "^1.7.4" }
+    black                  = "^22.10.0"
+    commitizen             = "^2.37.0"
+    coverage               = { extras = ["toml"], version = "^6.5.0" }
+    darglint               = "^1.8.1"
+    flake8                 = "^5.0.4"
+    flake8-bugbear         = "^22.10.27"
+    flake8-builtins        = "^2.0.1"
+    flake8-comprehensions  = "^3.10.1"
+    flake8-docstrings      = "^1.6.0"
+    flake8-eradicate       = "^1.4.0"
+    flake8-mutable         = "^1.2.0"
+    flake8-newspaper-style = "^0.4.3"
+    flake8-noqa            = "^1.2.9"
+    flake8-pytest-style    = "^1.6.0"
+    flake8-return          = "^1.2.0"
+    flake8-rst-docstrings  = "^0.3.0"
+    flake8-simplify        = "^0.19.3"
+    flake8-tidy-imports    = "^4.8.0"
+    flake8-use-pathlib     = "^0.3.0"
+    interrogate            = "^1.5.0"
+    isort                  = "^5.10.1"
+    mypy                   = "^0.991"
+    pdoc                   = "^12.3.0"
+    pep8-naming            = "^0.13.2"
+    poethepoet             = "^0.16.4"
+    pre-commit             = "^2.20.0"
+    pydocstyle             = { extras = ["toml"], version = "*" }
+    pyupgrade              = "^3.2.2"
+    shellcheck-py          = "^0.8.0.4"
+    tryceratops            = "^1.1.0"
+    typeguard              = "^2.13.3"
+    types-python-dateutil  = "^2.8.19"
+    vulture                = "^2.6"
+    yesqa                  = "^1.4.0"
 
 [tool.bandit] # https://bandit.readthedocs.io/en/latest/config.html
-skips = ["B101", "B404", "B607"]
+    skips = ["B101", "B404", "B607"]
 
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-via-a-file
 [tool.black]
-line-length = 100
+    line-length = 100
 
 [tool.interrogate]
-verbose = 2
-fail-under = 90
-exclude = [
-  "docs",
-  "build",
-  "tests",
-]
+    exclude    = ["build", "docs", "tests"]
+    fail-under = 90
+    verbose    = 2
 
 # https://coverage.readthedocs.io/en/latest/config.html#report
 [tool.coverage.report]
-fail_under = 50
-precision = 1
-show_missing = true
-skip_covered = true
-exclude_lines = [
-    'pragma: no cover',
-    'def __repr__',
-    'raise typer\.Exit',
-    'raise Exit',
-    'raise Abort',
-    'except [\w\s\._]+ as .*:',
-    'log\.trace',
-    'log\.debug',
-    'log\.success',
-    'log\.info',
-    'log\.warning',
-    'log\.error',
-    'log\.critical',
-    'log\.exception',
-]
+    exclude_lines = [
+        'def __repr__',
+        'except [\w\s\._]+ as .*:',
+        'log\.critical',
+        'log\.debug',
+        'log\.error',
+        'log\.exception',
+        'log\.info',
+        'log\.success',
+        'log\.trace',
+        'log\.warning',
+        'pragma: no cover',
+        'raise Abort',
+        'raise Exit',
+        'raise typer\.Exit',
+    ]
+    fail_under = 50
+    precision = 1
+    show_missing = true
+    skip_covered = true
 
 # https://coverage.readthedocs.io/en/latest/config.html#run
 [tool.coverage.run]
-branch = true
-command_line = "--module pytest"
-data_file = "reports/.coverage"
-source = ["src"]
+    branch       = true
+    command_line = "--module pytest"
+    data_file    = "reports/.coverage"
+    source       = ["src"]
 
 # https://coverage.readthedocs.io/en/latest/config.html#xml
 [tool.coverage.xml]
-output = "reports/coverage.xml"
+    output = "reports/coverage.xml"
 
 # https://pycqa.github.io/isort/docs/configuration/options.html
 [tool.isort]
-color_output = true
-line_length = 100
-profile = "black"
-src_paths = ["src", "tests"]
+    color_output = true
+    line_length  = 100
+    profile      = "black"
+    src_paths    = ["src", "tests"]
 
 # https://mypy.readthedocs.io/en/latest/config_file.html
 [tool.mypy]
-disallow_any_unimported = true
-disallow_subclassing_any = false
-disallow_untyped_decorators = false
-disallow_untyped_defs = true
-ignore_missing_imports = true
-junit_xml = "reports/mypy.xml"
-no_implicit_optional = true
-pretty = true
-show_column_numbers = true
-show_error_codes = true
-show_error_context = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
-exclude = [
-    'tests/',  # TOML literal string (single-quotes, regex okay, no escaping necessary)
-]
+    disallow_any_unimported = true
+    disallow_subclassing_any = false
+    disallow_untyped_decorators = false
+    disallow_untyped_defs = true
+    exclude = [
+        'tests/', # TOML literal string (single-quotes, regex okay, no escaping necessary)
+    ]
+    ignore_missing_imports = true
+    junit_xml = "reports/mypy.xml"
+    no_implicit_optional = true
+    pretty = true
+    show_column_numbers = true
+    show_error_codes = true
+    show_error_context = true
+    warn_redundant_casts = true
+    warn_unreachable = true
+    warn_unused_ignores = true
 
 # http://www.pydocstyle.org/en/latest/usage.html#configuration-files
 [tool.pydocstyle]
-convention = "google"
-add_ignore = ["D212","D107"]
+    add_ignore = ["D107", "D212"]
+    convention = "google"
 
 # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
 [tool.pytest.ini_options]
-addopts = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --verbosity=2 --junitxml=reports/pytest.xml"
-filterwarnings = ["error", "ignore::DeprecationWarning"]
-testpaths = ["src", "tests"]
-xfail_strict = true
+    addopts        = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --verbosity=2 --junitxml=reports/pytest.xml"
+    filterwarnings = ["error", "ignore::DeprecationWarning"]
+    testpaths      = ["src", "tests"]
+    xfail_strict   = true
 
 # https://pypi.org/project/vulture/
 [tool.vulture]
-# exclude = ["file*.py", "dir/"]
-# ignore_decorators = ["@app.route", "@require_*"]
-ignore_names = ["args", "kwargs", "request", "version"]
-# make_whitelist = true
-min_confidence = 80
-paths = ["src", "tests"]
-sort_by_size = true
-verbose = false
+    # exclude = ["file*.py", "dir/"]
+    # ignore_decorators = ["@app.route", "@require_*"]
+    ignore_names = ["args", "kwargs", "request", "version"]
+    # make_whitelist = true
+    min_confidence = 80
+    paths          = ["src", "tests"]
+    sort_by_size   = true
+    verbose        = false
 
 # https://github.com/nat-n/poethepoet
 [tool.poe.tasks]
 
-  [tool.poe.tasks.docs]
-  help = "Generate this package's docs"
-  cmd = """
+    [tool.poe.tasks.docs]
+        cmd = """
     pdoc
-      --docformat $docformat
-      --output-directory $outputdirectory
-      filemanager
+      --docformat google
+      --output-directory docs
+      src/filemanager
     """
+        help = "Generate this package's docs"
 
-    [[tool.poe.tasks.docs.args]]
-    help = "The docstring style (default: google)"
-    name = "docformat"
-    options = ["--docformat"]
-    default = "google"
+    [tool.poe.tasks.lint]
+        help = "Lint this package"
 
-    [[tool.poe.tasks.docs.args]]
-    help = "The output directory (default: docs)"
-    name = "outputdirectory"
-    options = ["--output-directory"]
-    default = "docs"
+        [[tool.poe.tasks.lint.sequence]]
+            shell = "vulture"
 
-  [tool.poe.tasks.lint]
-  help = "Lint this package"
-
-    [[tool.poe.tasks.lint.sequence]]
-    shell = "vulture"
-
-    [[tool.poe.tasks.lint.sequence]]
-    cmd = """
+        [[tool.poe.tasks.lint.sequence]]
+            cmd = """
       pre-commit run
         --all-files
         --color always
       """
 
-  [tool.poe.tasks.test]
-  help = "Test this package"
+[tool.poe.tasks.test]
+    help = "Test this package"
 
     [[tool.poe.tasks.test.sequence]]
-    cmd = "coverage run"
+        cmd = "coverage run"
 
     [[tool.poe.tasks.test.sequence]]
-    cmd = "coverage report"
+        cmd = "coverage report"
 
     [[tool.poe.tasks.test.sequence]]
-    cmd = "coverage xml"
+        cmd = "coverage xml"
 
-  [tool.poe.tasks.clean]
-  help = "Run isort and black"
+[tool.poe.tasks.clean]
+    help = "Run isort and black"
 
     [[tool.poe.tasks.clean.sequence]]
-    cmd = "isort src/ tests/"
+        cmd = "isort src/ tests/"
 
     [[tool.poe.tasks.clean.sequence]]
-    cmd = "black src/ tests/"
+        cmd = "black src/ tests/"

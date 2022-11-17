@@ -75,43 +75,6 @@ class Folder:
         yield "terms", self.terms
 
 
-def find_root_dir(config: dict, project_name: str) -> Path:
-    """Find a valid root directory for the specified project.
-
-    Args:
-        config: (dict) Configuration dictionary.
-        project_name: (str) The project name to index.
-
-    Returns:
-        Path: Path to a valid root directory.
-
-    Raises:
-        Abort: If a project folder is not found.
-    """
-    try:
-        if config["projects"]:
-            for project in config["projects"]:
-                if project_name.lower() == config["projects"][project]["name"].lower():
-                    project_path = Path(config["projects"][project]["path"]).expanduser().resolve()
-                    break
-
-            if project_path.exists() is False:
-                log.error(f"'Config variable 'project_path': '{project_path}' does not exist.")
-                raise Abort()
-
-        else:
-            log.error("No projects found in the configuration file")
-            raise Abort()  # noqa: TC301
-    except KeyError as e:
-        log.error(f"{e} is not defined in the config file.")
-        raise Abort() from e
-    except UnboundLocalError as e:
-        log.error(f"'{project_name}' is not defined in the config file.")
-        raise Abort() from e
-
-    return project_path
-
-
 def populate_project_folders(config: dict, project_name: str) -> list[Folder]:
     """Populate the list of Project objects (deepest level available for filing).
 
@@ -181,3 +144,40 @@ def show_tree(project: Path) -> None:  # pragma: no cover
     except ProcessExecutionError as e:
         log.error(e)
         raise Abort() from e
+
+
+def find_root_dir(config: dict, project_name: str) -> Path:
+    """Find a valid root directory for the specified project.
+
+    Args:
+        config: (dict) Configuration dictionary.
+        project_name: (str) The project name to index.
+
+    Returns:
+        Path: Path to a valid root directory.
+
+    Raises:
+        Abort: If a project folder is not found.
+    """
+    try:
+        if config["projects"]:
+            for project in config["projects"]:
+                if project_name.lower() == config["projects"][project]["name"].lower():
+                    project_path = Path(config["projects"][project]["path"]).expanduser().resolve()
+                    break
+
+            if project_path.exists() is False:
+                log.error(f"'Config variable 'project_path': '{project_path}' does not exist.")
+                raise Abort()
+
+        else:
+            log.error("No projects found in the configuration file")
+            raise Abort()  # noqa: TC301
+    except KeyError as e:
+        log.error(f"{e} is not defined in the config file.")
+        raise Abort() from e
+    except UnboundLocalError as e:
+        log.error(f"'{project_name}' is not defined in the config file.")
+        raise Abort() from e
+
+    return project_path
