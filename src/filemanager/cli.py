@@ -100,7 +100,7 @@ def main(  # noqa: C901
         show_default=True,
     ),
     log_file: Path = typer.Option(
-        Path(Path.home() / "logs" / "halp.log"),
+        Path(Path.home() / "logs" / "filemanager.log"),
         help="Path to log file",
         show_default=True,
         dir_okay=False,
@@ -122,7 +122,7 @@ def main(  # noqa: C901
         count=True,
     ),
     version: Optional[bool] = typer.Option(
-        None, "--version", callback=version_callback, is_eager=True
+        None, "--version", help="Print version and exit", callback=version_callback, is_eager=True
     ),
     # Filename Cleaning Options
     add_date: bool = typer.Option(
