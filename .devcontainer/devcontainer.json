@@ -20,7 +20,7 @@
         "coverage-gutters.showRulerCoverage": true,
         "editor.formatOnSave": true,
         "editor.rulers": [100],
-        "isort.args": ["--profile black"],
+        "isort.args": ["--profile", "black"],
         "python.analysis.completeFunctionParens": true,
         "python.formatting.provider": "black",
         "python.linting.banditArgs": ["--configfile", "pyproject.toml"],
@@ -34,12 +34,12 @@
         "python.terminal.activateEnvironment": false,
         "python.testing.pytestEnabled": true,
         "python.linting.mypyArgs": [
-            "--no-pretty",
-            "--follow-imports=silent",
-            "--ignore-missing-imports",
-            "--show-column-numbers",
-            "--warn-redundant-casts"
+            "--config-file",
+            "pyproject.toml",
+            "--exclude",
+            "'tests/'"
         ],
+        "python.linting.ignorePatterns": [".vscode/**/*.py", ".venv/**/*.py"],
         "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
         "shellformat.path": "/home/vscode/.local/bin/shfmt",
         "terminal.integrated.defaultProfile.linux": "zsh",
@@ -88,7 +88,7 @@
     "postCreateCommand": "bash ./.devcontainer/post-install.sh",
     "mounts": [
         // Re-use local Git configuration. Don't commit this line
-        //"source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind,consistency=cached"
+        // "source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind,consistency=cached"
     ]
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
