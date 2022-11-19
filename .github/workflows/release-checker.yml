@@ -47,7 +47,7 @@ jobs:
 
             - name: create test files
               run: |
-                  mkdir -p "~/test/30-39 readme/31 test files/31.01 readme"
+                  mkdir -p ~/test/30-39\ readme/31\ test\ files/31.01\ readme
                   mkdir ~/.filemanager
                   echo "[projects]\n[projects.test]\nname = \"Personal\"\npath = \"~/test"" > ~/.filemanager/filemanager.toml
                   cat ~/.filemanager/filemanager.toml
@@ -59,5 +59,5 @@ jobs:
 
             - name: confirm file exists
               run: |
-                  ls -al "~/test/30-39 readme/31 test files/31.01 readme"
-                  cat "~/test/30-39 readme/31 test files/31.01 readme/Test_Readme_File.txt"| grep "exists"
+                  ls -al ~/test/30-39\ readme/31\ test\ files/31.01\ readme
+                  cat ~/test/30-39\ readme/31\ test\ files/31.01\ readme/Test_Readme_File.txt | grep "exists"
