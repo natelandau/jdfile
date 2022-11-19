@@ -4,12 +4,14 @@ name: Test Current Release
 on:
     workflow_dispatch:
     push:
-        tags:
-            - "**"
+        paths:
+            - ".github/workflows/release-checker.yml"
     release:
         types:
             - published
     pull_request:
+        paths:
+            - ".github/workflows/release-checker.yml"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +23,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: ["3.8", "3.9", "3.10", "3.11"]
+                python-version: ["3.10", "3.11"]
 
         name: Python ${{ matrix.python-version }}
 
