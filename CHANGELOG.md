@@ -1,3 +1,13 @@
+## v0.4.7 (2022-11-19)
+
+### Fix
+
+- use correct package name for logfile
+
+### Refactor
+
+- remove unnecessary `else` and `elif` statements
+
 ## v0.4.6 (2022-10-08)
 
 ### Fix

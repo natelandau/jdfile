@@ -10,14 +10,14 @@
     name        = "filemanager"
     readme      = "README.md"
     repository  = "https://github.com/natelandau/filemanager"
-    version     = "0.4.6"
+    version     = "0.4.7"
 
 # https://commitizen-tools.github.io/commitizen/config/
 [tool.commitizen]
     bump_message = "bump(release): v$current_version → v$new_version"
     tag_format = "v$version"
     update_changelog_on_bump = true
-    version = "0.4.6"
+    version = "0.4.7"
     version_files = [
         "pyproject.toml:version",
         "src/filemanager/__version__.py:__version__",
