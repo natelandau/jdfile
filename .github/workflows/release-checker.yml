@@ -1,5 +1,5 @@
 ---
-name: test release
+name: Test Current Release
 
 on:
     workflow_dispatch:
@@ -34,6 +34,7 @@ jobs:
                       files.pythonhosted.org:443
                       github.com:443
                       pypi.org:443
+                      raw.githubusercontent.com:443
 
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v4
@@ -63,4 +64,4 @@ jobs:
             - name: confirm file exists
               run: |
                   ls -al ~/test/30-39\ readme/31\ test\ files/31.01\ readme
-                  cat ~/test/30-39\ readme/31\ test\ files/31.01\ readme/Test_Readme_File.txt | grep "exists"
+                  cat ~/test/30-39\ readme/31\ test\ files/31.01\ readme/Readme_File.txt | grep "exists"
