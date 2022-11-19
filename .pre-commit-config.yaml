@@ -109,9 +109,16 @@ repos:
 
           - id: flake8
             name: flake8
-            entry: flake8
+            entry: flake8 src/ tests/
             language: system
-            types: [python]
+            pass_filenames: false
+            files: |
+                (?x)^(
+                src/|
+                tests/|
+                poetry\.lock|
+                pyproject\.toml
+                )
 
           - id: poetry-check
             name: poetry check
@@ -132,4 +139,10 @@ repos:
             entry: poe test
             language: system
             pass_filenames: false
-            types: [python]
+            files: |
+                (?x)^(
+                src/|
+                tests/|
+                poetry\.lock|
+                pyproject\.toml
+                )
