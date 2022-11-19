@@ -29,6 +29,11 @@ jobs:
             - uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
               with:
                   egress-policy: audit
+                  disable-sudo: true
+                  allowed-endpoints: >
+                      files.pythonhosted.org:443
+                      github.com:443
+                      pypi.org:443
 
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v4
@@ -45,7 +50,7 @@ jobs:
                   mkdir -p "~/test/30-39 readme/31 test files/31.01 readme"
                   mkdir ~/.filemanager
                   echo "[projects]\n[projects.test]\nname = \"Personal\"\npath = \"~/test"" > ~/.filemanager/filemanager.toml
-                  echo "file exists">"~/test readme file.txt"
+                  echo "file exists" > "~/test readme file.txt"
 
             - name: test moving file
               run: |
