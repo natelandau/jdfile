@@ -51,7 +51,7 @@ jobs:
                   mkdir ~/.filemanager
                   echo "[projects]" > ~/.filemanager/filemanager.toml
                   echo "[projects.test]" >> ~/.filemanager/filemanager.toml
-                  echo "name = 'Personal'" >> ~/.filemanager/filemanager.toml
+                  echo "name = 'test'" >> ~/.filemanager/filemanager.toml
                   echo "path = '~/test'" >> ~/.filemanager/filemanager.toml
                   cat ~/.filemanager/filemanager.toml
                   echo "file exists" > ~/test-readme-file.txt
