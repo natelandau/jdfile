@@ -1,4 +1,4 @@
-[![Python Code Checker](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
+[![Python Code Checker](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml) [![Current Release](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
 
 # filemanager
 
@@ -54,6 +54,8 @@ Additionally, even if the filenames were normalized, filing documents manually i
 `Filemanager` is created to solve for these problems by providing an easy CLI to normalize the filename and organize it into an appropriate directory on your computer.
 
 ## Install
+
+Filemanager requires Python v3.10 or above
 
 Pip
 
