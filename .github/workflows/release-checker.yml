@@ -49,7 +49,7 @@ jobs:
               run: |
                   mkdir -p ~/test/30-39\ readme/31\ test\ files/31.01\ readme
                   mkdir ~/.filemanager
-                  echo "[projects]\n[projects.test]\nname = \"Personal\"\npath = \"~/test"" > ~/.filemanager/filemanager.toml
+                  echo "[projects]\n[projects.test]\nname = \"Personal\"\npath = \"~/test\"" > ~/.filemanager/filemanager.toml
                   cat ~/.filemanager/filemanager.toml
                   echo "file exists" > ~/test-readme-file.txt
                   cat ~/test-readme-file.txt
