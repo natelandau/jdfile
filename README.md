@@ -55,6 +55,8 @@ Additionally, even if the filenames were normalized, filing documents manually i
 
 ## Install
 
+Filemanager requires Python v3.10 or above
+
 Pip
 
 ```bash
