@@ -21,7 +21,7 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                python-version: ["3.10"]
+                python-version: ["3.8", "3.9", "3.10", "3.11"]
 
         name: Python ${{ matrix.python-version }}
 
@@ -54,14 +54,11 @@ jobs:
                   echo "[projects.test]" >> ~/.filemanager/filemanager.toml
                   echo "name = 'test'" >> ~/.filemanager/filemanager.toml
                   echo "path = '~/test'" >> ~/.filemanager/filemanager.toml
-                  cat ~/.filemanager/filemanager.toml
                   echo "file exists" > ~/test-readme-file.txt
-                  cat ~/test-readme-file.txt
 
             - name: test moving file
               run: filemanager --force --sep=underscore --case=title --organize=test ~/test-readme-file.txt
 
             - name: confirm file exists
               run: |
-                  ls -al ~/test/30-39\ readme/31\ test\ files/31.01\ readme
                   cat ~/test/30-39\ readme/31\ test\ files/31.01\ readme/Readme_File.txt | grep "exists"
