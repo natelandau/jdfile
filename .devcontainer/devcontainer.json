@@ -55,6 +55,7 @@
         "ms-python.python",
         "bierner.markdown-preview-github-styles",
         "donjayamanne.githistory",
+        "eamodio.gitlens",
         "fcrespo82.markdown-table-formatter",
         "foxundermoon.shell-format",
         "GitHub.copilot",
