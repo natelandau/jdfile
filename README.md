@@ -193,7 +193,7 @@ There are two ways to contribute to this project.
 1. Clone this repository. `git clone https://github.com/natelandau/filemanager.git`
 2. Open the repository in Visual Studio Code
 3. Start the [Dev Container](https://code.visualstudio.com/docs/remote/containers). Run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Remote-Containers: Reopen in Container_.
-4. If Run `poetry env info -p` to find the PATH to the Python interpreter if needed.
+4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed.
 
 ## Developing
 
