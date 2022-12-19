@@ -20,7 +20,6 @@ on:
             - "tests/**"
             - "pyproject.toml"
             - "poetry.lock"
-            - ".flake8"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -61,18 +60,12 @@ jobs:
 
             - name: Lint with Mypy
               run: poetry run mypy src/
-            - name: lint with flake8
-              run: poetry run flake8 src/
-            - name: lint with pydocstyle
-              run: poetry run pydocstyle src/
+            - name: lint with ruff
+              run: poetry run ruff src/
             - name: check pyproject.toml
               run: poetry run poetry check
-            - name: lint with bandit
-              run: poetry run bandit -r --configfile pyproject.toml src/
             - name: lint with black
               run: poetry run black --check src/
-            - name: lint with isort
-              run: poetry run isort -c src/
             - name: run vulture
               run: poetry run vulture src/
             - name: run interrogate
