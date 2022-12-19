@@ -15,12 +15,10 @@ repos:
     - repo: "https://github.com/pre-commit/pygrep-hooks"
       rev: v1.9.0
       hooks:
-          - id: python-check-blanket-noqa
           - id: python-check-mock-methods
           - id: python-no-eval
           - id: python-no-log-warn
           - id: python-use-type-annotations
-          - id: python-check-blanket-noqa
           - id: rst-backticks
           - id: rst-directive-colons
           - id: rst-inline-touching-normal
@@ -61,24 +59,9 @@ repos:
 
     - repo: local
       hooks:
-          - id: pyupgrade
-            name: pyupgrade
-            entry: pyupgrade --py310-plus
-            require_serial: true
-            language: system
-            types: [python]
-            exclude: cli\.py
-
           - id: absolufy-imports
             name: absolufy-imports
             entry: absolufy-imports
-            require_serial: true
-            language: system
-            types: [python]
-
-          - id: isort
-            name: isort
-            entry: isort
             require_serial: true
             language: system
             types: [python]
@@ -96,24 +79,6 @@ repos:
             language: system
             types: [shell]
 
-          - id: bandit
-            name: bandit
-            entry: bandit --configfile pyproject.toml
-            language: system
-            types: [python]
-
-          - id: pydocstyle
-            name: pydocstyle
-            entry: pydocstyle
-            language: system
-            types: [python]
-
-          - id: flake8
-            name: flake8
-            entry: flake8
-            language: system
-            types: [python]
-
           - id: poetry-check
             name: poetry check
             entry: poetry check
@@ -125,6 +90,13 @@ repos:
             name: mypy
             entry: mypy
             exclude: tests/
+            language: system
+            types: [python]
+
+          - id: ruff
+            name: ruff
+            entry: ruff
+            require_serial: true
             language: system
             types: [python]
 

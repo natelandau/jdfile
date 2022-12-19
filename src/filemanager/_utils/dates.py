@@ -316,10 +316,8 @@ def create_date(file: Path, date_format: str = "%Y-%m-%d") -> str:
     """
     try:
         created_date = Path(file).stat().st_ctime
-        return datetime.fromtimestamp(created_date, tz=timezone.utc).strftime(  # noqa: TC300
-            date_format
-        )
-    except Exception:
+        return datetime.fromtimestamp(created_date, tz=timezone.utc).strftime(date_format)
+    except Exception:  # noqa: BLE001
         return date.today().strftime(date_format)
 
 

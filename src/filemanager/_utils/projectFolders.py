@@ -172,7 +172,7 @@ def find_root_dir(config: dict, project_name: str) -> Path:
 
         else:
             log.error("No projects found in the configuration file")
-            raise Abort()  # noqa: TC301
+            raise Abort()
     except KeyError as e:
         log.error(f"{e} is not defined in the config file.")
         raise Abort() from e

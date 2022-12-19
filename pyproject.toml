@@ -32,45 +32,73 @@
         pytest-xdist           = "^2.5.0"
 
     [tool.poetry.group.dev.dependencies]
-        absolufy-imports       = "^0.3.1"
-        bandit                 = { extras = ["toml"], version = "^1.7.4" }
-        black                  = "^22.10.0"
-        commitizen             = "^2.37.0"
-        coverage               = { extras = ["toml"], version = "^6.5.0" }
-        darglint               = "^1.8.1"
-        flake8                 = "^5.0.4"
-        flake8-bugbear         = "^22.10.27"
-        flake8-builtins        = "^2.0.1"
-        flake8-comprehensions  = "^3.10.1"
-        flake8-docstrings      = "^1.6.0"
-        flake8-eradicate       = "^1.4.0"
-        flake8-mutable         = "^1.2.0"
-        flake8-newspaper-style = "^0.4.3"
-        flake8-noqa            = "^1.2.9"
-        flake8-pytest-style    = "^1.6.0"
-        flake8-return          = "^1.2.0"
-        flake8-rst-docstrings  = "^0.3.0"
-        flake8-simplify        = "^0.19.3"
-        flake8-tidy-imports    = "^4.8.0"
-        flake8-use-pathlib     = "^0.3.0"
-        interrogate            = "^1.5.0"
-        isort                  = "^5.10.1"
-        mypy                   = "^0.991"
-        pdoc                   = "^12.3.0"
-        pep8-naming            = "^0.13.2"
-        poethepoet             = "^0.16.4"
-        pre-commit             = "^2.20.0"
-        pydocstyle             = { extras = ["toml"], version = "*" }
-        pyupgrade              = "^3.2.2"
-        shellcheck-py          = "^0.8.0.4"
-        tryceratops            = "^1.1.0"
-        typeguard              = "^2.13.3"
-        types-python-dateutil  = "^2.8.19"
-        vulture                = "^2.6"
-        yesqa                  = "^1.4.0"
+        absolufy-imports      = "^0.3.1"
+        black                 = "^22.10.0"
+        commitizen            = "^2.37.0"
+        coverage              = { extras = ["toml"], version = "^6.5.0" }
+        interrogate           = "^1.5.0"
+        mypy                  = "^0.991"
+        pdoc                  = "^12.3.0"
+        pep8-naming           = "^0.13.2"
+        poethepoet            = "^0.16.4"
+        pre-commit            = "^2.20.0"
+        ruff                  = "^0.0.187"
+        shellcheck-py         = "^0.8.0.4"
+        typeguard             = "^2.13.3"
+        types-python-dateutil = "^2.8.19"
+        vulture               = "^2.6"
 
-[tool.bandit] # https://bandit.readthedocs.io/en/latest/config.html
-    skips = ["B101", "B404", "B607"]
+[tool.ruff] # https://github.com/charliermarsh/ruff
+
+    fix = true
+    ignore = [
+        "B006",
+        "B008",
+        "D107",
+        "D203",
+        "D204",
+        "D213",
+        "D215",
+        "D400",
+        "D404",
+        "D406",
+        "D407",
+        "D408",
+        "D409",
+        "D413",
+        "E501",
+        "PGH001",
+        "PGH003",
+    ]
+    ignore-init-module-imports = true
+    line-length = 100
+    select = [
+        "A",
+        "B",
+        "BLE",
+        "C4",
+        "C90",
+        "D",
+        "E",
+        "ERA",
+        "F",
+        "I",
+        "N",
+        "PGH",
+        "PLC",
+        "PLE",
+        "PLR",
+        "PLW",
+        "RET",
+        "RUF",
+        "SIM",
+        "TID",
+        "UP",
+        "W",
+        "YTT",
+    ]
+    src = ["src", "tests"]
+    target-version = "py310"
 
 [tool.black]
     line-length = 100
@@ -122,12 +150,6 @@
     ignore-init-method = true
     verbose            = 2
 
-[tool.isort] # https://pycqa.github.io/isort/docs/configuration/options.html
-    color_output = true
-    line_length  = 100
-    profile      = "black"
-    src_paths    = ["src", "tests"]
-
 [tool.mypy] # https://mypy.readthedocs.io/en/latest/config_file.html
     disallow_any_unimported     = true
     disallow_subclassing_any    = false
@@ -144,10 +166,6 @@
     warn_redundant_casts        = true
     warn_unreachable            = true
     warn_unused_ignores         = true
-
-[tool.pydocstyle] # http://www.pydocstyle.org/en/latest/usage.html#configuration-files
-    add_ignore = ["D107", "D212"]
-    convention = "google"
 
 [tool.pytest.ini_options] # https://docs.pytest.org/en/latest/reference/reference.html#ini-options-ref
     addopts        = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --verbosity=2 --junitxml=reports/pytest.xml"
@@ -183,22 +201,13 @@
             shell = "vulture src/ tests/"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "flake8 src/ tests/"
-
-        [[tool.poe.tasks.lint.sequence]]
-            shell = "isort --check-only --diff src/ tests/"
+            shell = "ruff src/ tests/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "black --check src/ tests/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "poetry check"
-
-        [[tool.poe.tasks.lint.sequence]]
-            shell = "bandit --configfile pyproject.toml -r src/ tests/"
-
-        [[tool.poe.tasks.lint.sequence]]
-            shell = "pydocstyle --config=pyproject.toml src/ tests/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "mypy --config-file pyproject.toml src/"
@@ -217,12 +226,3 @@
 
     [[tool.poe.tasks.test.sequence]]
         cmd = "coverage xml"
-
-[tool.poe.tasks.clean]
-    help = "Run isort and black"
-
-    [[tool.poe.tasks.clean.sequence]]
-        cmd = "isort src/ tests/"
-
-    [[tool.poe.tasks.clean.sequence]]
-        cmd = "black src/ tests/"

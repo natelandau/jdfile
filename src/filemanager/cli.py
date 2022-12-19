@@ -91,7 +91,7 @@ def main(  # noqa: C901
         False,
         "--dry-run",
         "-n",
-        help="Dry run – don't actually change anything",
+        help="Dry run - don't actually change anything",
     ),
     force: bool = typer.Option(
         False,
@@ -121,7 +121,7 @@ def main(  # noqa: C901
         help="""Set verbosity level (0=WARN, 1=INFO, 2=DEBUG, 3=TRACE)""",
         count=True,
     ),
-    version: Optional[bool] = typer.Option(
+    version: Optional[bool] = typer.Option(  # noqa: UP007
         None, "--version", help="Print version and exit", callback=version_callback, is_eager=True
     ),
     # Filename Cleaning Options
@@ -143,7 +143,7 @@ def main(  # noqa: C901
     clean: bool = typer.Option(
         True,
         "--clean/--no-clean",
-        help="Clean the filename – remove special characters, optionally change case and word separators",
+        help="Clean the filename - remove special characters, optionally change case and word separators",
         rich_help_panel="Filename Cleaning Options",
     ),
     date: str = typer.Option(
@@ -294,7 +294,7 @@ def main(  # noqa: C901
         config_file = config_file.expanduser().resolve()
         if config_file.exists() and config_file.is_file():
             possible_config_locations = [config_file]
-        elif config_file.is_dir():  # noqa: R506
+        elif config_file.is_dir():  # noqa RET506
             alerts.error(f"Please pass a valid configuration file, not a directory: {config_file}")
             raise typer.Exit(code=1)
         else:
