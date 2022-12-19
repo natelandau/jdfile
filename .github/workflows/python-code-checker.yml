@@ -10,7 +10,6 @@ on:
             - "tests/**"
             - "pyproject.toml"
             - "poetry.lock"
-            - ".flake8"
     pull_request:
         types: [opened, reopened]
         paths:
