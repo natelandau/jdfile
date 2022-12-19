@@ -24,7 +24,6 @@
         "coverage-gutters.showRulerCoverage": true,
         "editor.formatOnSave": true,
         "editor.rulers": [100],
-        "isort.args": ["--profile", "black"],
         "python.analysis.completeFunctionParens": true,
         "python.formatting.provider": "black",
         "python.linting.enabled": true,
