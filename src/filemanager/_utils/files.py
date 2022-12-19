@@ -104,7 +104,7 @@ class File:
                 terms = config["match_case"]
             else:
                 log.error("Expected 'match_case' to be a list.")
-                raise Abort()  # noqa: TC301
+                raise Abort()
         except KeyError:  # pragma: no cover
             pass
         else:
@@ -211,7 +211,7 @@ class File:
                 terms = config["match_case"]
             else:
                 log.error("Expected 'match_case' to be a list.")
-                raise Abort()  # noqa: TC301
+                raise Abort()
         except KeyError:  # pragma: no cover
             pass
         else:
@@ -311,7 +311,7 @@ class File:
 
         try:
             self.path.rename(target)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             alerts.error(f"{e}")
             raise Abort() from e
         else:

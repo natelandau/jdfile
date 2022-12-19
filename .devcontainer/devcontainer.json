@@ -14,6 +14,10 @@
     // Set *default* container specific settings.json values on container create.
     "settings": {
         "autoDocstring.startOnNewLine": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+        },
         "coverage-gutters.coverageFileNames": ["reports/coverage.xml"],
         "coverage-gutters.showGutterCoverage": false,
         "coverage-gutters.showLineCoverage": true,
@@ -23,12 +27,8 @@
         "isort.args": ["--profile", "black"],
         "python.analysis.completeFunctionParens": true,
         "python.formatting.provider": "black",
-        "python.linting.banditArgs": ["--configfile", "pyproject.toml"],
-        "python.linting.banditEnabled": true,
         "python.linting.enabled": true,
-        "python.linting.flake8Enabled": true,
         "python.linting.mypyEnabled": true,
-        "python.linting.pydocstyleEnabled": true,
         "python.linting.pylintEnabled": false,
         "python.terminal.activateEnvInCurrentTerminal": true,
         "python.terminal.activateEnvironment": false,
@@ -40,10 +40,10 @@
             "'tests/'"
         ],
         "python.linting.ignorePatterns": [".vscode/**/*.py", ".venv/**/*.py"],
-        "python.venvPath": "/home/vscode/.cache/pypoetry/virtualenvs",
+        "python.venvFolders": ["/home/vscode/.cache/pypoetry/virtualenvs"],
+        "ruff.importStrategy": "fromEnvironment",
         "shellformat.path": "/home/vscode/.local/bin/shfmt",
         "terminal.integrated.defaultProfile.linux": "zsh",
-
         "terminal.integrated.profiles.linux": {
             "zsh": {
                 "path": "/usr/bin/zsh"
@@ -54,6 +54,7 @@
     "extensions": [
         "ms-python.python",
         "bierner.markdown-preview-github-styles",
+        "charliermarsh.ruff",
         "donjayamanne.githistory",
         "eamodio.gitlens",
         "fcrespo82.markdown-table-formatter",

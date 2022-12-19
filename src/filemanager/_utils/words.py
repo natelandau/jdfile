@@ -1276,7 +1276,7 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
                                 stopwords.append(word)
             else:
                 log.error("No projects found in the configuration file")
-                raise Abort()  # noqa: TC301
+                raise Abort()
         except KeyError as e:
             log.error(f"{e} is not defined in the config file.")
             raise Abort() from e

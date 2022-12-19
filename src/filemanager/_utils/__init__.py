@@ -5,6 +5,7 @@ from filemanager._utils.utilities import (  # isort:skip
     from_camel_case,
     select_option,
 )
+
 from filemanager._utils.words import (  # isort: skip
     find_synonyms,
     instantiate_nltk,
