@@ -14,39 +14,39 @@
         filemanager = "filemanager.cli:app"
 
     [tool.poetry.dependencies] # https://python-poetry.org/docs/dependency-specification/
-        arrow       = "^1.2.2"
+        arrow       = "^1.2.3"
         loguru      = "^0.6.0"
-        nltk        = "^3.7"
-        plumbum     = "^1.7.2"
+        nltk        = "^3.8.1"
+        plumbum     = "^1.8.1"
         python      = "^3.10"
         rich        = "^12.5.1"
-        shellingham = "^1.4.0"
+        shellingham = "^1.5.0.post1"
         tomli       = "^2.0.1"
         typer       = { extras = ["all"], version = "^0.7.0" }
 
     [tool.poetry.group.test.dependencies]
-        pytest                 = "^7.1.2"
+        pytest                 = "^7.2.1"
         pytest-clarity         = "^1.0.1"
-        pytest-mock            = "^3.8.1"
+        pytest-mock            = "^3.10.0"
         pytest-pretty-terminal = "^1.1.0"
-        pytest-xdist           = "^2.5.0"
+        pytest-xdist           = "^3.1.0"
 
     [tool.poetry.group.dev.dependencies]
         absolufy-imports      = "^0.3.1"
-        black                 = "^22.10.0"
-        commitizen            = "^2.37.0"
-        coverage              = { extras = ["toml"], version = "^6.5.0" }
+        black                 = "^22.12.0"
+        commitizen            = "^2.39.1"
+        coverage              = "^7.0.5"
         interrogate           = "^1.5.0"
         mypy                  = "^0.991"
-        pdoc                  = "^12.3.0"
-        pep8-naming           = "^0.13.2"
-        poethepoet            = "^0.16.4"
-        pre-commit            = "^2.20.0"
-        ruff                  = "^0.0.187"
-        shellcheck-py         = "^0.8.0.4"
+        pdoc                  = "^12.3.1"
+        pep8-naming           = "^0.13.3"
+        poethepoet            = "^0.18.1"
+        pre-commit            = "^2.21.0"
+        ruff                  = "^0.0.229"
+        shellcheck-py         = "^0.9.0.2"
         typeguard             = "^2.13.3"
-        types-python-dateutil = "^2.8.19"
-        vulture               = "^2.6"
+        types-python-dateutil = "^2.8.19.6"
+        vulture               = "^2.7"
 
 [tool.ruff] # https://github.com/charliermarsh/ruff
     fix = true
