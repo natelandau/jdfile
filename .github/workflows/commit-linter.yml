@@ -13,13 +13,14 @@ permissions: # added using https://github.com/step-security/secure-workflows
 
 jobs:
     lint-commits:
+        if: "!contains(github.event.head_commit.message, 'bump(release)')"
         permissions:
             contents: read # for actions/checkout to fetch code
             pull-requests: read # for wagoid/commitlint-github-action to get commits in PR
         runs-on: ubuntu-latest
         steps:
             - name: Harden Runner
-              uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5 # v2.0.0
+              uses: step-security/harden-runner@18bf8ad2ca49c14cbb28b91346d626ccfb00c518 # v2.1.0
               with:
                   egress-policy: block
                   allowed-endpoints: >
