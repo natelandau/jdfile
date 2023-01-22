@@ -4,7 +4,7 @@ default_stages: [commit, manual]
 fail_fast: true
 repos:
     - repo: "https://github.com/commitizen-tools/commitizen"
-      rev: v2.38.0
+      rev: v2.39.1
       hooks:
           - id: commitizen
           - id: commitizen-branch
@@ -13,7 +13,7 @@ repos:
                 - push
 
     - repo: "https://github.com/pre-commit/pygrep-hooks"
-      rev: v1.9.0
+      rev: v1.10.0
       hooks:
           - id: python-check-mock-methods
           - id: python-no-eval

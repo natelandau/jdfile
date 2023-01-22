@@ -1,5 +1,5 @@
 """Shared utilities."""
-from filemanager._utils.utilities import (  # isort:skip
+from filemanager._utils.utilities import (  # isort: skip
     dedupe_list,
     diff_strings,
     from_camel_case,

@@ -49,7 +49,6 @@
         vulture               = "^2.6"
 
 [tool.ruff] # https://github.com/charliermarsh/ruff
-
     fix = true
     ignore = [
         "B006",
@@ -67,8 +66,10 @@
         "D409",
         "D413",
         "E501",
+        "N805",
         "PGH001",
         "PGH003",
+        "UP007",
     ]
     ignore-init-module-imports = true
     line-length = 100
@@ -99,7 +100,7 @@
     ]
     src = ["src", "tests"]
     target-version = "py310"
-    unfixable = ["UP007"]
+    unfixable = ["ERA001", "F401", "F401", "UP007"]
 
 [tool.black]
     line-length = 100
