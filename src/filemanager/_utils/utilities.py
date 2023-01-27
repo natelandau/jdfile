@@ -95,7 +95,7 @@ def diff_strings(a: str, b: str) -> str:
 
 
 def from_camel_case(string: str) -> str:
-    """Converts a string from camelCase to separate words.
+    """Convert a string from camelCase to separate words.
 
     Args:
         string (str): String to convert.

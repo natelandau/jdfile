@@ -1,5 +1,5 @@
 # type: ignore
-"""Helper functions for tests."""
+"""Test helper functions."""
 
 import re
 

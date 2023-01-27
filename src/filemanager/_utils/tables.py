@@ -16,7 +16,7 @@ def show_confirmation_table(
     total_num: int = 0,
     index: int = 0,
 ) -> None:
-    """Prints a table with process files.  Use this table to review changes and confirm.
+    """Print a table with process files.  Use this table to review changes and confirm.
 
     Args:
         list_of_files (list[File]): List of files to be processed.

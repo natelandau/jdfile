@@ -102,7 +102,7 @@ def create_file(tmp_path, filename):
 )
 def test_cleaning_filenames(test_files, file_num, command, expected):
     """Test permutations."""
-    whole_command = command + [str(test_files[file_num])]
+    whole_command = [*command, str(test_files[file_num])]
     result = runner.invoke(
         app,
         whole_command,
@@ -139,7 +139,7 @@ def test_cleaning_filenames(test_files, file_num, command, expected):
 )
 def test_cleaning_multiple_files(test_files, file1, file2, command, expected1, expected2):
     """Test cleaning multiple files."""
-    whole_command = command + [str(test_files[file1])] + [str(test_files[file2])]
+    whole_command = [*command, str(test_files[file1])] + [str(test_files[file2])]
     result = runner.invoke(
         app,
         whole_command,
@@ -222,9 +222,9 @@ def test_table_display(
 ):
     """Test cleaning multiple files."""
     if file2 is None:
-        whole_command = command + [str(test_files[file1])]
+        whole_command = [*command, str(test_files[file1])]
     else:
-        whole_command = command + [str(test_files[file1])] + [str(test_files[file2])]
+        whole_command = [*command, str(test_files[file1])] + [str(test_files[file2])]
 
     result = runner.invoke(
         app,

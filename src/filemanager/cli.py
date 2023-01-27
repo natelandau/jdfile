@@ -121,7 +121,7 @@ def main(  # noqa: C901
         help="""Set verbosity level (0=WARN, 1=INFO, 2=DEBUG, 3=TRACE)""",
         count=True,
     ),
-    version: Optional[bool] = typer.Option(  # noqa: UP007
+    version: Optional[bool] = typer.Option(
         None, "--version", help="Print version and exit", callback=version_callback, is_eager=True
     ),
     # Filename Cleaning Options
@@ -294,10 +294,10 @@ def main(  # noqa: C901
         config_file = config_file.expanduser().resolve()
         if config_file.exists() and config_file.is_file():
             possible_config_locations = [config_file]
-        elif config_file.is_dir():  # noqa RET506
+        elif config_file.is_dir():
             alerts.error(f"Please pass a valid configuration file, not a directory: {config_file}")
             raise typer.Exit(code=1)
-        else:
+        else:  # noqa: RET506
             alerts.error(f"Config file not found at '{config_file}'")
             raise typer.Exit(code=1)
     else:

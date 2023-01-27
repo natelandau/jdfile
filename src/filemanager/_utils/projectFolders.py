@@ -38,15 +38,17 @@ class Folder:
 
         if self.level == 3:
             self.name: str = re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
-            self.number: str = re.match(r"(^\d{2}\.\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.number: str = (
+                re.match(r"(^\d{2}\.\d{2})[- _]", str(self.path.name)).group(1).strip()
+            )
             self.tree: str = str(self.path).replace(str(self.root), "")
         elif self.level == 2:
             self.name = re.sub(r"^\d{2}[- _]", "", str(self.path.name)).strip()
-            self.number = re.match(r"(^\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.number = re.match(r"(^\d{2})[- _]", str(self.path.name)).group(1).strip()
             self.tree = str(self.path).replace(str(self.root), "")
         elif self.level == 1:
             self.name = re.sub(r"^\d{2}-\d{2}[- _]", "", str(self.path.name)).strip()
-            self.number = re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(1).strip()  # type: ignore[union-attr]
+            self.number = re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(1).strip()
             self.tree = str(self.path).replace(str(self.root), "")
         else:  # pragma: no cover
             self.name = "None"

@@ -126,7 +126,7 @@ class File:
         case: Enum,
         stopwords: list[str],
     ) -> None:
-        """Cleans the filename and updates instance variables for 'stem' and 'suffixes'.
+        """Clean the filename and updates instance variables for 'stem' and 'suffixes'.
 
         Args:
             separator: (Enum) Separator to use.
@@ -269,7 +269,7 @@ class File:
             log.trace(f"Added date: {self.new_stem}")
 
     def target(self) -> Path:
-        """Returns the target path for the file."""
+        """Return the target path for the file."""
         return self.new_parent / f"{''.join(self.new_stem)}{''.join(self.new_suffixes)}"
 
     def commit(
@@ -330,7 +330,7 @@ class File:
         jd_number: str,
         force: bool,
     ) -> bool:
-        """Matches a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
+        """Match a file to a Johnny Decimal folder based on the JD number or matching words in the filename.
 
         Updates self.new_parent
 
@@ -420,7 +420,7 @@ class File:
         return False
 
     def has_change(self) -> bool:
-        """Returns whether the file has a change.
+        """Return whether the file has a change.
 
         Returns:
             True if the file has a change, False otherwise.
@@ -428,7 +428,7 @@ class File:
         return self.target() != self.path
 
     def reset(self) -> None:
-        """Resets the file to its original state."""
+        """Reset the file to its original state."""
         self.new_parent = self.parent
         self.new_stem = self.stem
         self.new_suffixes = self.suffixes
