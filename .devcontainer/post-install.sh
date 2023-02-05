@@ -17,14 +17,12 @@ _mainScript_() {
         iotop
         jq
         less
-        libmagickwand-dev
         libxml2-utils
         lnav
         lsof
         nano
         net-tools
         openssh-server
-        p7zip-full
         python3-pip
         shellcheck
         unzip
@@ -34,21 +32,29 @@ _mainScript_() {
     )
 
     echo ""
-    header "Installing apt packages"
+    header "Install apt packages"
     _execute_ "sudo apt-get update"
     _execute_ "sudo apt-get upgrade -y"
     for package in "${APT_PACKAGES[@]}"; do
         _execute_ -p "sudo apt-get install -y \"${package}\""
     done
 
+    if [ -d "${WORKSPACE_DIR}/.venv" ]; then
+        echo ""
+        header "Remove existing virtual environment"
+        _execute_ -pv "rm -rf ${WORKSPACE_DIR}/.venv"
+    fi
+
     if command -v batcat &>/dev/null; then
+        echo ""
+        header "Favor bat over cat"
         _execute_ -p "mkdir -p /home/vscode/.local/bin && ln -s /usr/bin/batcat /home/vscode/.local/bin/bat"
     fi
 
     echo ""
     header "Installing shfmt"
     if ! command -v shfmt &>/dev/null; then
-        _execute_ "curl -sS https://webi.sh/shfmt | sh"
+        _execute_ -pv "curl -sS https://webi.sh/shfmt | sh"
     fi
 
     REPOS=(
@@ -88,16 +94,22 @@ _mainScript_() {
     } >>"${HOME}/.bash_profile"
 
     echo ""
+    header "Create alias to obsidian-metadata"
+    echo 'alias om="obsidian-metadata"' >>"${HOME}/.bash_profile"
+    echo 'alias om="obsidian-metadata"' >>"${HOME}/.zshrc"
+
+    echo ""
     header "Configuring Python environment"
     if command -v python3 &>/dev/null; then
         _execute_ -pv "pip install --upgrade pip"
         _execute_ -pv "pip install -U \
+            asciinema \
             black \
             commitizen \
             pre-commit \
             yamllint \
             detect-secrets \
-            isort \
+            ruff \
             mypy"
     else
         warning "python 3 is not installed"
@@ -106,7 +118,7 @@ _mainScript_() {
     echo ""
     header "Install virtual environment with poetry"
     if command -v poetry &>/dev/null; then
-        pushd "/workspaces/filemanager"
+        pushd "${WORKSPACE_DIR}" &>/dev/null
         _execute_ -pv "poetry install"
         venv_path="$(poetry env info --path)"
         echo "" >>"/home/vscode/.zshrc"
@@ -114,7 +126,7 @@ _mainScript_() {
         echo "" >>"/home/vscode/.bash_profile"
         echo "source ${venv_path}/bin/activate" >>"/home/vscode/.bash_profile"
 
-        popd
+        popd &>/dev/null
     else
         warning "poetry is not installed"
     fi
@@ -122,10 +134,14 @@ _mainScript_() {
     echo ""
     header "Initialize pre-commit"
     if command -v pre-commit &>/dev/null; then
-        pushd "/workspaces/filemanager"
-        _execute_ -pv "pre-commit install --install-hooks"
-        _execute_ -pv "pre-commit autoupdate"
-        popd
+        if [ -d "${WORKSPACE_DIR}/.git" ]; then
+            pushd "${WORKSPACE_DIR}" &>/dev/null
+            _execute_ -pv "pre-commit install --install-hooks"
+            _execute_ -pv "pre-commit autoupdate"
+            popd &>/dev/null
+        else
+            warning "Git repository not found in ${WORKSPACE_DIR}. Initialize pre-commit manually."
+        fi
     else
         warning "pre-commit is not installed"
     fi
@@ -144,7 +160,7 @@ DRYRUN=false
 declare -a ARGS=()
 
 # Script specific
-
+WORKSPACE_DIR="/workspaces/filemanager"
 # ################################## Custom utility functions (Pasted from repository)
 _execute_() {
     # DESC:
@@ -207,17 +223,17 @@ _execute_() {
         VERBOSE=true
     fi
 
-    if "${DRYRUN:-}"; then
+    if "${DRYRUN-}"; then
         if "${_quietMode}"; then
             VERBOSE=${_saveVerbose}
             return 0
         fi
-        if [ -n "${2:-}" ]; then
+        if [ -n "${2-}" ]; then
             dryrun "${1} (${2})" "$(caller)"
         else
             dryrun "${1}" "$(caller)"
         fi
-    elif ${VERBOSE:-}; then
+    elif ${VERBOSE-}; then
         if eval "${_command}"; then
             if "${_quietMode}"; then
                 VERBOSE=${_saveVerbose}
@@ -342,7 +358,7 @@ _alert_() {
     local _color
     local _alertType="${1}"
     local _message="${2}"
-    local _line="${3:-}" # Optional line number
+    local _line="${3-}" # Optional line number
 
     [[ $# -lt 2 ]] && fatal 'Missing required argument to _alert_'
 
@@ -380,7 +396,7 @@ _alert_() {
         ("${QUIET}") && return 0 # Print to console when script is not 'quiet'
         [[ ${VERBOSE} == false && ${_alertType} =~ ^(debug|verbose) ]] && return 0
 
-        if ! [[ -t 1 || -z ${TERM:-} ]]; then # Don't use colors on non-recognized terminals
+        if ! [[ -t 1 || -z ${TERM-} ]]; then # Don't use colors on non-recognized terminals
             _color=""
             reset=""
         fi
@@ -396,7 +412,7 @@ _alert_() {
     _writeToLog_() {
         [[ ${_alertType} == "input" ]] && return 0
         [[ ${LOGLEVEL} =~ (off|OFF|Off) ]] && return 0
-        if [ -z "${LOGFILE:-}" ]; then
+        if [ -z "${LOGFILE-}" ]; then
             LOGFILE="$(pwd)/$(basename "$0").log"
         fi
         [ ! -d "$(dirname "${LOGFILE}")" ] && mkdir -p "$(dirname "${LOGFILE}")"
@@ -454,17 +470,17 @@ _alert_() {
 
 } # /_alert_
 
-error() { _alert_ error "${1}" "${2:-}"; }
-warning() { _alert_ warning "${1}" "${2:-}"; }
-notice() { _alert_ notice "${1}" "${2:-}"; }
-info() { _alert_ info "${1}" "${2:-}"; }
-success() { _alert_ success "${1}" "${2:-}"; }
-dryrun() { _alert_ dryrun "${1}" "${2:-}"; }
-input() { _alert_ input "${1}" "${2:-}"; }
-header() { _alert_ header "${1}" "${2:-}"; }
-debug() { _alert_ debug "${1}" "${2:-}"; }
+error() { _alert_ error "${1}" "${2-}"; }
+warning() { _alert_ warning "${1}" "${2-}"; }
+notice() { _alert_ notice "${1}" "${2-}"; }
+info() { _alert_ info "${1}" "${2-}"; }
+success() { _alert_ success "${1}" "${2-}"; }
+dryrun() { _alert_ dryrun "${1}" "${2-}"; }
+input() { _alert_ input "${1}" "${2-}"; }
+header() { _alert_ header "${1}" "${2-}"; }
+debug() { _alert_ debug "${1}" "${2-}"; }
 fatal() {
-    _alert_ fatal "${1}" "${2:-}"
+    _alert_ fatal "${1}" "${2-}"
     _safeExit_ "1"
 }
 
@@ -504,7 +520,7 @@ _safeExit_() {
     # OUTS:
     #       None
 
-    if [[ -d ${SCRIPT_LOCK:-} ]]; then
+    if [[ -d ${SCRIPT_LOCK-} ]]; then
         if command rm -rf "${SCRIPT_LOCK}"; then
             debug "Removing script lock"
         else
@@ -512,8 +528,8 @@ _safeExit_() {
         fi
     fi
 
-    if [[ -n ${TMP_DIR:-} && -d ${TMP_DIR:-} ]]; then
-        if [[ ${1:-} == 1 && -n "$(ls "${TMP_DIR}")" ]]; then
+    if [[ -n ${TMP_DIR-} && -d ${TMP_DIR-} ]]; then
+        if [[ ${1-} == 1 && -n "$(ls "${TMP_DIR}")" ]]; then
             command rm -r "${TMP_DIR}"
         else
             command rm -r "${TMP_DIR}"
@@ -540,12 +556,12 @@ _trapCleanup_() {
     # OUTS:
     #         Exits script with error code 1
 
-    local _line=${1:-} # LINENO
-    local _linecallfunc=${2:-}
-    local _command="${3:-}"
-    local _funcstack="${4:-}"
-    local _script="${5:-}"
-    local _sourced="${6:-}"
+    local _line=${1-} # LINENO
+    local _linecallfunc=${2-}
+    local _command="${3-}"
+    local _funcstack="${4-}"
+    local _script="${5-}"
+    local _sourced="${6-}"
 
     # Replace the cursor in-case 'tput civis' has been used
     tput cnorm
@@ -555,9 +571,9 @@ _trapCleanup_() {
         _funcstack="'$(printf "%s" "${_funcstack}" | sed -E 's/ / < /g')'"
 
         if [[ ${_script##*/} == "${_sourced##*/}" ]]; then
-            fatal "${7:-} command: '${_command}' (line: ${_line}) [func: $(_printFuncStack_)]"
+            fatal "${7-} command: '${_command}' (line: ${_line}) [func: $(_printFuncStack_)]"
         else
-            fatal "${7:-} command: '${_command}' (func: ${_funcstack} called at line ${_linecallfunc} of '${_script##*/}') (line: ${_line} of '${_sourced##*/}') "
+            fatal "${7-} command: '${_command}' (func: ${_funcstack} called at line ${_linecallfunc} of '${_script##*/}') (line: ${_line} of '${_sourced##*/}') "
         fi
     else
         printf "%s\n" "Fatal error trapped. Exiting..."
@@ -580,9 +596,9 @@ _makeTempDir_() {
     # USAGE:
     #         _makeTempDir_ "$(basename "$0")"
 
-    [ -d "${TMP_DIR:-}" ] && return 0
+    [ -d "${TMP_DIR-}" ] && return 0
 
-    if [ -n "${1:-}" ]; then
+    if [ -n "${1-}" ]; then
         TMP_DIR="${TMPDIR:-/tmp/}${1}.${RANDOM}.${RANDOM}.$$"
     else
         TMP_DIR="${TMPDIR:-/tmp/}$(basename "$0").${RANDOM}.${RANDOM}.${RANDOM}.$$"
@@ -607,7 +623,7 @@ _acquireScriptLock_() {
     #         If the lock was acquired it's automatically released in _safeExit_()
 
     local _lockDir
-    if [[ ${1:-} == 'system' ]]; then
+    if [[ ${1-} == 'system' ]]; then
         _lockDir="${TMPDIR:-/tmp/}$(basename "$0").lock"
     else
         _lockDir="${TMPDIR:-/tmp/}$(basename "$0").${UID}.lock"
@@ -791,12 +807,12 @@ _parseOptions_() {
         esac
         shift
     done
-    set -- "${_options[@]:-}"
+    set -- "${_options[@]-}"
     unset _options
 
     # Read the options and set stuff
     # shellcheck disable=SC2034
-    while [[ ${1:-} == -?* ]]; do
+    while [[ ${1-} == -?* ]]; do
         case $1 in
             # Custom options
 
