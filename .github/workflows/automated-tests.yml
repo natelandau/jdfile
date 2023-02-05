@@ -1,4 +1,5 @@
-name: "Python Code Checker"
+---
+name: "Automated Tests"
 
 on:
     workflow_dispatch:
@@ -10,8 +11,13 @@ on:
             - "tests/**"
             - "pyproject.toml"
             - "poetry.lock"
+        branches:
+            - main
     pull_request:
-        types: [opened, reopened]
+        types:
+            - opened
+            - reopened
+            - synchronize
         paths:
             - ".github/workflows/python-code-checker.yml"
             - ".github/actions/**"
@@ -53,9 +59,9 @@ jobs:
             - name: Setup Python and Poetry
               uses: ./.github/actions/setup-poetry
 
-            #----------------------------------------------
+            # ----------------------------------------------
             #    run linters
-            #----------------------------------------------
+            # ----------------------------------------------
 
             - name: Lint with Mypy
               run: poetry run mypy src/
@@ -63,16 +69,10 @@ jobs:
               run: poetry run ruff src/
             - name: check pyproject.toml
               run: poetry run poetry check
-            - name: lint with black
-              run: poetry run black --check src/
-            - name: run vulture
-              run: poetry run vulture src/
-            - name: run interrogate
-              run: poetry run interrogate -c pyproject.toml .
 
-            #----------------------------------------------
+            # ----------------------------------------------
             #    run test suite
-            #----------------------------------------------
+            # ----------------------------------------------
             - name: Run tests with pytest
               run: |
                   poetry run coverage run

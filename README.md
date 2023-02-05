@@ -1,4 +1,4 @@
-[![Python Code Checker](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/python-code-checker.yml) [![Current Release](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
+[![Python Code Checker](https://github.com/natelandau/filemanager/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/automated-tests.yml) [![Current Release](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
 
 # filemanager
 
