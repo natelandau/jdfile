@@ -46,20 +46,20 @@ jobs:
             - name: Install dependencies
               run: |
                   python -m pip install --upgrade pip
-                  pip install git+https://github.com/natelandau/filemanager
+                  pip install git+https://github.com/natelandau/jdfile
 
             - name: create test files
               run: |
                   mkdir -p ~/test/30-39\ readme/31\ test\ files/31.01\ readme
-                  mkdir ~/.filemanager
-                  echo "[projects]" > ~/.filemanager/filemanager.toml
-                  echo "[projects.test]" >> ~/.filemanager/filemanager.toml
-                  echo "name = 'test'" >> ~/.filemanager/filemanager.toml
-                  echo "path = '~/test'" >> ~/.filemanager/filemanager.toml
+                  mkdir ~/.jdfile
+                  echo "[projects]" > ~/.jdfile/jdfile.toml
+                  echo "[projects.test]" >> ~/.jdfile/jdfile.toml
+                  echo "name = 'test'" >> ~/.jdfile/jdfile.toml
+                  echo "path = '~/test'" >> ~/.jdfile/jdfile.toml
                   echo "file exists" > ~/test-readme-file.txt
 
             - name: test moving file
-              run: filemanager --force --sep=underscore --case=title --organize=test ~/test-readme-file.txt
+              run: jdfile --force --sep=underscore --case=title --organize=test ~/test-readme-file.txt
 
             - name: confirm file exists
               run: |

@@ -8,7 +8,7 @@ from plumbum import FG, CommandNotFound, ProcessExecutionError, local
 from rich import print
 from typer import Abort
 
-from filemanager._utils.alerts import logger as log
+from jdfile._utils.alerts import logger as log
 
 
 @rich.repr.auto
@@ -59,8 +59,8 @@ class Folder:
 
         self.terms: list[str] = [word for word in re.split(r"[- _]", self.name) if word]
 
-        if Path(self.path, ".filemanager").exists():
-            content = Path(self.path, ".filemanager").read_text().splitlines()
+        if Path(self.path, ".jdfile").exists():
+            content = Path(self.path, ".jdfile").read_text().splitlines()
             for line in content:
                 if line.startswith("#"):
                     continue

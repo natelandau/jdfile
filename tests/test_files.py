@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from filemanager._utils import File, create_unique_filename, populate_stopwords
+from jdfile._utils import File, create_unique_filename, populate_stopwords
 from tests.helpers import Regex
 
 

@@ -40,8 +40,8 @@ def test_project(tmp_path):
     for folder in folders:
         folder.mkdir(parents=True, exist_ok=True)
 
-    term_file1 = Path(project, "10-19 area1/11 category1/11.01 subcategory1/.filemanager")
-    term_file2 = Path(project, "10-19 area1/11 category1/11.02 subcategory2/.filemanager")
+    term_file1 = Path(project, "10-19 area1/11 category1/11.01 subcategory1/.jdfile")
+    term_file2 = Path(project, "10-19 area1/11 category1/11.02 subcategory2/.jdfile")
 
     term_file1.write_text(
         dedent(

@@ -160,7 +160,7 @@ DRYRUN=false
 declare -a ARGS=()
 
 # Script specific
-WORKSPACE_DIR="/workspaces/filemanager"
+WORKSPACE_DIR="/workspaces/jdfile"
 # ################################## Custom utility functions (Pasted from repository)
 _execute_() {
     # DESC:

@@ -11,7 +11,7 @@ from rich import box, print
 from rich.table import Table
 from typer import Abort
 
-from filemanager._utils import (
+from jdfile._utils import (
     Folder,
     alerts,
     create_date,
@@ -21,7 +21,7 @@ from filemanager._utils import (
     parse_date,
     select_option,
 )
-from filemanager._utils.alerts import logger as log
+from jdfile._utils.alerts import logger as log
 
 
 @rich.repr.auto
@@ -456,7 +456,6 @@ def create_unique_filename(original: Path, separator: Enum, append_integer: bool
         sep = "-"
 
     if original.exists():
-
         parent: Path = original.parent
         stem: str = str(original)[: str(original).rfind("".join(original.suffixes))].replace(
             f"{str(parent)}/", ""

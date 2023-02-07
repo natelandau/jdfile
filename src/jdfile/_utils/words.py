@@ -5,13 +5,13 @@ from pathlib import Path
 import nltk
 from typer import Abort
 
-from filemanager._utils import dedupe_list
-from filemanager._utils.alerts import logger as log
+from jdfile._utils import dedupe_list
+from jdfile._utils.alerts import logger as log
 
 
 def instantiate_nltk() -> None:  # pragma: no cover
     """Instantiate nltk package."""
-    ntlk_data_path = Path(Path.home() / ".filemanager" / "nltk_data")
+    ntlk_data_path = Path(Path.home() / ".jdfile" / "nltk_data")
     nltk.data.path.append(ntlk_data_path)
 
     if Path(ntlk_data_path / "corpora" / "wordnet.zip").exists() is False:

@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from filemanager._utils.alerts import logger as log
+from jdfile._utils.alerts import logger as log
 
 
 def parse_date(  # noqa: C901

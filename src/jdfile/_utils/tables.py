@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.live import Live
 from rich.table import Table
 
-from filemanager._utils import File, diff_strings
+from jdfile._utils import File, diff_strings
 
 
 def show_confirmation_table(

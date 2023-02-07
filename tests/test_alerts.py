@@ -4,8 +4,8 @@ import re
 
 import pytest
 
-from filemanager._utils import alerts
-from filemanager._utils.alerts import logger as log
+from jdfile._utils import alerts
+from jdfile._utils.alerts import logger as log
 from tests.helpers import Regex
 
 

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from filemanager.cli import app
+from jdfile.cli import app
 from tests.helpers import Regex
 
 runner = CliRunner()

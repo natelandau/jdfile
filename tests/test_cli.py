@@ -1,10 +1,10 @@
 # type: ignore
-"""Test filemanager CLI."""
+"""Test jdfile CLI."""
 import re
 
 from typer.testing import CliRunner
 
-from filemanager.cli import app
+from jdfile.cli import app
 from tests.helpers import Regex
 
 runner = CliRunner()
@@ -14,7 +14,7 @@ def test_version():
     """Test printing version and then exiting."""
     result = runner.invoke(app, ["-n", "--version"])
     assert result.exit_code == 0
-    assert result.output == Regex(r"filemanager version: \d+\.\d+\.\d+$")
+    assert result.output == Regex(r"jdfile version: \d+\.\d+\.\d+$")
 
 
 def test_no_files_specified():

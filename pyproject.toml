@@ -5,14 +5,14 @@
 [tool.poetry] # https://python-poetry.org/docs/pyproject/
     authors     = ["Nate Landau <github@natenate.org>"]
     description = "File Manager for the Johnny Decimal System"
-    homepage    = "https://github.com/natelandau/filemanager"
+    homepage    = "https://github.com/natelandau/jdfile"
     license     = "GNU AFFERO"
-    name        = "filemanager"
+    name        = "jdfile"
     readme      = "README.md"
-    repository  = "https://github.com/natelandau/filemanager"
+    repository  = "https://github.com/natelandau/jdfile"
     version     = "0.4.7"
     [tool.poetry.scripts] # https://python-poetry.org/docs/pyproject/#scripts
-        filemanager = "filemanager.cli:app"
+        jdfile = "jdfile.cli:app"
 
     [tool.poetry.dependencies] # https://python-poetry.org/docs/dependency-specification/
         arrow       = "^1.2.3"
@@ -59,7 +59,6 @@
         "D204",
         "D213",
         "D215",
-        "D400",
         "D404",
         "D406",
         "D407",
@@ -70,11 +69,18 @@
         "N805",
         "PGH001",
         "PGH003",
-        "PLR2004",
         "UP007",
     ]
     ignore-init-module-imports = true
     line-length = 100
+    per-file-ignores = { "cli.py" = [
+        "PLR0912",
+        "PLR0913",
+        "PLR0915",
+    ], "tests/*.py" = [
+        "E999",
+        "PLR2004",
+    ] }
     select = [
         "A",
         "B",
@@ -102,7 +108,7 @@
     ]
     src = ["src", "tests"]
     target-version = "py310"
-    unfixable = ["ERA001", "F401", "F401", "UP007"]
+    unfixable = ["ERA001", "F401", "F841", "UP007"]
 
 [tool.black]
     line-length = 100
@@ -114,7 +120,7 @@
     version = "0.4.7"
     version_files = [
         "pyproject.toml:version",
-        "src/filemanager/__version__.py:__version__",
+        "src/jdfile/__version__.py:__version__",
     ]
 
 [tool.coverage.report] # https://coverage.readthedocs.io/en/latest/config.html#report
@@ -198,7 +204,7 @@
     pdoc
       --docformat google
       --output-directory docs
-      src/filemanager
+      src/jdfile
     """
         help = "Generate this package's docs"
 
@@ -206,10 +212,7 @@
         help = "Lint this package"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "vulture src/ tests/"
-
-        [[tool.poe.tasks.lint.sequence]]
-            shell = "ruff src/ tests/"
+            shell = "ruff --extend-ignore=I001,D301,D401,PLR2004,PLR0913 src/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "black --check src/ tests/"
@@ -219,6 +222,12 @@
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "mypy --config-file pyproject.toml src/"
+
+        [[tool.poe.tasks.lint.sequence]]
+            shell = "vulture src/ tests/"
+
+        [[tool.poe.tasks.lint.sequence]]
+            shell = "yamllint ."
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "interrogate -c pyproject.toml ."

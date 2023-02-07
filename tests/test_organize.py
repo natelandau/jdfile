@@ -5,7 +5,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from filemanager.cli import app
+from jdfile.cli import app
 from tests.helpers import Regex
 
 runner = CliRunner()
@@ -41,7 +41,7 @@ def test_find_single_folder(test_project, test_files):
     """Test finding a single matching folder."""
     config, project_root = test_project
 
-    # Match on term in .filemanager
+    # Match on term in .jdfile
     result = runner.invoke(
         app,
         [

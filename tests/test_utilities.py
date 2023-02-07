@@ -4,7 +4,7 @@ from io import StringIO
 
 import pytest
 
-from filemanager._utils.utilities import dedupe_list, diff_strings, from_camel_case, select_option
+from jdfile._utils.utilities import dedupe_list, diff_strings, from_camel_case, select_option
 
 
 def test_dedupe_list():

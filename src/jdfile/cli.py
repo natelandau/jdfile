@@ -1,4 +1,4 @@
-"""filemanager CLI."""
+"""jdfile CLI."""
 
 from enum import Enum
 from pathlib import Path
@@ -9,14 +9,14 @@ from rich import print
 from rich.console import Console
 from rich.progress import track
 
-from filemanager.__version__ import __version__
+from jdfile.__version__ import __version__
 
 try:
     import tomllib
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore [no-redef]
 
-from filemanager._utils import (
+from jdfile._utils import (
     File,
     alerts,
     instantiate_nltk,
@@ -26,7 +26,7 @@ from filemanager._utils import (
     show_confirmation_table,
     show_tree,
 )
-from filemanager._utils.alerts import logger as log
+from jdfile._utils.alerts import logger as log
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, rich_markup_mode="rich")
 
@@ -36,7 +36,7 @@ typer.rich_utils.STYLE_HELPTEXT = ""
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        print(f"filemanager version: {__version__}")
+        print(f"jdfile version: {__version__}")
         raise typer.Exit()
 
 
@@ -100,7 +100,7 @@ def main(  # noqa: C901
         show_default=True,
     ),
     log_file: Path = typer.Option(
-        Path(Path.home() / "logs" / "filemanager.log"),
+        Path(Path.home() / "logs" / "jdfile.log"),
         help="Path to log file",
         show_default=True,
         dir_okay=False,
@@ -235,7 +235,7 @@ def main(  # noqa: C901
         rich_help_panel="File Organization Options",
     ),
 ) -> None:
-    """[bold]filemanager[/bold] normalizes filenames based on your preferences.
+    """[bold]jdfile[/bold] normalizes filenames based on your preferences.
 
     -   Remove special characters
     -   Trim multiple separators ([reverse #999999] word____word [/] becomes [reverse #999999] word_word [/])
@@ -252,35 +252,35 @@ def main(  # noqa: C901
     -   Specify casing for words which should never be changed
     -   more...
 
-    [bold]filemanager[/] can organize your files into folders when --organize is specified.
+    [bold]jdfile[/] can organize your files into folders when --organize is specified.
 
     -   Move files into directory trees following the [link=https://johnnydecimal.com]Johnny Decimal system[/link]
     -   Parse files and folder names looking for matching terms
     -   Uses [link=https://www.nltk.org]nltk[/link] to lookup synonyms to improve matching
-    -   Add [reverse #999999].filemanager[/] files to directories containing a list of words that will match files
+    -   Add [reverse #999999].jdfile[/] files to directories containing a list of words that will match files
 
     [bold underline]Example usage:[/]
 
     [dim]# Normalize all files in a directory to lowercase, with underscore separators[/dim]
-    $ filemanager --case=lower --separator=underscore /path/to/directory
+    $ jdfile --case=lower --separator=underscore /path/to/directory
 
     [dim]# Organize files into a specified Johnny Decimal folder and add a date[/dim]
-    $ filemanager --organize=project --add-date --number=23.01 some_file.jpg
+    $ jdfile --organize=project --add-date --number=23.01 some_file.jpg
 
     [dim]# Print a tree representation of a Johnny Decimal project[/dim]
-    $ filemanager --organize=project --tree
+    $ jdfile --organize=project --tree
 
     [dim]# Organize files into a Johnny Decimal project with specified terms with title casing[/dim]
-    $ filemanager --case=title --organize=project --term=term1 --term=term2 some_file.jpg
+    $ jdfile --case=title --organize=project --term=term1 --term=term2 some_file.jpg
 
     [dim]# Run in --dry_run mode to avoid making permanent changes on all files within two levels[/dim]
-    $ filemanager --dry-run --diff --depth 2 /path/to/directory
+    $ jdfile --dry-run --diff --depth 2 /path/to/directory
 
     [dim]# Run on a whole directory and filter out files that are already correct from the output[/dim]
-    $ filemanager --filter-correct /path/to/directory
+    $ jdfile --filter-correct /path/to/directory
 
     [dim]# Run on a whole directory and accept the first option for all prompts[/dim]
-    $ filemanager --force /path/to/directory
+    $ jdfile --force /path/to/directory
 
     """
     console = Console()
@@ -309,9 +309,9 @@ def main(  # noqa: C901
 
     config = load_configuration(possible_config_locations, required=False)
     try:
-        config["ignored_files"].append(".filemanager")
+        config["ignored_files"].append(".jdfile")
     except KeyError:
-        config["ignored_files"] = [".filemanager"]
+        config["ignored_files"] = [".jdfile"]
 
     if project_name:
         folders: list = populate_project_folders(config, project_name)
@@ -394,7 +394,6 @@ def main(  # noqa: C901
             for file in list_of_files:
                 file.commit(dry_run, overwrite, separator, append_unique_integer)
         elif choice.upper() == "I":
-
             console.clear()
             choices = {
                 "C": "Commit changes",

@@ -1,29 +1,29 @@
 {
-  "template": "git@github.com:radix-ai/poetry-cookiecutter",
-  "commit": "966391b0342fc923a177a30c39285adf4416fa17",
   "checkout": null,
+  "commit": "966391b0342fc923a177a30c39285adf4416fa17",
   "context": {
     "cookiecutter": {
-      "package_name": "filemanager",
-      "package_description": "A cli for personalized file management",
-      "package_url": "https://github.com/natelandau/filemanager",
-      "author_name": "Nate Landau",
+      "__package_name_kebab_case": "jdfile",
+      "__package_name_snake_case": "jdfile",
+      "_template": "git@github.com:radix-ai/poetry-cookiecutter",
       "author_email": "github@natenate.org",
+      "author_name": "Nate Landau",
+      "continuous_integration": "GitHub",
+      "docstring_style": "Google",
+      "package_description": "A cli for personalized file management",
+      "package_name": "jdfile",
+      "package_url": "https://github.com/natelandau/jdfile",
+      "private_package_repository_name": "",
+      "private_package_repository_url": "",
       "python_version": "3.10",
       "with_fastapi_api": "0",
       "with_jupyter_lab": "0",
       "with_pydantic_typing": "0",
       "with_sentry_logging": "0",
       "with_streamlit_app": "0",
-      "with_typer_cli": "1",
-      "continuous_integration": "GitHub",
-      "docstring_style": "Google",
-      "private_package_repository_name": "",
-      "private_package_repository_url": "",
-      "__package_name_kebab_case": "filemanager",
-      "__package_name_snake_case": "filemanager",
-      "_template": "git@github.com:radix-ai/poetry-cookiecutter"
+      "with_typer_cli": "1"
     }
   },
-  "directory": null
+  "directory": null,
+  "template": "git@github.com:radix-ai/poetry-cookiecutter"
 }

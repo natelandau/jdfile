@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from filemanager._utils.dates import create_date, month_to_number, parse_date
+from jdfile._utils.dates import create_date, month_to_number, parse_date
 from tests.helpers import Regex
 
 
 def test_create_date(mocker):
     """Test create_date."""
-    mocker.patch("filemanager._utils.dates.Path.stat", st_ctime=1661526200.5003605)
+    mocker.patch("jdfile._utils.dates.Path.stat", st_ctime=1661526200.5003605)
     assert create_date(Path("test.txt"), date_format="%Y-%m-%d") == "1970-01-01"
 
 

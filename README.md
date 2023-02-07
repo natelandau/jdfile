@@ -1,10 +1,10 @@
-[![Python Code Checker](https://github.com/natelandau/filemanager/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/automated-tests.yml) [![Current Release](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/filemanager/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/filemanager/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/filemanager)
+[![Python Code Checker](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml) [![Current Release](https://github.com/natelandau/jdfile/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/jdfile/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/jdfile)
 
-# filemanager
+# jdfile
 
 A script to normalize filenames and (optionally) organize files into directories following the [Johnny Decimal](https://johnnydecimal.com) system.
 
-`filemanager` normalizes filenames based on your preferences.
+`jdfile` normalizes filenames based on your preferences.
 
 -   Remove special characters
 -   Trim multiple separators (`word----word` becomes `word-word`)
@@ -21,12 +21,12 @@ A script to normalize filenames and (optionally) organize files into directories
 -   Specify casing for words which should never be changed
 -   more...
 
-`filemanager` can organize your files into folders.
+`jdfile` can organize your files into folders.
 
 -   Move files into directory trees following the [Johnny Decimal](https://johnnydecimal.com) system
 -   Parse files and folder names looking for matching terms
 -   Uses [nltk](https://www.nltk.org) to lookup synonyms to improve matching
--   Add `.filemanager` files to directories containing a list of words that will match files
+-   Add `.jdfile` files to directories containing a list of words that will match files
 
 ### Why build this?
 
@@ -51,31 +51,31 @@ If you are a person who archives documents there are a number of problems with t
 
 Additionally, even if the filenames were normalized, filing documents manually is a pain.
 
-`Filemanager` is created to solve for these problems by providing an easy CLI to normalize the filename and organize it into an appropriate directory on your computer.
+`jdfile` is created to solve for these problems by providing an easy CLI to normalize the filename and organize it into an appropriate directory on your computer.
 
 ## Install
 
-Filemanager requires Python v3.10 or above
+jdfile requires Python v3.10 or above
 
 Pip
 
 ```bash
-pip install git+https://github.com/natelandau/filemanager
+pip install git+https://github.com/natelandau/jdfile
 ```
 
 [PIPX](https://pypa.github.io/pipx/)
 
 ```bash
-pipx install git+https://github.com/natelandau/filemanager
+pipx install git+https://github.com/natelandau/jdfile
 ```
 
 ## Usage
 
-Run `filemanager --help` for usage
+Run `jdfile --help` for usage
 
 ### Configuration
 
-`filemanager` will clean filenames without needing a configuration file. To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.filemanager/filemanager.toml`
+`jdfile` will clean filenames without needing a configuration file. To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.jdfile/jdfile.toml`
 
 ```toml
 ignored_files = ['.DS_Store', '.bashrc', 'something_not_to_rename'] # If cleaning an entire directory, files in this list will be skipped
@@ -101,25 +101,25 @@ path = "~/work-docs/"
 
 ```bash
 # Normalize all files in a directory to lowercase, with underscore separators
-$ filemanager --case=lower --separator=underscore /path/to/directory
+$ jdfile --case=lower --separator=underscore /path/to/directory
 
 # Organize files into a specified Johnny Decimal folder and add a date
-$ filemanager --organize=project --add-date --number=23.01 some_file.jpg
+$ jdfile --organize=project --add-date --number=23.01 some_file.jpg
 
 # Print a tree representation of a Johnny Decimal project
-$ filemanager --organize=project --tree
+$ jdfile --organize=project --tree
 
 # Organize files into a Johnny Decimal project with specified terms with title casing
-$ filemanager --case=title --organize=project --term=term1 --term=term2 some_file.jpg
+$ jdfile --case=title --organize=project --term=term1 --term=term2 some_file.jpg
 
 # Run in --dry_run mode to avoid making permanent changes on all files within two levels
-$ filemanager --dry-run --diff --depth 2 /path/to/directory
+$ jdfile --dry-run --diff --depth 2 /path/to/directory
 
 # Run on a whole directory and filter out files that are already correct from the output
-$ filemanager --filter-correct /path/to/directory
+$ jdfile --filter-correct /path/to/directory
 
 # Run on a whole directory and accept the first option for all prompts
-$ filemanager --force /path/to/**directory**
+$ jdfile --force /path/to/**directory**
 ```
 
 ### Tips
@@ -128,41 +128,41 @@ Adding custom functions to your `.bashrc` or `.zshrc` can save time and ensure y
 
 ```bash
 # ~/.bashrc
-if command -v filemanager &>/dev/null; then
+if command -v jdfile &>/dev/null; then
 
     cf() {
-        # DESC:	 Clean filenames using the filemanager package
+        # DESC:	 Clean filenames using the jdfile package
         if [[ $1 == "--help" || $1 == "-h" ]]; then
-            filemanager --help
+            jdfile --help
         else
-            filemanager --sep=space --case=title "$@"
+            jdfile --sep=space --case=title "$@"
         fi
     }
 
     cfd() {
-        # DESC:	 Clean filenames using the filemanager package
+        # DESC:	 Clean filenames using the jdfile package
         if [[ $1 == "--help" || $1 == "-h" ]]; then
-            filemanager --help
+            jdfile --help
         else
-            filemanager --add-date --sep=space --case=title "$@"
+            jdfile --add-date --sep=space --case=title "$@"
         fi
     }
 
     wfile() {
-        # DESC:	 File work documents using the Johnny Decimal System and the filemanager package
+        # DESC:	 File work documents using the Johnny Decimal System and the jdfile package
         if [[ $1 == "--help" || $1 == "-h" ]]; then
-            filemanager --help
+            jdfile --help
         else
-            filemanager --add-date --sep=underscore --case=lower --organize=work "$@"
+            jdfile --add-date --sep=underscore --case=lower --organize=work "$@"
         fi
     }
 
     pfile() {
-        # DESC:	 File personal documents using the Johnny Decimal System and the filemanager package
+        # DESC:	 File personal documents using the Johnny Decimal System and the jdfile package
         if [[ $1 == "--help" || $1 == "-h" ]]; then
-            filemanager --help
+            jdfile --help
         else
-            filemanager --add-date --sep=space --case=title --organize=personal "$@"
+            jdfile --add-date --sep=space --case=title --organize=personal "$@"
         fi
     }
 fi
@@ -170,11 +170,11 @@ fi
 
 ## Caveats
 
-`filemanager` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
+`jdfile` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
 
 # Contributing
 
-Thank you for taking an interest in improving Filemanager.
+Thank you for taking an interest in improving jdfile.
 
 ## Setup: Once per project
 
@@ -183,14 +183,14 @@ There are two ways to contribute to this project.
 ### 1. Local development
 
 1. Install Python 3.10 and [Poetry](https://python-poetry.org)
-2. Clone this repository. `git clone https://github.com/natelandau/filemanager.git`
+2. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
 3. Install the Poetry environment with `poetry install`.
 4. Activate your Poetry environment with `poetry shell`.
 5. Install the pre-commit hooks with `pre-commit install --install-hooks`.
 
 ### 2. Containerized development
 
-1. Clone this repository. `git clone https://github.com/natelandau/filemanager.git`
+1. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
 2. Open the repository in Visual Studio Code
 3. Start the [Dev Container](https://code.visualstudio.com/docs/remote/containers). Run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Remote-Containers: Reopen in Container_.
 4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed.
