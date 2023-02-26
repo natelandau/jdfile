@@ -57,16 +57,8 @@ Additionally, even if the filenames were normalized, filing documents manually i
 
 jdfile requires Python v3.10 or above
 
-Pip
-
 ```bash
-pip install git+https://github.com/natelandau/jdfile
-```
-
-[PIPX](https://pypa.github.io/pipx/)
-
-```bash
-pipx install git+https://github.com/natelandau/jdfile
+pip install pip install obsidian-metadata
 ```
 
 ## Usage
