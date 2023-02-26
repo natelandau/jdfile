@@ -1,13 +1,11 @@
 ---
-name: "Create Release"
+name: Create Release
 
 on:
+    workflow_dispatch:
     push:
         tags:
-            - "v*"
-        branches:
-            - main # Push events to matching v*, i.e. v1.0, v20.15.10
-
+            - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -61,6 +59,7 @@ jobs:
                   echo $TAG
                   echo $PROJECT_VERSION
                   if [[ "$TAG" != "v$PROJECT_VERSION" ]]; then exit 1; fi
+                  echo "current_tag=refs/tags/${TAG}" >> $GITHUB_ENV
 
             # ----------------------------------------------
             # Test and then build the package
@@ -71,7 +70,6 @@ jobs:
                   poetry run poetry check
                   poetry run coverage run
                   poetry build
-
             # ----------------------------------------------
             # Generate release notes
             # ----------------------------------------------
@@ -98,7 +96,8 @@ jobs:
             - name: Create Release Draft
               uses: softprops/action-gh-release@v1
               with:
-                  body_path: ".github/RELEASE-TEMPLATE.md"
+                  #   body_path: ".github/RELEASE-TEMPLATE.md"
+                  body: ${{join(fromJson(steps.generate_notes.outputs.notes).notes, '')}}
                   draft: true
                   files: |
                       dist/*-${{env.PROJECT_VERSION}}-py3-none-any.whl
