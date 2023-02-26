@@ -129,10 +129,14 @@ $ jdfile --stopwords /path/to/directory
 $ jdfile --date-format="%Y-%m-%d" ./somefile_march 3rd, 2022.txt
 
 # Print a tree representation of a Johnny Decimal project
-$ jdfile --organize=[project_name] --tree
+$ jdfile --project=[project_name] --tree
+
+# Use the settings of a project in the config file to clean filenames without
+# organizing them into folders
+$ jdfile --project=[project_name] --no-organize path/to/some_file.jpg
 
 # Organize files into a Johnny Decimal project with specified terms with title casing
-$ jdfile ---organize=[project_name] --term=term1 --term=term2 some_file.jpg
+$ jdfile ---project=[project_name] --term=term1 --term=term2 path/to/some_file.jpg
 ```
 
 ### Tips
@@ -153,17 +157,11 @@ if command -v jdfile &>/dev/null; then
     }
 
     wfile() {
-        # DESC:	 File work documents using the Johnny Decimal System and the jdfile package
+        # DESC:	 File work documents
         if [[ $1 == "--help" || $1 == "-h" ]]; then
             jdfile --help
         else
-            jdfile \
-            --date-format="%Y-%m-%d" \
-            --sep=underscore \
-            --case=lower \
-            --organize=work \
-            --stopwords
-            "$@"
+            jdfile --project=work "$@"
         fi
     }
 fi

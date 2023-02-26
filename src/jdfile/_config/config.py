@@ -66,6 +66,11 @@ class Config:
         self._ignored_files = (
             self.project_config["ignored_files"] if "ignored_files" in self.project_config else []
         )
+        self._organize = (
+            self.context["organize"]
+            if "organize" in self.context and self.context["organize"] is not None
+            else True
+        )
 
         self._cli_terms = self._get_cli_terms()
         self._date_format = self._get_date_format()
@@ -87,6 +92,7 @@ class Config:
         yield "ignored_files", self.ignored_files
         yield "insert_location", self.insert_location
         yield "match_case", self.match_case
+        yield "organize", self.organize
         yield "project_name", self.project_name
         yield "project_path", self.project_path
         yield "separator", self.separator
@@ -444,6 +450,19 @@ class Config:
             return self.project_config["match_case"]
 
         return []
+
+    @property
+    def organize(self) -> bool:
+        """Get the organize option for the project.
+
+        Returns:
+            bool: Organize option for the project.
+        """
+        return self._organize
+
+    @organize.setter
+    def organize(self, value: bool) -> None:
+        self._organize = value
 
     @property
     def overwrite_existing(self) -> bool:

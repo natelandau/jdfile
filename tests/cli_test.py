@@ -25,7 +25,7 @@ def test_specify_config_location(tmp_path):
     assert config_path.exists() is False
 
     result = runner.invoke(
-        app, ["--config-file", config_path, "--organize", "test", str(Path(tmp_path / "testfile"))]
+        app, ["--config-file", config_path, "--project", "test", str(Path(tmp_path / "testfile"))]
     )
     print(result.output)
     assert result.exit_code == 1

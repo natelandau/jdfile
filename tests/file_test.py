@@ -205,6 +205,22 @@ def test_commit_overwrite_original(tmp_path):
     assert Path(tmp_path / "foo.txt").exists() is True
 
 
+def test_no_organize(config1_project):
+    """Ensure no organizing happens when organize is False."""
+    config, original_files_path, project_path = config1_project
+    project = Project(config)
+    fixture = Path(original_files_path / "foobar(one).txt")
+    fixture.touch()
+    config.clean = True
+    config.organize = False
+    config.cli_terms = ["11.01"]
+    file = File(path=fixture, config=config, project=project)
+    assert file.commit() is True
+    assert Path(original_files_path / "foobarone.txt").exists() is True
+    assert file.parent == file.new_parent
+    assert Path(project_path / "10-19 foo/11 bar/11.01 foo/foobarone.txt").exists() is False
+
+
 def test_new_path_by_number(config1_project):
     """Test creating a File object from a project."""
     config, original_files_path, project_path = config1_project

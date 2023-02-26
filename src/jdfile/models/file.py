@@ -82,7 +82,9 @@ class File:
             self.new_suffixes = self.suffixes.copy()
 
         self.new_parent = (
-            self._get_new_parent() if self.project and self.project.exists else self.parent
+            self._get_new_parent()
+            if self.project and self.project.exists and config.organize
+            else self.parent
         )
 
     def __rich_repr__(self) -> rich.repr.RichReprResult:  # pragma: no cover

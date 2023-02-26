@@ -106,12 +106,33 @@ def main(
         help="Log to file",
         show_default=True,
     ),
+    organize: bool = typer.Option(
+        True,
+        "--organize/--no-organize",
+        help="Move files into matched folders within a specified project",
+        rich_help_panel="File Organization Options",
+        show_default=True,
+    ),
     overwrite_existing: bool = typer.Option(
         None,
         "--overwrite/--no-overwrite",
         help="Overwrite existing files",
         rich_help_panel="Filename Cleaning Options",
         show_default=True,
+    ),
+    print_tree: bool = typer.Option(
+        False,
+        "--tree",
+        help="Print a tree representation of the directories within a project and exit",
+        show_default=True,
+        rich_help_panel="File Organization Options",
+    ),
+    project_name: str = typer.Option(
+        None,
+        "--project",
+        "-p",
+        help="Specify a project from the configuration file.",
+        rich_help_panel="File Organization Options",
     ),
     separator: Separator = typer.Option(
         None,
@@ -152,20 +173,6 @@ def main(
     ),
     version: Optional[bool] = typer.Option(
         None, "--version", help="Print version and exit", callback=version_callback, is_eager=True
-    ),
-    print_tree: bool = typer.Option(
-        False,
-        "--tree",
-        help="Print a tree representation of the directories within a project and exit",
-        show_default=True,
-        rich_help_panel="File Organization Options",
-    ),
-    project_name: str = typer.Option(
-        None,
-        "--organize",
-        "-o",
-        help="JohnnyDecimal project to organize files into",
-        rich_help_panel="File Organization Options",
     ),
     use_nltk: bool = typer.Option(
         False,
@@ -216,10 +223,14 @@ def main(
     $ jdfile --date-format="%Y-%m-%d" ./somefile_march 3rd, 2022.txt
 
     [dim]Print a tree representation of a Johnny Decimal project[/]
-    $ jdfile --organize=[project_name] --tree
+    $ jdfile --project={project_name} --tree
 
-    [dim]Organize files into a Johnny Decimal project with specified terms with [/]title casing
-    $ jdfile ---organize=[project_name] --term=term1 --term=term2 some_file.jpg
+    [dim]Use the settings of a project in the config file to clean filenames without[/]
+    [dim]organizing them into folders[/]
+    $ jdfile --project={project_name} --no-organize path/to/some_file.jpg
+
+    [dim]Organize files into a Johnny Decimal project with specified terms with title casing[/]
+    $ jdfile ---project={project_name} --term=term1 --term=term2 path/to/some_file.jpg
     """
     console = Console()
     alerts.LoggerManager(  # pragma: no cover
@@ -235,6 +246,7 @@ def main(
         "depth": depth,
         "dry_run": dry_run,
         "force": force,
+        "organize": organize,
         "overwrite_existing": overwrite_existing,
         "print_tree": print_tree,
         "project_name": project_name,
@@ -290,7 +302,9 @@ def main(
                 file.new_stem + "".join(file.new_suffixes)
                 if file.has_changes()
                 else "[green]No Changes[/green]",
-                str(file.new_parent.relative_to(project.path)) if project.exists else "",
+                str(file.new_parent.relative_to(project.path))
+                if project.exists and file.parent != file.new_parent
+                else "",
                 file.print_diff() if file.has_changes() else "",
             )
         console.print(table)
