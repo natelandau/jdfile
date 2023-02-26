@@ -1,4 +1,4 @@
-[![Python Code Checker](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml) [![Current Release](https://github.com/natelandau/jdfile/actions/workflows/release-checker.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/release-checker.yml) [![codecov](https://codecov.io/gh/natelandau/jdfile/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/jdfile)
+[![PyPI version](https://badge.fury.io/py/jdfile.svg)](https://badge.fury.io/py/jdfile) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jdfile) [![Python Code Checker](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml) [![codecov](https://codecov.io/gh/natelandau/jdfile/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/jdfile)
 
 # jdfile
 
@@ -173,15 +173,13 @@ fi
 
 `jdfile` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
 
----
-
 ## Contributing
 
-## Setup: Once per project
+### Setup: Once per project
 
 There are two ways to contribute to this project.
 
-### 1. Local development
+#### 1. Local development
 
 1. Install Python 3.10 and [Poetry](https://python-poetry.org)
 2. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
@@ -189,14 +187,14 @@ There are two ways to contribute to this project.
 4. Activate your Poetry environment with `poetry shell`.
 5. Install the pre-commit hooks with `pre-commit install --install-hooks`.
 
-### 2. Containerized development
+#### 2. Containerized development
 
 1. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
 2. Open the repository in Visual Studio Code
 3. Start the [Dev Container](https://code.visualstudio.com/docs/remote/containers). Run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Remote-Containers: Reopen in Container_.
 4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed by VSCode.
 
-## Developing
+### Developing
 
 -   This project follows the [Conventional Commits](https://www.conventionalcommits.org/) standard to automate [Semantic Versioning](https://semver.org/) and [Keep A Changelog](https://keepachangelog.com/) with [Commitizen](https://github.com/commitizen-tools/commitizen).
     -   When you're ready to commit changes run `cz c`
