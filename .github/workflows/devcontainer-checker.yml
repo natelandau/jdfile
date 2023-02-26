@@ -18,6 +18,7 @@ on:
             - ".devcontainer/**"
             - ".github/workflows/devcontainer-checker.yml"
 
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -61,5 +62,4 @@ jobs:
               uses: devcontainers/ci@v0.2
               with:
                   runCmd: |
-                      poe lint
                       poe test

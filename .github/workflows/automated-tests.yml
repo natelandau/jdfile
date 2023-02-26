@@ -43,6 +43,7 @@ jobs:
                   egress-policy: block
                   disable-sudo: true
                   allowed-endpoints: >
+                      api.snapcraft.io:443
                       api.github.com:443
                       codecov.io:443
                       files.pythonhosted.org:443

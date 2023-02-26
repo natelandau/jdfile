@@ -3,7 +3,7 @@ github_actions:
     - ".github/**"
 dev_container:
     - ".devcontainer/**"
-config:
+configuration:
     - ".*"
     - "*.js"
     - "*.json"

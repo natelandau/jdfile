@@ -1,58 +1,158 @@
-"""Gather synonyms from NLTK."""
-import contextlib
-from pathlib import Path
+"""String utilities."""
+import re
 
-import nltk
-from typer import Abort
-
-from jdfile._utils import dedupe_list
-from jdfile._utils.alerts import logger as log
+from jdfile.utils.alerts import logger as log
+from jdfile.utils.enums import InsertLocation, Separator, TransformCase
 
 
-def instantiate_nltk() -> None:  # pragma: no cover
-    """Instantiate nltk package."""
-    ntlk_data_path = Path(Path.home() / ".jdfile" / "nltk_data")
-    nltk.data.path.append(ntlk_data_path)
-
-    if Path(ntlk_data_path / "corpora" / "wordnet.zip").exists() is False:
-        nltk.download("wordnet", download_dir=ntlk_data_path)
-
-    if Path(ntlk_data_path / "corpora" / "omw-1.4.zip").exists() is False:
-        nltk.download("omw-1.4", download_dir=ntlk_data_path)
-
-    log.trace("NLTK instantiated")
-
-
-def find_synonyms(word: str) -> list[str]:  # pragma: no cover
-    """Find synonyms for a word.
+def insert(string: str, value: str, location: InsertLocation, separator: Separator) -> str:
+    """Insert a value into the new filename.
 
     Args:
-        word (str): The word to find synonyms for.
+        string (str): String to insert value into.
+        location (InsertLocation): Where to insert the value.
+        separator (Separator): Separator to use.
+        value (str): Value to insert.
 
     Returns:
-        list[str]: List of synonyms.
+        str: New filename with value inserted.
     """
-    from nltk.corpus import wordnet
+    match separator:
+        case Separator.UNDERSCORE:
+            sep = "_"
+        case Separator.DASH:
+            sep = "-"
+        case Separator.SPACE:
+            sep = " "
+        case Separator.NONE:
+            sep = ""
+        case _:
+            sep = "_"
 
-    synonyms = [word]
-
-    if len(wordnet.synsets(word)) > 0:
-        for syn in wordnet.synsets(word):
-            for lm in syn.lemmas():
-                synonyms.append(lm.name())
-
-        for w in wordnet.synsets(word)[0].also_sees():
-            synonyms.append(w.lemmas()[0].name())
-
-        for w in wordnet.synsets(word)[0].similar_tos():
-            synonyms.append(w.lemmas()[0].name())
-
-    return dedupe_list(synonyms)
+    match location:
+        case InsertLocation.BEFORE:
+            return f"{value}{sep}{string}"
+        case InsertLocation.AFTER:
+            return f"{string}{sep}{value}"
 
 
-def populate_stopwords(config: dict = {}, organize_folder: str | None = None) -> list[str]:
-    """Return a list of common English stopwords."""
-    stopwords = [
+def match_case(string: str, match_case: list[str] = []) -> str:
+    """Match case of words in a string to a list of words.
+
+    Args:
+        match_case (list[str]): List of words to match case.
+        string (str): String to match case in.
+
+    Returns:
+        str: String with case matched.
+    """
+    if len(match_case) > 0:
+        for term in match_case:
+            string = re.sub(
+                rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)", rf"\1{term}\2", string, flags=re.I
+            )
+
+    return string
+
+
+def normalize_separators(string: str, separator: Separator = Separator.IGNORE) -> str:
+    """Normalize separators in a string.
+
+    Args:
+        Separator (Separator): Separator to normalize to.
+        string (str): String to fix separators in.
+
+    Returns:
+        str: String with separators normalized.
+    """
+    match separator:
+        case Separator.SPACE:
+            return re.sub(r"[-_ \.]+", " ", string).strip("-_ ")
+
+        case Separator.DASH:
+            return re.sub(r"[-_ \.]+", "-", string).strip("-_ ")
+
+        case Separator.UNDERSCORE:
+            return re.sub(r"[-_ \.]+", "_", string).strip("-_ ")
+
+        case Separator.NONE:
+            return re.sub(r"[-_ \.]+", "", string).strip("-_ ")
+
+        case _:
+            return re.sub(r"([-_ \.])[-_ \.]+", r"\1", string).strip("-_ ")
+
+
+def split_camelcase_words(string: str, match_case: list[str] = []) -> str:
+    """Split camelCase words in a string into separate words.
+
+    If camelCase words are in the match_case list, they will be put back together.
+
+    Args:
+        match_case (list[str], optional): List of words to retain case. Defaults to [].
+        string (str): String to split words in.
+
+    Returns:
+        str: String with camelCase words split.
+    """
+    words = " ".join([word for word in re.split(r"(?=[A-Z][a-z])", string) if word])
+
+    # Put match case words back together
+    if len(match_case) > 0:
+        match_case_terms = {}
+        for _match in match_case:
+            split_term = " ".join([w for w in re.split(r"(?=[A-Z][a-z])", _match) if w])
+            match_case_terms[_match] = split_term
+
+        for phrase, split_phrase in match_case_terms.items():
+            words = re.sub(
+                rf"(^|[-_ \d]){re.escape(split_phrase)}([-_ \d]|$)",
+                rf"\1{phrase}\2",
+                words,
+                flags=re.I,
+            )
+
+    return words
+
+
+def split_words(string: str) -> list[str]:
+    """Split a string into a list of words. Ignore single letters, special characters, and numbers.
+
+    Args:
+        string (str): String to split into words.
+
+    Returns:
+        list[str]: List of words.
+    """
+    string = strip_special_chars(string)
+    return [
+        w for w in re.split(r"[-_ \.]+", string) if re.match(r"^\d*[A-Z]+\d*[A-Z]+\d*$", w.upper())
+    ]
+
+
+def strip_special_chars(string: str, replacement: str = "") -> str:
+    """Strip special characters from a string.
+
+    Args:
+        string (str): String to strip special characters from.
+        replacement (str, optional): Replacement character. Defaults to "".
+
+    Returns:
+        str: String with special characters stripped.
+    """
+    return re.sub(r"[^\w\d_ -]", replacement, string)
+
+
+def strip_stopwords(string: str, stopwords: list[str] = []) -> str:
+    """Strip stopwords from the new filename.
+
+    Args:
+        string(str): String to strip stopwords from.
+        stopwords (list[str], optional): List of additional stopwords to strip. Defaults to [].
+
+    Returns:
+        str: String with stopwords stripped.
+    """
+    common_english_stopwords = [
         "a",
         "able",
         "ableabout",
@@ -1266,19 +1366,41 @@ def populate_stopwords(config: dict = {}, organize_folder: str | None = None) ->
         "zr",
     ]
 
-    if organize_folder:
-        try:
-            if config["projects"]:
-                for project in config["projects"]:
-                    if organize_folder.lower() == config["projects"][project]["name"].lower():
-                        with contextlib.suppress(KeyError):
-                            for word in config["projects"][project]["stopwords"]:
-                                stopwords.append(word)
-            else:
-                log.error("No projects found in the configuration file")
-                raise Abort()
-        except KeyError as e:
-            log.error(f"{e} is not defined in the config file.")
-            raise Abort() from e
+    cleaned_string = string
+    stopwords = sorted(set(common_english_stopwords + stopwords))
 
-    return stopwords
+    for word in stopwords:
+        cleaned_string = re.sub(
+            rf"(^|[^A-Za-z]){re.escape(word)}([^A-Za-z]|$)", r"\1\2", cleaned_string, flags=re.I
+        )
+
+    if re.match(r"^.$|^$|^[- _]+$", cleaned_string):
+        log.trace(f"Skip stripping stopwords. String is empty: {string}")
+        return string
+
+    return cleaned_string.strip(" -_")
+
+
+def transform_case(string: str, transform_case: TransformCase) -> str:
+    """Transform the case of a string.
+
+    Args:
+        string (str): String to transform case of.
+        transform_case (TransformCase): Case to transform to.
+
+    Returns:
+        str: Transformed string.
+    """
+    match transform_case:
+        case TransformCase.LOWER:
+            return string.lower()
+        case TransformCase.UPPER:
+            return string.upper()
+        case TransformCase.TITLE:
+            return string.title()
+        case TransformCase.CAMELCASE:
+            return re.sub(r"[-_ ]", "", string.title())
+        case TransformCase.SENTENCE:
+            return string.capitalize()
+        case _:
+            return string

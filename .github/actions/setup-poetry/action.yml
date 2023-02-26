@@ -29,6 +29,7 @@ runs:
           run: |
               echo "pipx-home=${PIPX_HOME}" >> $GITHUB_OUTPUT
               echo "pipx-bin-dir=${PIPX_BIN_DIR}" >> $GITHUB_OUTPUT
+
         - name: Load pipx cache
           # If env vars are not defined do not load cache
           if: >
@@ -41,6 +42,7 @@ runs:
                   ${{ steps.pipx-env-vars.outputs.pipx-home }}/venvs/poetry
                   ${{ steps.pipx-env-vars.outputs.pipx-bin-dir }}/poetry
               key: ${{ runner.os }}-${{ inputs.python-version }}-pipx-${{ hashFiles('**/poetry.lock') }}
+
         - name: Install poetry
           # If env vars are not defined or we missed pipx cache, install poetry
           if: >
@@ -51,12 +53,14 @@ runs:
               || steps.pipx-cache.outputs.cache-hit != 'true'
           shell: bash
           run: pipx install poetry
+
         - name: Load poetry cache
           uses: actions/setup-python@v4
           id: setup-python
           with:
               python-version: ${{ inputs.python-version }}
               cache: poetry
+
         - name: Install poetry dependencies
           # If we missed poetry cache install dependencies
           if: steps.setup-python.outputs.cache-hit != 'true'

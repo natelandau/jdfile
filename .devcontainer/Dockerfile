@@ -25,7 +25,7 @@ RUN if [ "${POETRY_VERSION}" != "none" ]; then su vscode -c "umask 0002 && pip3 
 RUN apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -y \
-        locales && \
+    locales && \
     rm -r /var/lib/apt/lists/*
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \

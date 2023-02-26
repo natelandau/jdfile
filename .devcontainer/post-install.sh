@@ -4,29 +4,18 @@ _mainScript_() {
 
     APT_PACKAGES=(
         bat
-        bc
         build-essential
         coreutils
         curl
-        dnsutils
         exa
-        fzf
         git
         git-extras
-        iftop
-        iotop
         jq
         less
-        libxml2-utils
-        lnav
-        lsof
         nano
-        net-tools
-        openssh-server
         python3-pip
         shellcheck
         unzip
-        yamllint
         wget
         zsh
     )
@@ -54,7 +43,7 @@ _mainScript_() {
     echo ""
     header "Installing shfmt"
     if ! command -v shfmt &>/dev/null; then
-        _execute_ -pv "curl -sS https://webi.sh/shfmt | sh"
+        _execute_ "curl -sS https://webi.sh/shfmt | sh"
     fi
 
     REPOS=(
@@ -94,16 +83,10 @@ _mainScript_() {
     } >>"${HOME}/.bash_profile"
 
     echo ""
-    header "Create alias to obsidian-metadata"
-    echo 'alias om="obsidian-metadata"' >>"${HOME}/.bash_profile"
-    echo 'alias om="obsidian-metadata"' >>"${HOME}/.zshrc"
-
-    echo ""
     header "Configuring Python environment"
     if command -v python3 &>/dev/null; then
         _execute_ -pv "pip install --upgrade pip"
         _execute_ -pv "pip install -U \
-            asciinema \
             black \
             commitizen \
             pre-commit \
@@ -161,6 +144,7 @@ declare -a ARGS=()
 
 # Script specific
 WORKSPACE_DIR="/workspaces/jdfile"
+
 # ################################## Custom utility functions (Pasted from repository)
 _execute_() {
     # DESC:
@@ -483,6 +467,7 @@ fatal() {
     _alert_ fatal "${1}" "${2-}"
     _safeExit_ "1"
 }
+
 
 _printFuncStack_() {
     # DESC:

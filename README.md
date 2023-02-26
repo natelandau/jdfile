@@ -2,24 +2,24 @@
 
 # jdfile
 
-A script to normalize filenames and (optionally) organize files into directories following the [Johnny Decimal](https://johnnydecimal.com) system.
+`jdfile` cleans and normalizes filenames. In addition, if you have directories which follow the [Johnny Decimal](https://johnnydecimal.com), jdfile can move your files into the appropriate directory.
 
-`jdfile` normalizes filenames based on your preferences.
+`jdfile` cleans filenames based on your preferences.
 
 -   Remove special characters
 -   Trim multiple separators (`word----word` becomes `word-word`)
--   Normalize to `lowercase`, `uppercase`, or `titlecase`
--   Normalize to a common word separator (`_`, `-`, ` `)
--   Replace all `.jpeg` extensions to `.jpg`
--   Remove common stopwords
+-   Normalize to `lower case`, `upper case`, `sentence case`, or `title case`
+-   Normalize all files to a common word separator (`_`, `-`, ` `)
+-   Enforce lowercase file extensions
+-   Remove common English stopwords
+-   Split `camelCase` words into separate words (`camel Case`)
 -   Parse the filename for a date in many different formats
 -   Remove or reformat the date and add it to the the beginning of the filename
 -   Avoid overwriting files by adding a unique integer when renaming/moving
 -   Clean entire directory trees
--   Shows previews of changes to be made before commiting
--   Ignore files listed in config
--   Specify casing for words which should never be changed
--   more...
+-   Optionally, show previews of changes to be made before commiting
+-   Ignore files listed in a config file
+-   Specify casing for words which should never be changed (ie. `iMac` will never be re-cased)
 
 `jdfile` can organize your files into folders.
 
@@ -75,51 +75,72 @@ Run `jdfile --help` for usage
 
 ### Configuration
 
-`jdfile` will clean filenames without needing a configuration file. To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.jdfile/jdfile.toml`
+To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.jdfile/jdfile.toml`
 
 ```toml
-ignored_files = ['.DS_Store', '.bashrc', 'something_not_to_rename'] # If cleaning an entire directory, files in this list will be skipped
-match_case = ["OKR", "OKRs", "KPI", "KPIs"]  # Force the casing of certain words. Great for acronyms or proper nouns.
+# The name of the project is used as a command line option.
+# (e.g. --organize=project_name)
+[project_name]
+    # (Required) Path to the folder containing the Johnny Decimal project
+    path = "~/johnnydecimal"
 
-[projects]                      # Define any number of different projects
+    # An optional date format. If specified, the date will be appended to the filename
+    # See https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes for details on how to specify a date.
+    date_format = "None"
 
-[projects.jd_folder]            # A Johnny Decimal project
-name = "test"                   # (Required)  Name of this project (used as a command line option --organize=test)
-path = "~/johnnydecimal"        # (Required) Path to the folder containing the Johnny Decimal project
-stopwords = ["stopword", "stopword"]   # Optional list of project specific stopwords
+    # Ignores dotfiles (files that start with a period) when cleaning a directory.  true or false
+    ignore_dotfiles = true
 
-[projects.test2]
-name = "test2"
-path = "~/somedir/test2"
+    # Files in this list will be skipped.
+    ignored_files = ['file1.txt', 'file2.txt']
 
-[projects.work]
-name = "work"
-path = "~/work-docs/"
+    # Force the casing of certain words. Great for acronyms or proper nouns.
+    match_case = ["CEO", "CEOs", "iMac", "iPhone"]
+
+    # Overwrite existing files. true or false. If false, unique integers will be appended to the filename.
+    overwrite_existing = false
+
+    # Separator to use between words. Options: "ignore", "underscore", "space", "dash", "none"
+    separator = "ignore"
+
+    # Split CamelCase words into separate words. true or false
+    split_words = false
+
+    # Optional list of project specific stopwords to be stripped from filenames
+    stopwords = ["stopword1", "stopword2"]
+
+    # Strip stopwords from filenames. true or false
+    strip_stopwords = true
+
+    # Transform case of filenames.
+    # Options: "lower", "upper", "title", "CamelCase", "sentence", "ignore",
+    transform_case = "ignore"
+
+    # Use the nltk wordnet corpus to find synonyms for words in filenames. true or false
+    # Note, this will download a large corpus (~400mb) the first time it is run.
+    use_synonyms = false
 ```
 
-### Examples
+### Example usage
 
 ```bash
 # Normalize all files in a directory to lowercase, with underscore separators
 $ jdfile --case=lower --separator=underscore /path/to/directory
 
-# Organize files into a specified Johnny Decimal folder and add a date
-$ jdfile --organize=project --add-date --number=23.01 some_file.jpg
+# Clean all files in a directory and confirm all changes before committing them
+$ jdfile --clean /path/to/directory
+
+# Strip common English stopwords from all files in a directory
+$ jdfile --stopwords /path/to/directory
+
+# Transform a date and add it to the filename
+$ jdfile --date-format="%Y-%m-%d" ./somefile_march 3rd, 2022.txt
 
 # Print a tree representation of a Johnny Decimal project
-$ jdfile --organize=project --tree
+$ jdfile --organize=[project_name] --tree
 
 # Organize files into a Johnny Decimal project with specified terms with title casing
-$ jdfile --case=title --organize=project --term=term1 --term=term2 some_file.jpg
-
-# Run in --dry_run mode to avoid making permanent changes on all files within two levels
-$ jdfile --dry-run --diff --depth 2 /path/to/directory
-
-# Run on a whole directory and filter out files that are already correct from the output
-$ jdfile --filter-correct /path/to/directory
-
-# Run on a whole directory and accept the first option for all prompts
-$ jdfile --force /path/to/**directory**
+$ jdfile ---organize=[project_name] --term=term1 --term=term2 some_file.jpg
 ```
 
 ### Tips
@@ -130,21 +151,12 @@ Adding custom functions to your `.bashrc` or `.zshrc` can save time and ensure y
 # ~/.bashrc
 if command -v jdfile &>/dev/null; then
 
-    cf() {
+    clean() {
         # DESC:	 Clean filenames using the jdfile package
         if [[ $1 == "--help" || $1 == "-h" ]]; then
             jdfile --help
         else
-            jdfile --sep=space --case=title "$@"
-        fi
-    }
-
-    cfd() {
-        # DESC:	 Clean filenames using the jdfile package
-        if [[ $1 == "--help" || $1 == "-h" ]]; then
-            jdfile --help
-        else
-            jdfile --add-date --sep=space --case=title "$@"
+            jdfile --sep=space --case=title --confirm "$@"
         fi
     }
 
@@ -153,16 +165,13 @@ if command -v jdfile &>/dev/null; then
         if [[ $1 == "--help" || $1 == "-h" ]]; then
             jdfile --help
         else
-            jdfile --add-date --sep=underscore --case=lower --organize=work "$@"
-        fi
-    }
-
-    pfile() {
-        # DESC:	 File personal documents using the Johnny Decimal System and the jdfile package
-        if [[ $1 == "--help" || $1 == "-h" ]]; then
-            jdfile --help
-        else
-            jdfile --add-date --sep=space --case=title --organize=personal "$@"
+            jdfile \
+            --date-format="%Y-%m-%d" \
+            --sep=underscore \
+            --case=lower \
+            --organize=work \
+            --stopwords
+            "$@"
         fi
     }
 fi
@@ -172,9 +181,9 @@ fi
 
 `jdfile` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
 
-# Contributing
+---
 
-Thank you for taking an interest in improving jdfile.
+## Contributing
 
 ## Setup: Once per project
 
@@ -193,7 +202,7 @@ There are two ways to contribute to this project.
 1. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
 2. Open the repository in Visual Studio Code
 3. Start the [Dev Container](https://code.visualstudio.com/docs/remote/containers). Run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Remote-Containers: Reopen in Container_.
-4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed.
+4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed by VSCode.
 
 ## Developing
 
