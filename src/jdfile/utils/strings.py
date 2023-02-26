@@ -114,7 +114,9 @@ def split_camelcase_words(string: str, match_case: list[str] = []) -> str:
     return words
 
 
-def split_words(string: str) -> list[str]:
+def split_words(
+    string: str,
+) -> list[str]:
     """Split a string into a list of words. Ignore single letters, special characters, and numbers.
 
     Args:
@@ -1366,19 +1368,22 @@ def strip_stopwords(string: str, stopwords: list[str] = []) -> str:
         "zr",
     ]
 
-    cleaned_string = string
-    stopwords = sorted(set(common_english_stopwords + stopwords))
+    tmp_string = string
+    common_english_stopwords.extend(stopwords)
 
-    for word in stopwords:
-        cleaned_string = re.sub(
-            rf"(^|[^A-Za-z]){re.escape(word)}([^A-Za-z]|$)", r"\1\2", cleaned_string, flags=re.I
+    for word in common_english_stopwords:
+        tmp_string = re.sub(
+            rf"(^|[^A-Za-z0-9]){re.escape(word)}([^A-Za-z0-9]|$)",
+            r"\1\2",
+            tmp_string,
+            flags=re.I,
         )
 
-    if re.match(r"^.$|^$|^[- _]+$", cleaned_string):
+    if re.match(r"^.$|^$|^[- _]+$", tmp_string):
         log.trace(f"Skip stripping stopwords. String is empty: {string}")
         return string
 
-    return cleaned_string.strip(" -_")
+    return tmp_string.strip(" -_")
 
 
 def transform_case(string: str, transform_case: TransformCase) -> str:

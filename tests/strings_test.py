@@ -41,7 +41,7 @@ def test_normalize_separators():
 
 
 def test_camelcase_words():
-    """Test splitting words in a string."""
+    """Test splitting camelcase words in a string."""
     assert split_camelcase_words("foo bar baz") == "foo bar baz"
     assert split_camelcase_words("fooBarBaz") == "foo Bar Baz"
     assert split_camelcase_words("fooBarBaz", match_case=["fooBarBaz"]) == "fooBarBaz"
@@ -49,7 +49,7 @@ def test_camelcase_words():
 
 
 def test_split_words():
-    """Test splitting words in a string."""
+    """Test splitting words in a string into a list."""
     assert split_words("foo bar baz") == ["foo", "bar", "baz"]
     assert split_words("---99_ _9foo-b9ar_baz9 9f9oo9") == ["9foo", "b9ar", "baz9", "9f9oo9"]
     assert split_words("123 a 456 B 789 c") == []
@@ -65,7 +65,7 @@ def test_strip_stopwords():
     """Test stripping stopwords from a string."""
     assert strip_stopwords("foo bar baz") == "foo bar baz"
     assert strip_stopwords("foo bar baz", stopwords=["bar"]) == "foo  baz"
-    assert strip_stopwords("foo bar baz", stopwords=["bar", "baz"]) == "foo"
+    assert strip_stopwords("foo bar bar1 baz", stopwords=["bar", "baz"]) == "foo  bar1"
     assert strip_stopwords("foo bar baz", stopwords=["foo", "bar", "baz"]) == "foo bar baz"
 
 
