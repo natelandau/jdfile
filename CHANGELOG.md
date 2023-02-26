@@ -1,3 +1,11 @@
+## v1.0.0 (2023-02-26)
+
+### Refactor
+
+- full rewrite (#33)
+- refactor alerts
+- **package**: renamge package from `filemanager` to `jdfile`
+
 ## v0.4.7 (2022-11-19)
 
 ### Fix
