@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import rich.repr
+import typer
 
 from jdfile._config import Config
 from jdfile.utils import alerts
@@ -121,7 +122,7 @@ class Project:
             self.exists = False
             self.all_folders = {}
         else:
-            self.path = Path(self.config.project_path).expanduser().resolve()
+            self.path = self._validate_project_path(self.config.project_path)
             self.name = self.config.project_name
             self.exists = self.path.exists()
             self.all_folders = self._find_folders()
@@ -181,6 +182,27 @@ class Project:
                 if subcategory.is_dir() and re.match(r"^\d{2}\.\d{2}[- _]", subcategory.name)
             ]
         )
+
+    def _validate_project_path(self, path: Path) -> Path:
+        """Assign the project path after validating it exists.
+
+        Args:
+            path: (Path) Path to the project.
+
+        Returns:
+            bool: Whether the path is valid.
+        """
+        path = Path(path).expanduser().resolve()
+
+        if not path.exists():
+            alerts.error(f"Specified project path does not exist: {path}")
+            raise typer.Abort()
+
+        if not path.is_dir():
+            alerts.error(f"Specified project path is not a directory: {path}")
+            raise typer.Abort()
+
+        return path
 
     @functools.cached_property
     def usable_folders(self) -> list[Folder]:
