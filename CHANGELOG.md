@@ -1,3 +1,14 @@
+## v1.1.0 (2023-02-26)
+
+### Feat
+
+- add `--organize`, `--no-organize` to control filing into a project
+
+### Fix
+
+- improve error handling with invalid path to project
+- **stopwords**: keep stopwords when combined with numbers
+
 ## v1.0.0 (2023-02-26)
 
 ### Refactor
