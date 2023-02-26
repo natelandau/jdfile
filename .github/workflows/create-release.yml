@@ -1,10 +1,13 @@
 ---
-name: Create Release
+name: "Create Release"
 
 on:
     push:
         tags:
-            - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+            - "v*"
+        branches:
+            - main # Push events to matching v*, i.e. v1.0, v20.15.10
+
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,20 +63,33 @@ jobs:
                   if [[ "$TAG" != "v$PROJECT_VERSION" ]]; then exit 1; fi
 
             # ----------------------------------------------
-            # Generate release notes
-            # ----------------------------------------------
-
-            - name: Release Notes
-              run: git log $(git describe HEAD~ --tags --abbrev=0)..HEAD --pretty='format:* %h %s' --no-merges >> ".github/RELEASE-TEMPLATE.md"
-
-            # ----------------------------------------------
             # Test and then build the package
             # ----------------------------------------------
+
             - name: run poetry build
               run: |
                   poetry run poetry check
                   poetry run coverage run
                   poetry build
+
+            # ----------------------------------------------
+            # Generate release notes
+            # ----------------------------------------------
+
+            # - name: Release Notes
+            #   run: git log $(git describe HEAD~ --tags --abbrev=0)..HEAD --pretty='format:* %h %s' --no-merges >> ".github/RELEASE-TEMPLATE.md"
+
+            - name: Export tag name to env variable
+              run: |
+                  TAG=$(git describe HEAD --tags --abbrev=0)
+                   echo "CURRENT_TAG=refs/tags/${TAG}" >> $GITHUB_ENV
+
+            - name: Get notes
+              id: generate_notes
+              uses: anmarkoulis/commitizen-changelog-reader@master
+              with:
+                  tag_name: ${{ env.CURRENT_TAG }}
+                  changelog: CHANGELOG.md
 
             # ----------------------------------------------
             # Build draft release (Note: Will need to manually publish)

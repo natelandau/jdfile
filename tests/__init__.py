@@ -1,1 +1,1 @@
-"""filemanager test suite."""
+"""jdfile test suite."""

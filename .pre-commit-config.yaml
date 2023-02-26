@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 fail_fast: true
 repos:
     - repo: "https://github.com/commitizen-tools/commitizen"
-      rev: v2.40.0
+      rev: v2.42.0
       hooks:
           - id: commitizen
           - id: commitizen-branch
@@ -61,22 +61,16 @@ repos:
             entry: yamllint --strict --config-file .yamllint.yml
 
     - repo: "https://github.com/charliermarsh/ruff-pre-commit"
-      rev: "v0.0.242"
+      rev: "v0.0.252"
       hooks:
           - id: ruff
-            args: ["--extend-ignore", "I001,D301,D401,PLR2004,PLR0913,PLR0911,PLR0912,PLR0915"]
+            args: ["--extend-ignore", "I001,D301,D401,PLR2004,PLR0913"]
             exclude: tests/
 
     - repo: "https://github.com/jendrikseipp/vulture"
       rev: "v2.7"
       hooks:
           - id: vulture
-
-    - repo: "https://github.com/econchick/interrogate"
-      rev: 1.5.0
-      hooks:
-          - id: interrogate
-            args: [-c, pyproject.toml]
 
     - repo: local
       hooks:
@@ -103,6 +97,13 @@ repos:
             entry: poetry check
             language: system
             files: pyproject.toml
+            pass_filenames: false
+
+          - id: interrogate
+            name: interrogate check
+            entry: interrogate -c pyproject.toml src/
+            language: system
+            types: [python]
             pass_filenames: false
 
           - id: mypy

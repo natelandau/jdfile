@@ -17,7 +17,6 @@ jobs:
                   allowed-endpoints: >
                       api.github.com:443
                       github.com:443
-
             - uses: actions/labeler@v4
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}

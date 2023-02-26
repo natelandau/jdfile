@@ -284,6 +284,7 @@ fatal() {
     _safeExit_ "1"
 }
 
+
 _printFuncStack_() {
     # DESC:
     #         Prints the function stack in use. Used for debugging, and error reporting.
@@ -760,6 +761,7 @@ $(_columns_ -b -- "--force" "Skip all user interaction.  Implied 'Yes' to all ac
     $(basename "$0") -vn --logfile "/path/to/file.log" --loglevel 'WARN'
 USAGE_TEXT
 }
+
 
 # ################################## INITIALIZE AND RUN THE SCRIPT
 #                                    (Comment or uncomment the lines below to customize script behavior)

@@ -1,143 +1,118 @@
 # type: ignore
 """Fixtures for tests."""
 
+import shutil
 from pathlib import Path
 from textwrap import dedent
 
 import pytest
 
+from jdfile._config.config import Config
+from jdfile.models.file import File
+
+CONFIG_1 = """
+[fixture]
+    date_format         = "None"
+    ignore_dotfiles     = true
+    ignored_files       = ['ignore.txt']
+    match_case          = ["BarBaz"]
+    overwrite_existing  = false
+    path                = "PATH"
+    separator           = "ignore"
+    split_words         = false
+    stopwords           = ["qux"]
+    strip_stopwords     = false
+    transform_case      = "ignore"
+"""
+
+TEST_FILES = [
+    "foobar.txt",
+    ".dotfile",
+    "ignore.txt",
+    "1974-03-19 foo.JPEG.GZ",
+    "$#@FOO(#BAR)*&^.txt",
+    "FooBarBaz.txt",
+    "___foo----BARBAZ March 19, 1974---.txt",
+    "03191974 foo bar.txt",
+    "foo_Mar19_1974_bar.txt",
+    "foo 19Mar1974 bar.txt",
+    "foobar_2.txt",
+    "lorem_ipsum.txt",
+    "foo_bar_baz_QUX.txt",
+    "IpSum.txt",
+    "qux.txt",
+]
+
+DIRS = [
+    "10-19 foo/11 bar/11.01 foo",
+    "10-19 foo/11 bar/11.02 bar",
+    "10-19 foo/11 bar/11.03 baz",
+    "10-19 foo/12 baz/12.01 foo",
+    "10-19 foo/12 baz/12.02 bar",
+    "10-19 foo/12 baz/12.03 QUX",
+    "10-19 foo/12 baz/12.04 baz",
+    "20-29_bar/20_foo/20.01_foo_bar_baz",
+    "20-29_bar/20_foo/20.02_bar",
+    "20-29_bar/21_bar",
+    "30-39_baz",
+    "foo/bar/foo",
+    "foo/bar/bar",
+    "foo/bar/baz",
+    "foo/bar/qux",
+]
+
 
 @pytest.fixture()
-def test_project(tmp_path):
-    """Fixture for creating a test config file.
+def test_file_object(tmp_path):
+    """Fixture for creating a test File object."""
+    config = Config()
+    test_file = Path(tmp_path / "test_file.txt")
+    test_file.touch()
+    yield File(path=test_file, config=config)
+    test_file.unlink(missing_ok=True)
 
-    Args:
-        tmp_path: (Path) Temporary path to create the test config file.
+
+@pytest.fixture()
+def config1_project(tmp_path):
+    """Fixture to create a config object with values parsed from a config file.
 
     Returns:
-        root: (Path) Root directory of the test config file.
+        tuple: (config object, original_files_path, project_path)
     """
-    project = Path(tmp_path) / "project"
-    project.mkdir(parents=True, exist_ok=True)
+    project_path = Path(tmp_path / "project")
+    project_path.mkdir(parents=True, exist_ok=True)
 
-    folders = [
-        Path(project, "10-19 area1"),
-        Path(project, "10-19 area1/11 category1"),
-        Path(project, "10-19 area1/11 category1/11.01 subcategory1"),
-        Path(project, "10-19 area1/11 category1/11.02 subcategory2"),
-        Path(project, "10-19 area1/11 category1/11.03 subcategory3"),
-        Path(project, "10-19 area1/12 category2"),
-        Path(project, "10-19 area1/12 category2/12.01 subcategory1"),
-        Path(project, "10-19 area1/12 category2/12.02 subcategory2"),
-        Path(project, "10-19 area1/12 category2/12.03 subcategory3"),
-        Path(project, "20-29 area2"),
-        Path(project, "20-29 area2/20 category1"),
-        Path(project, "20-29 area2/20 category1/20.01 subcategory1"),
-        Path(project, "20-29 area2/20 category1/20.02 subcategory2"),
-        Path(project, "20-29 area2/21 category2"),
-        Path(project, "30-39 project plans"),
-    ]
-    for folder in folders:
-        folder.mkdir(parents=True, exist_ok=True)
+    original_files_path = Path(tmp_path / "originals")
+    original_files_path.mkdir(parents=True, exist_ok=True)
 
-    term_file1 = Path(project, "10-19 area1/11 category1/11.01 subcategory1/.jdfile")
-    term_file2 = Path(project, "10-19 area1/11 category1/11.02 subcategory2/.jdfile")
+    config_path = Path(tmp_path / "config.toml")
+    config_path.write_text(CONFIG_1.replace("PATH", str(project_path)))
+    config = Config(config_path=config_path, context={"project_name": "fixture"})
 
+    for d in DIRS:
+        Path(project_path / d).mkdir(parents=True, exist_ok=True)
+    term_file1 = Path(project_path, "10-19 foo/11 bar/11.01 foo/.jdfile")
+    term_file2 = Path(project_path, "foo/bar/baz/.jdfile")
     term_file1.write_text(
         dedent(
             """\
             # words to match
-            fruit
-            apple
-            orange
+            lorem
             """
         )
     )
     term_file2.write_text(
         dedent(
             """\
-            fruit
-            apple
-            banana
+            Ipsum
             """
         )
     )
 
-    config = Path(tmp_path) / "filemanager.toml"
-    config_text = f"""\
-        match_case = [
-            "PEAR",
-            "KiWi"
-        ]
+    for f in TEST_FILES:
+        Path(original_files_path / f).touch()
+    yield config, original_files_path, project_path
 
-        [projects]
-
-        [projects.jd]
-        name = "test"
-        path = "{project}"
-        stopwords = ["apricot"]
-        """
-
-    config.write_text(dedent(config_text))
-
-    return str(config), str(project)
-
-
-@pytest.fixture()
-def test_files(tmp_path) -> Path:
-    """Create testfiles for testing filename.
-
-    Args:
-        tmp_path (Path): Path to tmpdir created by tmp_path builtin fixture.
-
-    Returns:
-        list of test filenames.
-    """
-    filenames = [
-        "2019-01-02_underscore_with_date.txt",  # 0
-        "2021-06-08_some_TEST_file.txt",  # 1
-        "2022-08-28_a-fine_&(filename).txt",  # 2
-        "2022-08-28 a_FIne &(filename).txt",  # 3
-        "2022-08-28 A FINE &(FILENAME)",  # 4
-        "2022-08-28 date and &(chars).txt",  # 5
-        "[b]rackets.txt",  # 6
-        "__stripped separators--.txt",  # 7
-        "ALLCAPS.txt",  # 8
-        "lowercase.txt",  # 9
-        "disk_image.dmg",  # 10
-        "i_have_underscores.txt",  # 11
-        "month-DD-YY March 19, 74 test.txt",  # 12
-        "month-DD-YY March 21, 2002 test.txt",  # 13
-        "month-DD-YYYY file january 01 2016.txt",  # 14
-        "Multiple---separators  are___stripped.txt",  # 15
-        "one.txt",  # 16
-        "some (TEST) file 2022-08-28.txt",  # 17
-        "some_file_12-22-2021.txt",  # 18
-        "specialChars(@#$)-&*.txt",  # 19
-        "two-extensions.TAR.gz",  # 20
-        "testfile.txt",  # 21
-        "testfile.txt.1",  # 22
-        "testfile 1.txt",  # 23
-        "TESTFILE.txt",  # 24
-        ".dotfile.txt",  # 25
-        ".dotfile.JPEG.ZIP.gzip",  # 26
-        "QuickBrownFox has camelCase words.txt",  # 27
-        "quick brown apples and fruit.txt",  # 28
-        "quick_project_and_foxes.txt",  # 29
-        "quick brown apricot and fruit.txt",  # 30
-        "quick brown banana.txt",  # 31
-        "category1 and subcategory1.txt",  # 32
-        "quick brown area3 and fruit.txt",  # 33
-    ]
-
-    originals = tmp_path / "originals"
-    originals.mkdir(parents=True, exist_ok=True)
-    new = tmp_path / "new"
-    new.mkdir(parents=True, exist_ok=True)
-
-    test_files = []
-    for file in filenames:
-        Path(originals / file).touch()
-        test_files.append(Path(originals / file))
-
-    return test_files
+    # # Cleanup
+    # shutil.rmtree(project_path)
+    # shutil.rmtree(original_files_path)
