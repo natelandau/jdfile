@@ -1,3 +1,13 @@
+## v1.1.1 (2023-02-27)
+
+### Fix
+
+- respect verbosity in file lists
+
+### Refactor
+
+- improve handling of files without matching folders
+
 ## v1.1.0 (2023-02-26)
 
 ### Feat
