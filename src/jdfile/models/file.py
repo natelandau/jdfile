@@ -57,7 +57,8 @@ class File:
         else:
             self.is_dotfile = False
         self.project = project
-        self.skip_file = False
+        self.organize_possible_folders: dict[str, Any] = {}
+        self.organize_skip = False
 
         #### Create new attributes for the file ####
         if self.config.date_format:
@@ -93,15 +94,16 @@ class File:
         Returns:
             rich.repr.RichReprResult: Rich representation of the File object.
         """
-        yield "path", self.path
-        yield "name", self.name
-        yield "stem", self.stem
-        yield "parent", self.parent
-        yield "suffixes", self.suffixes
-        yield "created", self.created
-        yield "modified", self.modified
         yield "accessed", self.accessed
+        yield "created", self.created
         yield "is_dotfile", self.is_dotfile
+        yield "modified", self.modified
+        yield "name", self.name
+        yield "parent", self.parent
+        yield "path", self.path
+        yield "skip_file", self.organize_skip
+        yield "stem", self.stem
+        yield "suffixes", self.suffixes
         yield "target", self.target
 
     def _clean_stem(self) -> str:
@@ -176,8 +178,7 @@ class File:
                     possible_folders[key][1].append(term)
 
         if len(possible_folders) == 0:
-            log.warning(f"Skipping '{self.name}': No matching folders")
-            self.skip_file = True
+            self.organize_skip = True
             return self.parent
 
         if len(possible_folders) == 1 or self.config.force:
@@ -185,20 +186,11 @@ class File:
             return list(possible_folders.values())[0][0].path
 
         if len(possible_folders) > 1:
-            log.trace(f"'{self.name}': {len(possible_folders)} matching folders")
-            result = select_folder(
-                possible_folders=possible_folders,
-                project_path=self.project.path,
-                filename=self.name,
-            )
-            if result == "skip":
-                self.skip_file = True
-                return self.parent
-
-            return Path(result)
+            self.organize_possible_folders = possible_folders
+            return None
 
         # If no matches are found, skip the file
-        self.skip_file = True
+        self.organize_skip = True
         return self.parent
 
     @property
@@ -216,7 +208,7 @@ class File:
         Returns:
             bool: True if the file was successfully moved, False otherwise.
         """
-        if not self.has_changes() or self.skip_file:
+        if not self.has_changes() or self.organize_skip:
             log.info(f"{self.name} -> No changes")
             return False
 
@@ -282,6 +274,20 @@ class File:
                 output.append(f"{red}{a[a0:a1]}{endred}")
 
         return "".join(output)
+
+    def select_new_parent(self) -> None:
+        """Select the new parent directory for the file."""
+        result = select_folder(
+            possible_folders=self.organize_possible_folders,
+            project_path=self.project.path,
+            filename=self.name,
+        )
+        if result == "skip":
+            self.organize_skip = True
+            self.new_parent = self.parent
+        else:
+            self.organize_skip = False
+            self.new_parent = Path(result)
 
     def tokenize_stem(self) -> list[str]:
         """Tokenize the stem of the file.

@@ -41,6 +41,7 @@ TEST_FILES = [
     "foo_bar_baz_QUX.txt",
     "IpSum.txt",
     "qux.txt",
+    "waldo.txt",
 ]
 
 DIRS = [
@@ -51,8 +52,10 @@ DIRS = [
     "10-19 foo/12 baz/12.02 bar",
     "10-19 foo/12 baz/12.03 QUX",
     "10-19 foo/12 baz/12.04 baz",
+    "10-19 foo/12 baz/12.05 waldo",
     "20-29_bar/20_foo/20.01_foo_bar_baz",
     "20-29_bar/20_foo/20.02_bar",
+    "20-29_bar/20_foo/20.03_waldo",
     "20-29_bar/21_bar",
     "30-39_baz",
     "foo/bar/foo",

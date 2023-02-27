@@ -17,7 +17,7 @@ def test_project_indexing(config1_project):
     assert project.exists is True
     assert project.name == "fixture"
     assert project.path == project_path
-    assert len(project.usable_folders) == 11
+    assert len(project.usable_folders) == 13
     assert project.usable_folders[0].name == "foo"
     assert project.usable_folders[0].number == "11.01"
     assert project.usable_folders[0].path == Path(project_path / "10-19 foo/11 bar/11.01 foo")
@@ -34,31 +34,22 @@ def test_project_indexing(config1_project):
     assert project.usable_folders[1].category == Path(project_path / "10-19 foo/11 bar")
     assert project.usable_folders[1].type == FolderType.SUBCATEGORY
 
-    assert project.usable_folders[7].name == "foo_bar_baz"
-    assert project.usable_folders[7].number == "20.01"
-    assert project.usable_folders[7].path == Path(
-        project_path / "20-29_bar/20_foo/20.01_foo_bar_baz"
-    )
-    assert project.usable_folders[7].terms == ["foo", "bar", "baz"]
-    assert project.usable_folders[7].area == Path(project_path / "20-29_bar")
-    assert project.usable_folders[7].category == Path(project_path / "20-29_bar/20_foo")
-    assert project.usable_folders[7].type == FolderType.SUBCATEGORY
+    assert project.usable_folders[7].name == "waldo"
+    assert project.usable_folders[7].number == "12.05"
+    assert project.usable_folders[7].path == Path(project_path / "10-19 foo/12 baz/12.05 waldo")
 
-    assert project.usable_folders[9].name == "bar"
-    assert project.usable_folders[9].number == "21"
-    assert project.usable_folders[9].path == Path(project_path / "20-29_bar/21_bar")
-    assert project.usable_folders[9].terms == ["bar"]
-    assert project.usable_folders[9].area == Path(project_path / "20-29_bar")
-    assert project.usable_folders[9].category == Path(project_path / "20-29_bar/21_bar")
-    assert project.usable_folders[9].type == FolderType.CATEGORY
+    assert project.usable_folders[8].terms == ["foo", "bar", "baz"]
+    assert project.usable_folders[8].area == Path(project_path / "20-29_bar")
+    assert project.usable_folders[8].category == Path(project_path / "20-29_bar/20_foo")
+    assert project.usable_folders[8].type == FolderType.SUBCATEGORY
 
-    assert project.usable_folders[10].name == "baz"
-    assert project.usable_folders[10].number == "30-39"
-    assert project.usable_folders[10].path == Path(project_path / "30-39_baz")
-    assert project.usable_folders[10].terms == ["baz"]
-    assert project.usable_folders[10].area == Path(project_path / "30-39_baz")
-    assert project.usable_folders[10].category is None
-    assert project.usable_folders[10].type == FolderType.AREA
+    assert project.usable_folders[12].name == "baz"
+    assert project.usable_folders[12].number == "30-39"
+    assert project.usable_folders[12].path == Path(project_path / "30-39_baz")
+    assert project.usable_folders[12].terms == ["baz"]
+    assert project.usable_folders[12].area == Path(project_path / "30-39_baz")
+    assert project.usable_folders[12].category is None
+    assert project.usable_folders[12].type == FolderType.AREA
 
 
 def test_name_not_in_config():
@@ -82,11 +73,13 @@ def test_tree(tmp_path, config1_project, capsys):
 │             ├── 12.01 foo
 │             ├── 12.02 bar
 │             ├── 12.03 QUX
-│             └── 12.04 baz
+│             ├── 12.04 baz
+│             └── 12.05 waldo
 ├── 20-29_bar
 │     ├── 20_foo
 │     │     ├── 20.01_foo_bar_baz
-│     │     └── 20.02_bar
+│     │     ├── 20.02_bar
+│     │     └── 20.03_waldo
 │     └── 21_bar
 └── 30-39_baz
 """

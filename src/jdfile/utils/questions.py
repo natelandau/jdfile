@@ -57,7 +57,7 @@ def select_folder(
         ]
     )
 
-    alerts.notice(f"Found {len(possible_folders)} matching folders for '[cyan bold]{filename}[/]'")
+    alerts.notice(f"Found {len(possible_folders)} possible folders for '[cyan bold]{filename}[/]'")
     result = questionary.select(
         "Select a folder", choices=choices, style=STYLE, qmark="INPUT    |"
     ).ask()

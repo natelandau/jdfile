@@ -4,19 +4,17 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from rich import box
-from rich.console import Console
 from rich.prompt import Confirm
-from rich.table import Table
 
 from jdfile.__version__ import __version__
 from jdfile._config import Config
 from jdfile.models.project import Project
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
+from jdfile.utils.console import console
 from jdfile.utils.enums import Separator, TransformCase
 from jdfile.utils.nltk import instantiate_nltk
-from jdfile.utils.utilities import build_file_list
+from jdfile.utils.utilities import build_file_list, table_confirmation, table_skipped_files
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, rich_markup_mode="rich")
 
@@ -26,7 +24,7 @@ typer.rich_utils.STYLE_HELPTEXT = ""
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        print(f"{__package__} version: {__version__}")
+        console.print(f"{__package__} version: {__version__}")
         raise typer.Exit()
 
 
@@ -232,7 +230,6 @@ def main(
     [dim]Organize files into a Johnny Decimal project with specified terms with title casing[/]
     $ jdfile ---project={project_name} --term=term1 --term=term2 path/to/some_file.jpg
     """
-    console = Console()
     alerts.LoggerManager(  # pragma: no cover
         log_file,
         verbosity,
@@ -275,43 +272,27 @@ def main(
     if project.exists and use_nltk:
         instantiate_nltk()
     if project.exists:
-        all_files = build_file_list(files, config, project)
+        processed_files, skip_organize_files = build_file_list(files, config, project)
     else:
-        all_files = build_file_list(files, config)
+        processed_files, skip_organize_files = build_file_list(files, config)
 
-    if files is None or len(files) == 0 or len(all_files) == 0:
+    if (
+        files is None
+        or len(files) == 0
+        or (len(processed_files) == 0 and len(skip_organize_files) == 0)
+    ):
         alerts.error("No files found to process")
         raise typer.Exit(1)
 
-    log.debug(f"Working on {len(all_files)} files")
+    if len(skip_organize_files) > 0:
+        table_skipped_files(skip_organize_files)
 
-    if confirm_changes:
-        table = Table(
-            "#",
-            "Original Name",
-            "New Name",
-            "New Path" if project and project.exists else "",
-            "Diff",
-            box=box.SIMPLE,
-            show_header=True,
-        )
-        for _n, file in enumerate(all_files, start=1):
-            table.add_row(
-                str(_n),
-                file.stem + "".join(file.suffixes),
-                file.new_stem + "".join(file.new_suffixes)
-                if file.has_changes()
-                else "[green]No Changes[/green]",
-                str(file.new_parent.relative_to(project.path))
-                if project.exists and file.parent != file.new_parent
-                else "",
-                file.print_diff() if file.has_changes() else "",
-            )
-        console.print(table)
+    if confirm_changes and len(processed_files) > 0:
+        table_confirmation(processed_files, project)
         if not force:
             make_chages = Confirm.ask("Commit changes?")
             if not make_chages:
                 raise typer.Exit()
 
-    for file in all_files:
+    for file in processed_files:
         file.commit()
