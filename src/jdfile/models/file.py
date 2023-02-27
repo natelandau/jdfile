@@ -202,15 +202,20 @@ class File:
         """
         return Path(self.new_parent / f"{self.new_stem}{''.join(self.new_suffixes)}")
 
-    def commit(self) -> bool:
+    def commit(self, verbosity: int = 1) -> bool:
         """Commit the changes to the file by writing the new filename to disk.
 
         Returns:
             bool: True if the file was successfully moved, False otherwise.
+            verbosity (int, optional): Verbosity level. Defaults to 1.
         """
         if not self.has_changes() or self.organize_skip:
-            log.info(f"{self.name} -> No changes")
+            if verbosity > 0:
+                alerts.info(f"{self.name} -> No changes")
             return False
+
+        if self.target.exists() and (not self.config.overwrite_existing or self.target.is_dir()):
+            self.unique_name()
 
         if self.project and self.project.exists:
             try:
@@ -220,19 +225,10 @@ class File:
         else:
             display = self.target.name
 
-        if self.target.exists() and self.config.overwrite_existing and not self.target.is_dir():
-            if self.config.dry_run:
-                alerts.dryrun(f"{self.name} -> {display}")
-                return True
-
-            self.path.rename(self.target)
-            log.success(f"{self.name} -> {display}")
-            return True
-
-        self.unique_name()
         if self.config.dry_run:
             alerts.dryrun(f"{self.name} -> {display}")
             return True
+
         self.path.rename(self.target)
         log.success(f"{self.name} -> {display}")
         return True

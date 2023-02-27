@@ -200,7 +200,7 @@
         help = "Lint this package"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "ruff --extend-ignore=I001,D301,D401,PLR2004,PLR0913 src/"
+            shell = "ruff --extend-ignore=I001,D301,D401,PLR0913 src/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "black --check src/ tests/"

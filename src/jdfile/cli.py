@@ -1,7 +1,7 @@
 """jdfile CLI."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from rich.prompt import Confirm
@@ -29,7 +29,7 @@ def version_callback(value: bool) -> None:
 
 
 @app.command()
-def main(
+def main(  # noqa: C901
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
@@ -162,7 +162,7 @@ def main(
         rich_help_panel="File Organization Options",
     ),
     verbosity: int = typer.Option(
-        1,
+        0,
         "-v",
         "--verbose",
         show_default=False,
@@ -235,7 +235,7 @@ def main(
         verbosity,
         log_to_file,
     )
-    context = {
+    context: dict[str, Any] = {
         "clean": clean,
         "cli_terms": terms,
         "confirm_changes": confirm_changes,
@@ -252,6 +252,7 @@ def main(
         "strip_stopwords": strip_stopwords,
         "transform_case": case,
         "use_nltk": use_nltk,
+        "verbosity": verbosity,
     }
     log.trace(f"Context: {context}")
 
@@ -287,12 +288,27 @@ def main(
     if len(skip_organize_files) > 0:
         table_skipped_files(skip_organize_files)
 
+    files_with_changes = [x for x in processed_files if x.has_changes()]
+    if len(files_with_changes) == 0:
+        alerts.info(f"No changes out of {len(processed_files)} files")
+        raise typer.Exit()
+
     if confirm_changes and len(processed_files) > 0:
-        table_confirmation(processed_files, project)
+        files_to_confirm = (
+            processed_files
+            if context["verbosity"] > 0
+            else [x for x in processed_files if x.has_changes()]
+        )
+        if len(files_to_confirm) == 0:
+            alerts.info(f"No changes out of {len(processed_files)} files")
+            raise typer.Exit()
+
+        table_confirmation(files_to_confirm, project, total_files=len(processed_files))
         if not force:
             make_chages = Confirm.ask("Commit changes?")
             if not make_chages:
                 raise typer.Exit()
 
+    alerts.notice(f"Committing {len(files_with_changes)} of {len(processed_files)} files")
     for file in processed_files:
-        file.commit()
+        file.commit(verbosity=context["verbosity"])

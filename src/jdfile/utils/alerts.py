@@ -210,11 +210,11 @@ class LoggerManager:
             logger.add(
                 sys.stderr,
                 format=_log_formatter,  # type: ignore[arg-type]
-                level="WARNING",
+                level="SUCCESS",
                 backtrace=False,
                 diagnose=True,
             )
-            self.log_level = 30
+            self.log_level = 25
 
         if self.log_to_file is True:
             logger.add(

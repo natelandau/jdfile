@@ -65,12 +65,13 @@ def build_file_list(
     )
 
 
-def table_confirmation(files: list[File], project: Project) -> None:
+def table_confirmation(files: list[File], project: Project, total_files: int) -> None:
     """Display a confirmation table to the user.
 
     Args:
         files (list[File]): List of files to process.
         project (Project): Project object.
+        total_files (int): Total number of files to process.
     """
     alerts.notice("Confirm the changes below")
     if project and project.exists and len([x for x in files if x.parent != x.new_parent]) > 0:
@@ -88,6 +89,7 @@ def table_confirmation(files: list[File], project: Project) -> None:
         show_header=True,
         header_style="bold",
         min_width=40,
+        title=f"Pending changes for {len(files)} of {total_files} files",
     )
     for _n, file in enumerate(files, start=1):
         table.add_row(
@@ -121,7 +123,7 @@ def table_skipped_files(files: list[File]) -> None:
     )
     alerts.warning("These files matched no folders and were skipped")
     for file in files:
-        if len(file.path.parents) > 2:
+        if len(file.path.parents) > 2:  # noqa: PLR2004
             parents = "         [dim]…/[/]" + str(
                 file.path.parent.relative_to(file.path.parents[2])
             )
