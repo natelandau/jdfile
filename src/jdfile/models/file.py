@@ -41,6 +41,7 @@ class File:
             config (Config, optional): Configuration object. Defaults to Config().
             project (Project, optional): Project object. Defaults to None.
         """
+        log.trace(f"Initializing File: {path}")
         self.config = config
         self.accessed = datetime.fromtimestamp(path.stat().st_atime)
         self.created = datetime.fromtimestamp(path.stat().st_ctime)

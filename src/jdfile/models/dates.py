@@ -3,6 +3,8 @@ import re
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from jdfile.utils.alerts import logger as log
+
 
 @dataclass
 class DatePattern:
@@ -77,10 +79,16 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            return (
-                date(int(match.group("year")), int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(
+                        int(match.group("year")), int(match.group("month")), int(match.group("day"))
+                    ),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def yyyy_dd_mm(self) -> tuple[date, str] | None:
@@ -108,10 +116,16 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            return (
-                date(int(match.group("year")), int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(
+                        int(match.group("year")), int(match.group("month")), int(match.group("day"))
+                    ),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def month_dd_yyyy(self) -> tuple[date, str] | None:
@@ -139,10 +153,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             month = int(self._month_to_number(match.group("month")))
-            return (
-                date(int(match.group("year")), month, int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(int(match.group("year")), month, int(match.group("day"))),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def dd_month_yyyy(self) -> tuple[date, str] | None:
@@ -171,10 +189,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             month = int(self._month_to_number(match.group("month")))
-            return (
-                date(int(match.group("year")), month, int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(int(match.group("year")), month, int(match.group("day"))),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def month_dd(self) -> tuple[date, str] | None:
@@ -201,10 +223,14 @@ class DatePattern:
         if match:
             month = int(self._month_to_number(match.group("month")))
             year = date.today().year
-            return (
-                date(year, month, int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(year, month, int(match.group("day"))),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def month_yyyy(self) -> tuple[date, str] | None:
@@ -230,10 +256,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             month = int(self._month_to_number(match.group("month")))
-            return (
-                date(int(match.group("year")), month, 1),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(int(match.group("year")), month, 1),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def yyyy_month(self) -> tuple[date, str] | None:
@@ -259,10 +289,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             month = int(self._month_to_number(match.group("month")))
-            return (
-                date(int(match.group("year")), month, 1),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(int(match.group("year")), month, 1),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def mmddyyyy(self) -> tuple[date, str] | None:
@@ -289,10 +323,16 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            return (
-                date(int(match.group("year")), int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(
+                        int(match.group("year")), int(match.group("month")), int(match.group("day"))
+                    ),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def ddmmyyyy(self) -> tuple[date, str] | None:
@@ -319,10 +359,16 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            return (
-                date(int(match.group("year")), int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(
+                        int(match.group("year")), int(match.group("month")), int(match.group("day"))
+                    ),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def mm_dd(self) -> tuple[date, str] | None:
@@ -349,10 +395,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             year = date.today().year
-            return (
-                date(year, int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(year, int(match.group("month")), int(match.group("day"))),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def dd_mm(self) -> tuple[date, str] | None:
@@ -379,10 +429,14 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             year = date.today().year
-            return (
-                date(year, int(match.group("month")), int(match.group("day"))),
-                str(match.group("found")),
-            )
+            try:
+                return (
+                    date(year, int(match.group("month")), int(match.group("day"))),
+                    str(match.group("found")),
+                )
+            except ValueError as e:
+                log.trace(f"Error while reformating date {match}: {e}")
+                return None
         return None
 
     def today(self) -> tuple[date, str] | None:
@@ -613,5 +667,9 @@ class Date:
             str: Reformatted date.
         """
         if self.date:
-            return self.date.strftime(self.date_format)
+            try:
+                return self.date.strftime(self.date_format)
+            except ValueError as e:
+                log.trace(f"Error while reformating date {self.date}: {e}")
+                self.date, self.found_string, self.reformatted_date = None, None, None
         return None
