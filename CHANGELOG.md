@@ -1,3 +1,12 @@
+## v1.1.2 (2023-02-28)
+
+### Fix
+
+- log messages no longer bold
+- filter files by regex
+- gracefully handle invalid date exceptions
+- improve instructions in default configuration file
+
 ## v1.1.1 (2023-02-27)
 
 ### Fix
