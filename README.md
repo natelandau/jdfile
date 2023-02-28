@@ -18,7 +18,7 @@
 -   Avoid overwriting files by adding a unique integer when renaming/moving
 -   Clean entire directory trees
 -   Optionally, show previews of changes to be made before commiting
--   Ignore files listed in a config file
+-   Ignore files listed in a config file by filename or by regex
 -   Specify casing for words which should never be changed (ie. `iMac` will never be re-cased)
 
 `jdfile` can organize your files into folders.
@@ -85,6 +85,10 @@ To organize files into folders, a valid [toml](https://toml.io/en/) configuratio
 
     # Files in this list will be skipped.
     ignored_files = ['file1.txt', 'file2.txt']
+
+    # File names matching this regex will be skipped.
+    # IMPORTANT: You must double escape within the pattern
+    ignored_regex = [".*\\.tar.gz$"]
 
     # Force the casing of certain words. Great for acronyms or proper nouns.
     match_case = ["CEO", "CEOs", "iMac", "iPhone"]

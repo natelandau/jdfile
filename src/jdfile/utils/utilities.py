@@ -1,6 +1,7 @@
 """Utilities for jdfile."""
 
 
+import re
 from pathlib import Path
 
 from rich import box
@@ -10,6 +11,7 @@ from jdfile._config.config import Config
 from jdfile.models.file import File
 from jdfile.models.project import Project
 from jdfile.utils import alerts
+from jdfile.utils.alerts import logger as log
 from jdfile.utils.console import console
 
 
@@ -36,6 +38,11 @@ def build_file_list(
     #                 list_of_files.append(File(f, terms))
     """
     config._ignored_files.extend([".DS_Store", ".jdfile", ".stignore"])
+    if len(config.ignored_regex) > 0:
+        combined_regex = "(" + ")|(".join(config.ignored_regex) + ")"
+    else:
+        combined_regex = "^$"  # match nothing
+
     directories = [f for f in files if f.is_dir() and f.exists()]
     for _dir in directories:
         files.remove(_dir)
@@ -44,11 +51,18 @@ def build_file_list(
             if depth_of_file <= config.depth and f.is_file():
                 files.append(f)
 
-    with console.status("Processing Files...", spinner="bouncingBall"):
+    initial_files_length = len(files)
+
+    with console.status(
+        "Processing Files...  [dim](Can take a while for large directory trees)[/]",
+        spinner="bouncingBall",
+    ):
         all_files = [
             File(path=f, config=config, project=project)
             for f in files
-            if f.is_file() and f.name not in config.ignored_files
+            if f.is_file()
+            and f.name not in config.ignored_files
+            and not re.search(combined_regex, f.name)
         ]
 
     for file in [x for x in all_files if len(x.organize_possible_folders) > 0]:
@@ -60,6 +74,7 @@ def build_file_list(
     processed_files = [f for f in all_files if f.organize_skip is False]
     skip_organize_files = [f for f in all_files if f.organize_skip is True]
 
+    log.info(f"Processed {len(processed_files)} of {initial_files_length} files")
     return sorted(processed_files, key=lambda x: x.name), sorted(
         skip_organize_files, key=lambda x: x.name
     )

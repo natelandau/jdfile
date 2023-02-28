@@ -189,6 +189,30 @@ def test_build_file_list_ignored_files(tmp_path):
     assert files_to_process[0].path == files[2]
 
 
+def test_build_file_list_ignore_regex(tmp_path):
+    """Test building a list of files to process.
+
+    GIVEN a list of files and specified ignored regex patterns
+    WHEN the files are processed
+    THEN only the non-ignored files are returned
+    """
+    config = Config()
+    config.clean = False
+    config.ignored_regex = ["\\.jpg$", "^\\w+2"]
+    files = [
+        Path(tmp_path / "test1.txt"),
+        Path(tmp_path / "test1.jpg"),
+        Path(tmp_path / "test2.txt"),
+    ]
+    for f in files:
+        f.touch()
+
+    files_to_process, skipped_files = build_file_list(files, config)
+    assert len(skipped_files) == 0
+    assert len(files_to_process) == 1
+    assert files_to_process[0].path == files[0]
+
+
 def test_build_file_list_skipped_only(config1_project):
     """Test building a list of files to process.
 

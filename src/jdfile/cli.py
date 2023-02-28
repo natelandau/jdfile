@@ -196,7 +196,7 @@ def main(  # noqa: C901
     -   Avoid overwriting files by adding a unique integer when renaming/moving
     -   Clean entire directory trees
     -   Optionally, show previews of changes to be made before commiting
-    -   Ignore files listed in a config file
+    -   Ignore files listed in a config file by filename or by regex
     -   Specify casing for words which should never be changed (ie. [reverse #999999]iMac[/] will never be re-cased)
 
     When a project is specified, [bold]jdfile[/] will organize your files into folders.

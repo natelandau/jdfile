@@ -66,6 +66,9 @@ class Config:
         self._ignored_files = (
             self.project_config["ignored_files"] if "ignored_files" in self.project_config else []
         )
+        self._ignored_regex = (
+            self.project_config["ignored_regex"] if "ignored_regex" in self.project_config else []
+        )
         self._organize = (
             self.context["organize"]
             if "organize" in self.context and self.context["organize"] is not None
@@ -90,6 +93,7 @@ class Config:
         yield "force", self.force
         yield "ignore_dotfiles", self.ignore_dotfiles
         yield "ignored_files", self.ignored_files
+        yield "ignored_regex", self.ignored_regex
         yield "insert_location", self.insert_location
         yield "match_case", self.match_case
         yield "organize", self.organize
@@ -389,6 +393,15 @@ class Config:
     @ignored_files.setter
     def ignored_files(self, value: list[str]) -> None:
         self._ignored_files = value
+
+    @property
+    def ignored_regex(self) -> list[str]:
+        """Get the ignored regex patterns for the project."""
+        return self._ignored_regex
+
+    @ignored_regex.setter
+    def ignored_regex(self, value: list[str]) -> None:
+        self._ignored_regex = value
 
     @property
     def split_words(self) -> bool:

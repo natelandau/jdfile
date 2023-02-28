@@ -20,6 +20,10 @@
     # Files in this list will be skipped.
     ignored_files = ['file1.txt', 'file2.txt']
 
+    # File names matching this regex will be skipped.
+    # IMPORTANT: You must double escape within the pattern
+    ignored_regex = [".*\\.tar.gz$"]
+
     # Force the casing of certain words. Great for acronyms or proper nouns.
     match_case = ["CEO", "CEOs", "iMac", "iPhone"]
 
