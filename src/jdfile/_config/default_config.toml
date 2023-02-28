@@ -4,7 +4,7 @@
 # USAGE: To create more projects, duplicate the [project_name] section below
 
 # The name of the project is used as a command line option.
-# (e.g. --organize=project_name)
+# (e.g. --project=project_name)
 [project_name]
 
     # (Required) Path to the folder containing the Johnny Decimal project
