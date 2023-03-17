@@ -20,10 +20,10 @@ def build_file_list(
 ) -> tuple[list[File], list[File]]:
     """Build a list of files to process. If a directory is specified, all files in the directory will be processed.
 
-        Args:
-            config (Config): Configuration object.
-            files (list[Path]): List of files or directories to process.
-            project (Project, optional): Project object. Defaults to None.
+    Args:
+        config (Config): Configuration object.
+        files (list[Path]): List of files or directories to process.
+        project (Project, optional): Project object. Defaults to None.
 
     Returns:
             list[Path]: List of files to process.

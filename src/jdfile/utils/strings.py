@@ -59,7 +59,7 @@ def normalize_separators(string: str, separator: Separator = Separator.IGNORE) -
     """Normalize separators in a string.
 
     Args:
-        Separator (Separator): Separator to normalize to.
+        separator (Separator): Separator to normalize to.
         string (str): String to fix separators in.
 
     Returns:

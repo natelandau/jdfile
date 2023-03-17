@@ -31,10 +31,7 @@ class Config:
         context: dict[str, Any] = {},
     ) -> None:
         """Initialize configuration file."""
-        if config_path is not None:
-            self.config_path = config_path.expanduser().resolve()
-        else:
-            self.config_path = None
+        self.config_path = config_path.expanduser().resolve() if config_path else None
         self.context = context
 
         if (
