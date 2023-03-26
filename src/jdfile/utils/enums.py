@@ -25,11 +25,11 @@ class TransformCase(Enum):
 class Separator(Enum):
     """Define choices for separator transformation."""
 
-    DASH = "dash"
-    IGNORE = "ignore"
-    NONE = "none"
-    SPACE = "space"
-    UNDERSCORE = "underscore"
+    DASH = "-"
+    IGNORE = None
+    NONE = ""
+    SPACE = " "
+    UNDERSCORE = "_"
 
 
 class InsertLocation(Enum):

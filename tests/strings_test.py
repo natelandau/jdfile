@@ -1,5 +1,7 @@
 # type: ignore
 """Tests for string utilities."""
+import hypothesis.strategies as st
+from hypothesis import given
 
 from jdfile.utils.enums import InsertLocation, Separator, TransformCase
 from jdfile.utils.strings import (
@@ -14,29 +16,173 @@ from jdfile.utils.strings import (
 )
 
 
-def test_insert():
-    """Test inserting a string into another string."""
+def test_insert_1():
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN separator is IGNORE and location is BEFORE
+    THEN the value is inserted before the string
+    """
     assert insert("foo bar", "qux", InsertLocation.BEFORE, Separator.IGNORE) == "qux_foo bar"
+
+
+def test_insert_2():
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN separator is SPACE and location is AFTER
+    THEN the value is inserted after the string
+    """
     assert insert("foo bar", "qux", InsertLocation.AFTER, Separator.SPACE) == "foo bar qux"
+
+
+def test_insert_3():
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN separator is NONE and location is AFTER
+    THEN the value is inserted after the string
+    """
     assert insert("foo bar", "qux", InsertLocation.AFTER, Separator.NONE) == "foo barqux"
+
+
+def test_insert_4():
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN separator is UNDERSCORE and location is AFTER
+    THEN the value is inserted before the string
+    """
     assert insert("foo bar", "qux", InsertLocation.AFTER, Separator.UNDERSCORE) == "foo bar_qux"
+
+
+def test_insert_5():
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN separator is DASH and location is AFTER
+    THEN the value is inserted before the string
+    """
     assert insert("foo bar", "qux", InsertLocation.AFTER, Separator.DASH) == "foo bar-qux"
 
 
-def test_match_case():
-    """Test matching the case of a string."""
-    assert match_case("foobar baz") == "foobar baz"
+@given(
+    string=st.text(),
+    value=st.text(),
+    location=st.sampled_from(InsertLocation),
+    separator=st.sampled_from(Separator),
+)
+def test_insert_6(string: str, value: str, location: InsertLocation, separator: Separator) -> None:
+    """Test insert() function.
+
+    GIVEN a string, a value, a location, and a separator
+    WHEN hypothesis generates the test cases
+    THEN values are inserted before or after the string with the correct separator
+    """
+    sep = separator.value if separator.name != "IGNORE" else "_"
+
+    if location == InsertLocation.BEFORE:
+        assert (
+            insert(string=string, value=value, location=location, separator=separator)
+            == f"{value}{sep}{string}"
+        )
+    elif location == InsertLocation.AFTER:
+        assert (
+            insert(string=string, value=value, location=location, separator=separator)
+            == f"{string}{sep}{value}"
+        )
+
+
+def test_match_case_1():
+    """Test match_case() function.
+
+    GIVEN a string and a list of strings
+    WHEN the list is empty
+    THEN the string is returned unchanged
+    """
+    assert match_case("FooBar BAZ", []) == "FooBar BAZ"
+
+
+def test_match_case_2():
+    """Test match_case() function.
+
+    GIVEN a string and a list of strings
+    WHEN no list is provided
+    THEN the string is returned unchanged
+    """
+    assert match_case("FooBar BAZ") == "FooBar BAZ"
+
+
+def test_match_case_3():
+    """Test match_case() function.
+
+    GIVEN a string and a list of strings
+    WHEN values in the list match the string
+    THEN return the changed string
+    """
     assert match_case("foobar baz", ["FOOBAR", "BAZ"]) == "FOOBAR BAZ"
     assert match_case("foobar baz", ["FooBar"]) == "FooBar baz"
 
 
-def test_normalize_separators():
-    """Test normalizing separators in a string."""
+def test_normalize_separators_1():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is not specified
+    THEN the string is returned unchanged
+    """
     assert normalize_separators("foo-bar_baz foo") == "foo-bar_baz foo"
-    assert normalize_separators("foo-bar_baz foo", Separator.IGNORE) == "foo-bar_baz foo"
+    assert normalize_separators("text.without.any.separators") == "text.without.any.separators"
+
+
+def test_normalize_separators_2():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is IGNORE
+    THEN the string is returned unchanged
+    """
+    assert normalize_separators("foo-bar_baz foo") == "foo-bar_baz foo"
+
+
+def test_normalize_separators_3():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is NONE
+    THEN the string is returned with all separators removed
+    """
     assert normalize_separators("- _foo-bar___baz foo", Separator.NONE) == "foobarbazfoo"
+
+
+def test_normalize_separators_4():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is SPACE
+    THEN the string is returned with all separators changed to spaces
+    """
     assert normalize_separators("foo--bar_baz foo", Separator.SPACE) == "foo bar baz foo"
+
+
+def test_normalize_separators_5():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is DASH
+    THEN the string is returned with all separators changed to dashes
+    """
     assert normalize_separators(" foo-bar___baz foo", Separator.DASH) == "foo-bar-baz-foo"
+
+
+def test_normalize_separators_6():
+    """Test normalize_separators() function.
+
+    GIVEN a string and a target separator
+    WHEN the targe separator is UNDERSCORE
+    THEN the string is returned with all separators changed to underscores
+    """
+    """Test normalizing separators in a string."""
     assert normalize_separators("--foo--bar_baz foo--", Separator.UNDERSCORE) == "foo_bar_baz_foo"
 
 

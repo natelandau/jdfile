@@ -1,5 +1,6 @@
 """String utilities."""
 import re
+from contextlib import suppress
 
 from jdfile.utils.alerts import logger as log
 from jdfile.utils.enums import InsertLocation, Separator, TransformCase
@@ -17,17 +18,7 @@ def insert(string: str, value: str, location: InsertLocation, separator: Separat
     Returns:
         str: New filename with value inserted.
     """
-    match separator:
-        case Separator.UNDERSCORE:
-            sep = "_"
-        case Separator.DASH:
-            sep = "-"
-        case Separator.SPACE:
-            sep = " "
-        case Separator.NONE:
-            sep = ""
-        case _:
-            sep = "_"
+    sep = separator.value if separator.name != "IGNORE" else "_"
 
     match location:
         case InsertLocation.BEFORE:
@@ -48,9 +39,10 @@ def match_case(string: str, match_case: list[str] = []) -> str:
     """
     if len(match_case) > 0:
         for term in match_case:
-            string = re.sub(
-                rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)", rf"\1{term}\2", string, flags=re.I
-            )
+            with suppress(re.error):
+                string = re.sub(
+                    rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)", rf"\1{term}\2", string, flags=re.I
+                )
 
     return string
 
@@ -65,21 +57,10 @@ def normalize_separators(string: str, separator: Separator = Separator.IGNORE) -
     Returns:
         str: String with separators normalized.
     """
-    match separator:
-        case Separator.SPACE:
-            return re.sub(r"[-_ \.]+", " ", string).strip("-_ ")
+    if separator.name != "IGNORE":
+        return re.sub(r"[-_ \.]+", separator.value, string).strip("-_ ")
 
-        case Separator.DASH:
-            return re.sub(r"[-_ \.]+", "-", string).strip("-_ ")
-
-        case Separator.UNDERSCORE:
-            return re.sub(r"[-_ \.]+", "_", string).strip("-_ ")
-
-        case Separator.NONE:
-            return re.sub(r"[-_ \.]+", "", string).strip("-_ ")
-
-        case _:
-            return re.sub(r"([-_ \.])[-_ \.]+", r"\1", string).strip("-_ ")
+    return re.sub(r"([-_ \.])[-_ \.]+", r"\1", string).strip("-_ ")
 
 
 def split_camelcase_words(string: str, match_case: list[str] = []) -> str:
