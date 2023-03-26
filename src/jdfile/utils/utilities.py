@@ -27,15 +27,6 @@ def build_file_list(
 
     Returns:
             list[Path]: List of files to process.
-
-    # for possible_file in files:
-    #     if possible_file.is_file() and possible_file.stem not in config["ignored_files"]:
-    #         list_of_files.append(File(possible_file, terms))
-    #     if possible_file.is_dir():
-    #         for f in possible_file.rglob("*"):
-    #             depth_of_file = len(f.relative_to(possible_file).parts)
-    #             if depth_of_file <= depth and f.is_file() and f.stem not in config["ignored_files"]:
-    #                 list_of_files.append(File(f, terms))
     """
     config._ignored_files.extend([".DS_Store", ".jdfile", ".stignore"])
     if len(config.ignored_regex) > 0:

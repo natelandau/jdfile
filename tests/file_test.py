@@ -81,7 +81,6 @@ def test_files(
     is_dotfile,
     date_format,
     expected_diff,
-    capsys,
 ):
     """Test creating a File object.
 
@@ -310,7 +309,7 @@ def test_new_path_by_terms_single_match(config1_project):
     assert Path(project_path / "10-19 foo/12 baz/12.03 QUX/qux.txt").exists() is True
 
 
-def test_new_path_by_terms_multiple_matches(config1_project, mocker):
+def test_new_path_by_terms_multiple_matches(config1_project):
     """Test creating a File object from a project with multiple matching terms.
 
     GIVEN a project, and a file

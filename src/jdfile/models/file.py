@@ -12,7 +12,6 @@ from jdfile.models.dates import Date
 from jdfile.models.project import Project
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
-from jdfile.utils.enums import Separator
 from jdfile.utils.nltk import find_synonyms
 from jdfile.utils.questions import select_folder
 from jdfile.utils.strings import (
@@ -306,19 +305,8 @@ class File:
 
     def unique_name(self) -> None:
         """Append an integer to the end of the new filename if the target path already exists."""
-        match self.config.separator:
-            case Separator.UNDERSCORE:
-                sep = "_"
-            case Separator.DASH:
-                sep = "-"
-            case Separator.SPACE:
-                sep = " "
-            case Separator.NONE:
-                sep = ""
-            case _:
-                sep = "_"
+        sep = self.config.separator.value if self.config.separator.name != "IGNORE" else "_"
 
-        ########################################
         i = 1
         original_new_stem = f"{self.new_stem}"
         while self.target.exists():

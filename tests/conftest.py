@@ -1,7 +1,6 @@
 # type: ignore
 """Fixtures for tests."""
 
-import shutil
 from pathlib import Path
 from textwrap import dedent
 
@@ -114,8 +113,4 @@ def config1_project(tmp_path):
 
     for f in TEST_FILES:
         Path(original_files_path / f).touch()
-    yield config, original_files_path, project_path
-
-    # # Cleanup
-    # shutil.rmtree(project_path)
-    # shutil.rmtree(original_files_path)
+    return config, original_files_path, project_path

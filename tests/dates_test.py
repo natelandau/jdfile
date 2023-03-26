@@ -42,7 +42,7 @@ def test__month_to_number():
     assert date._month_to_number("OcTobEr") == "10"
     assert date._month_to_number("november") == "11"
     assert date._month_to_number("december") == "12"
-    assert date._month_to_number("xxx") == ""
+    assert not date._month_to_number("xxx")
 
 
 @pytest.mark.parametrize(
