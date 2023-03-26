@@ -1,3 +1,10 @@
+## v1.1.3 (2023-03-26)
+
+### Fix
+
+- improve edge case management when inserting strings
+- usage alerts use console width
+
 ## v1.1.2 (2023-02-28)
 
 ### Fix
