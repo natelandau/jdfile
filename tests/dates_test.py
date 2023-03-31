@@ -10,7 +10,7 @@ from jdfile.models.dates import Date, DatePattern
 TODAY = date.today()
 YESTERDAY = date.today() - timedelta(days=1)
 TOMORROW = date.today() + timedelta(days=1)
-LAST_MONTH = date.today().replace(month=date.today().month - 1)
+LAST_MONTH = date.today().replace(month=date.today().month - 1, day=1)
 LAST_WEEK = date.today() - timedelta(days=7)
 
 

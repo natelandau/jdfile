@@ -571,7 +571,7 @@ class DatePattern:
         match = pattern.search(self.string)
         if match:
             return (
-                date.today().replace(month=date.today().month - 1),
+                date.today().replace(month=date.today().month - 1, day=1),
                 str(match.group("found")),
             )
         return None
