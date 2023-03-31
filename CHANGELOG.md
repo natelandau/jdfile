@@ -1,3 +1,9 @@
+## v1.1.4 (2023-03-31)
+
+### Fix
+
+- `last month` defaults to day 1
+
 ## v1.1.3 (2023-03-26)
 
 ### Fix
