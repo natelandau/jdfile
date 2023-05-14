@@ -1,3 +1,9 @@
+## v1.1.5 (2023-05-14)
+
+### Fix
+
+- `--separator` no longer contains NoneType to avoid error printing help
+
 ## v1.1.4 (2023-03-31)
 
 ### Fix
