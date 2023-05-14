@@ -133,12 +133,11 @@ def main(  # noqa: C901
         rich_help_panel="File Organization Options",
     ),
     separator: Separator = typer.Option(
-        None,
+        "ignore",
         "--separator",
         case_sensitive=False,
         help="Word separator",
         rich_help_panel="Filename Cleaning Options",
-        show_default=False,
     ),
     split_words: bool = typer.Option(
         None,

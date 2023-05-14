@@ -26,7 +26,7 @@ class Separator(Enum):
     """Define choices for separator transformation."""
 
     DASH = "-"
-    IGNORE = None
+    IGNORE = "ignore"
     NONE = ""
     SPACE = " "
     UNDERSCORE = "_"
