@@ -33,8 +33,8 @@ class Folder:
         self,
         path: str,
         folder_type: FolderType,
-        area: Path = None,
-        category: Path = None,
+        area: Path | None = None,
+        category: Path | None = None,
     ) -> None:
         self.path = Path(path).expanduser().resolve()
         self.type = folder_type
@@ -63,7 +63,7 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
 
-        return None
+        return None  # type: ignore [unreachable]
 
     @functools.cached_property
     def number(self) -> str:
@@ -77,7 +77,7 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.match(r"^(\d{2}\.\d{2})[- _]", str(self.path.name)).group(0).strip("- _")
 
-        return None
+        return None  # type: ignore [unreachable]
 
     @functools.cached_property
     def terms(self) -> list[str]:

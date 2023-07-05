@@ -27,7 +27,7 @@ class Config:
 
     def __init__(
         self,
-        config_path: Path = None,
+        config_path: Path | None = None,
         context: dict[str, Any] = {},
     ) -> None:
         """Initialize configuration file."""

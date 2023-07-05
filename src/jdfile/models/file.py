@@ -31,7 +31,7 @@ class File:
     """Representation for a File object."""
 
     def __init__(
-        self, path: Path = None, config: Config = Config(), project: Project = None
+        self, path: Path | None = None, config: Config = Config(), project: Project = None
     ) -> None:
         """Initialize the File object.
 
@@ -50,7 +50,7 @@ class File:
         self.path = path.expanduser().resolve()
         self.suffixes = self.path.suffixes
         self.stem = str(self.path)[: str(self.path).rfind("".join(self.path.suffixes))].replace(
-            f"{str(self.parent)}/", ""
+            f"{self.parent!s}/", ""
         )
         if re.match(r"^\.", self.stem):
             self.is_dotfile: bool = True

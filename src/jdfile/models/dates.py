@@ -580,7 +580,7 @@ class DatePattern:
 class Date:
     """Date class for jdfile."""
 
-    def __init__(self, date_format: str, string: str, ctime: datetime = None) -> None:
+    def __init__(self, date_format: str, string: str, ctime: datetime | None = None) -> None:
         """Initialize the Date class.
 
         Args:
