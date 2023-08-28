@@ -148,9 +148,7 @@ class File:
         Returns:
             list[str]: Cleaned suffixes.
         """
-        return [
-            ".jpg" if ext == ".jpeg" or ext == ".JPEG" else ext.lower() for ext in self.suffixes
-        ]
+        return [".jpg" if ext.lower() == ".jpeg" else ext.lower() for ext in self.suffixes]
 
     def _get_new_parent(self) -> Path:
         """Identify the new parent directory for the file.
@@ -183,7 +181,7 @@ class File:
 
         if len(possible_folders) == 1 or self.config.force:
             log.trace(f"'{self.name}': 1 matching folder")
-            return list(possible_folders.values())[0][0].path
+            return next(iter(possible_folders.values()))[0].path
 
         if len(possible_folders) > 1:
             self.organize_possible_folders = possible_folders
