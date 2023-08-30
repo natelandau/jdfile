@@ -2,10 +2,13 @@
 
 from pathlib import Path
 
+import inflect
 import questionary
 import typer
 
 from jdfile.utils import alerts
+
+p = inflect.engine()
 
 questionary.prompts.select.DEFAULT_STYLE = questionary.Style([("qmark", "")])
 STYLE = questionary.Style(
@@ -57,7 +60,9 @@ def select_folder(
         ]
     )
 
-    alerts.notice(f"Found {len(possible_folders)} possible folders for '[cyan bold]{filename}[/]'")
+    alerts.notice(
+        f"Found {len(possible_folders)} possible {p.plural_noun('folder', len(possible_folders))} for '[cyan bold]{filename}[/]'"
+    )
     result = questionary.select(
         "Select a folder", choices=choices, style=STYLE, qmark="INPUT    |"
     ).ask()

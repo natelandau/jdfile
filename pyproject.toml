@@ -16,6 +16,7 @@
         jdfile = "jdfile.cli:app"
 
     [tool.poetry.dependencies]
+        inflect     = "^7.0.0"
         loguru      = "^0.7.0"
         nltk        = "^3.8.1"
         python      = "^3.10"
