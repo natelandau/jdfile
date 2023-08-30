@@ -87,7 +87,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -124,7 +124,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -159,7 +159,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -195,7 +195,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -229,7 +229,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -262,7 +262,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -295,7 +295,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -331,7 +331,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -367,7 +367,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -401,7 +401,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -435,7 +435,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformating date {match}: {e}")
+                log.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -670,6 +670,6 @@ class Date:
             try:
                 return self.date.strftime(self.date_format)
             except ValueError as e:
-                log.trace(f"Error while reformating date {self.date}: {e}")
+                log.trace(f"Error while reformatting date {self.date}: {e}")
                 self.date, self.found_string, self.reformatted_date = None, None, None
         return None

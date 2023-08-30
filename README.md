@@ -17,7 +17,7 @@
 -   Remove or reformat the date and add it to the the beginning of the filename
 -   Avoid overwriting files by adding a unique integer when renaming/moving
 -   Clean entire directory trees
--   Optionally, show previews of changes to be made before commiting
+-   Optionally, show previews of changes to be made before committing
 -   Ignore files listed in a config file by filename or by regex
 -   Specify casing for words which should never be changed (ie. `iMac` will never be re-cased)
 
