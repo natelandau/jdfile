@@ -179,22 +179,11 @@ fi
 
 ### Setup: Once per project
 
-There are two ways to contribute to this project.
-
-#### 1. Local development
-
 1. Install Python 3.10 and [Poetry](https://python-poetry.org)
 2. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
 3. Install the Poetry environment with `poetry install`.
 4. Activate your Poetry environment with `poetry shell`.
 5. Install the pre-commit hooks with `pre-commit install --install-hooks`.
-
-#### 2. Containerized development
-
-1. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
-2. Open the repository in Visual Studio Code
-3. Start the [Dev Container](https://code.visualstudio.com/docs/remote/containers). Run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Remote-Containers: Reopen in Container_.
-4. Run `poetry env info -p` to find the PATH to the Python interpreter if needed by VSCode.
 
 ### Developing
 
