@@ -10,7 +10,10 @@ from jdfile.utils import alerts
 
 p = inflect.engine()
 
-questionary.prompts.select.DEFAULT_STYLE = questionary.Style([("qmark", "")])
+questionary.prompts.select.DEFAULT_STYLE = questionary.Style(  # type:ignore [attr-defined]
+    [("qmark", "")]
+)
+
 STYLE = questionary.Style(
     [
         ("qmark", "bold"),

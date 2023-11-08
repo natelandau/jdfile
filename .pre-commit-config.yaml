@@ -5,7 +5,7 @@ default_stages: [commit, manual]
 fail_fast: true
 repos:
     - repo: "https://github.com/commitizen-tools/commitizen"
-      rev: 3.10.0
+      rev: 3.12.0
       hooks:
           - id: commitizen
           - id: commitizen-branch
@@ -26,7 +26,7 @@ repos:
           - id: text-unicode-replacement-char
 
     - repo: "https://github.com/pre-commit/pre-commit-hooks"
-      rev: v4.4.0
+      rev: v4.5.0
       hooks:
           - id: check-added-large-files
           - id: check-ast
@@ -61,19 +61,19 @@ repos:
             entry: yamllint --strict --config-file .yamllint.yml
 
     - repo: "https://github.com/charliermarsh/ruff-pre-commit"
-      rev: "v0.0.292"
+      rev: "v0.1.4"
       hooks:
           - id: ruff
             args: ["--extend-ignore", "I001,D301,D401,PLR0913"]
             exclude: tests/
 
     - repo: "https://github.com/jendrikseipp/vulture"
-      rev: "v2.9.1"
+      rev: "v2.10"
       hooks:
           - id: vulture
 
     - repo: "https://github.com/crate-ci/typos"
-      rev: v1.16.17
+      rev: v1.16.23
       hooks:
           - id: typos
 
@@ -106,13 +106,6 @@ repos:
             entry: poetry check
             language: system
             files: pyproject.toml
-            pass_filenames: false
-
-          - id: interrogate
-            name: interrogate check
-            entry: interrogate -c pyproject.toml src/
-            language: system
-            types: [python]
             pass_filenames: false
 
           - id: mypy
