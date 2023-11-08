@@ -108,7 +108,7 @@
     strict_optional = false
     warn_redundant_casts = true
     warn_unreachable = true
-    warn_unused_ignores = true
+    warn_unused_ignores = false
 
 [tool.pytest.ini_options]
     addopts        = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --verbosity=2 --junitxml=reports/pytest.xml"
@@ -249,7 +249,7 @@
             shell = "poetry check"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "mypy --config-file pyproject.toml src/"
+            shell = "mypy --warn-unused-ignores --config-file pyproject.toml src/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "vulture src/ tests/"
