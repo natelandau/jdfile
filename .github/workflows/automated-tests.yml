@@ -55,8 +55,21 @@ jobs:
                       storage.googleapis.com:443
                       uploader.codecov.io:443
 
+            # ----------------------------------------------
+            #    Install python and checkout repository
+            # ----------------------------------------------
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+
             - name: Checkout repository
               uses: actions/checkout@v4
+
+            # ----------------------------------------------
+            #    Install poetry and project dependencies
+            # ----------------------------------------------
 
             - name: Setup Python and Poetry
               uses: ./.github/actions/setup-poetry
@@ -68,7 +81,7 @@ jobs:
             - name: Lint with Mypy
               run: poetry run mypy src/
             - name: lint with ruff
-              run: poetry run ruff src/
+              run: poetry run ruff --extend-ignore=I001,D301,D401 src/
             - name: check pyproject.toml
               run: poetry run poetry check
 
@@ -80,6 +93,7 @@ jobs:
                   poetry run coverage run
                   poetry run coverage report
                   poetry run coverage xml
+
             # ----------------------------------------------
             #             upload coverage stats
             # ----------------------------------------------

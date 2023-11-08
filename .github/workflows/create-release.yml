@@ -37,13 +37,30 @@ jobs:
                       python-poetry.org:443
                       uploads.github.com:443
 
+            # ----------------------------------------------
+            #    Install python and checkout repository
+            # ----------------------------------------------
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
+            # ----------------------------------------------
+            #    Install poetry and project dependencies
+            # ----------------------------------------------
+
             - name: Setup Python and Poetry
               uses: ./.github/actions/setup-poetry
+
+            # ----------------------------------------------
+            #    Grab version
+            # ----------------------------------------------
 
             - name: Add version to environment vars
               run: |
@@ -71,6 +88,7 @@ jobs:
                   poetry run poetry check
                   poetry run coverage run
                   poetry build
+
             # ----------------------------------------------
             # Generate release notes
             # ----------------------------------------------

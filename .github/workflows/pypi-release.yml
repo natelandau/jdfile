@@ -32,8 +32,21 @@ jobs:
                       python-poetry.org:443
                       upload.pypi.org:443
 
+            # ----------------------------------------------
+            #    Install python and checkout repository
+            # ----------------------------------------------
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+
             - name: Checkout repository
               uses: actions/checkout@v4
+
+            # ----------------------------------------------
+            #    Install poetry and project dependencies
+            # ----------------------------------------------
 
             - name: Setup Python and Poetry
               uses: ./.github/actions/setup-poetry
