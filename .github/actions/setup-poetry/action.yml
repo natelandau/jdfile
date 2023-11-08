@@ -23,46 +23,36 @@ outputs:
 runs:
     using: composite
     steps:
-        - name: Get pipx env vars
-          id: pipx-env-vars
-          shell: bash
-          run: |
-              echo "pipx-home=${PIPX_HOME}" >> $GITHUB_OUTPUT
-              echo "pipx-bin-dir=${PIPX_BIN_DIR}" >> $GITHUB_OUTPUT
+        # ----------------------------------------------
+        #    Install python and checkout repository
+        # ----------------------------------------------
 
-        - name: Load pipx cache
-          # If env vars are not defined do not load cache
-          if: >
-              steps.pipx-env-vars.outputs.pipx-home != ''
-              && steps.pipx-env-vars.outputs.pipx-bin-dir != ''
-          id: pipx-cache
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v4
+          with:
+              python-version: ${{ matrix.python-version }}
+
+        # ----------------------------------------------
+        #    Install poetry and project dependencies
+        # ----------------------------------------------
+        # poetry config installer.max-workers 1
+        - name: Install Poetry
+          uses: snok/install-poetry@v1
+          with:
+              virtualenvs-create: true
+              virtualenvs-in-project: true
+              installer-parallel: true
+
+        # Load cached venv if cache exists
+        - name: Load cached venv
+          id: cached-poetry-dependencies
           uses: actions/cache@v3
           with:
-              path: |
-                  ${{ steps.pipx-env-vars.outputs.pipx-home }}/venvs/poetry
-                  ${{ steps.pipx-env-vars.outputs.pipx-bin-dir }}/poetry
-              key: ${{ runner.os }}-${{ inputs.python-version }}-pipx-${{ hashFiles('**/poetry.lock') }}
+              path: .venv
+              key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-        - name: Install poetry
-          # If env vars are not defined or we missed pipx cache, install poetry
-          if: >
-              (
-              steps.pipx-env-vars.outputs.pipx-home == ''
-              && steps.pipx-env-vars.outputs.pipx-bin-dir == ''
-              )
-              || steps.pipx-cache.outputs.cache-hit != 'true'
-          shell: bash
-          run: pipx install poetry
-
-        - name: Load poetry cache
-          uses: actions/setup-python@v4
-          id: setup-python
-          with:
-              python-version: ${{ inputs.python-version }}
-              cache: poetry
-
-        - name: Install poetry dependencies
-          # If we missed poetry cache install dependencies
-          if: steps.setup-python.outputs.cache-hit != 'true'
+        # Install dependencies if cache does not exist
+        - name: Install dependencies
+          if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
           shell: bash
           run: poetry install --all-extras
