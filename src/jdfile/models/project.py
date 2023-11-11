@@ -166,7 +166,8 @@ class Project:
                 }
         return dict(sorted(category_dict.items()))
 
-    def _find_subcategories(self, category: Path) -> list[Path]:
+    @staticmethod
+    def _find_subcategories(category: Path) -> list[Path]:
         """Find all subcategories in the project.
 
         Args:
@@ -183,7 +184,8 @@ class Project:
             ]
         )
 
-    def _validate_project_path(self, path: Path) -> Path:
+    @staticmethod
+    def _validate_project_path(path: Path) -> Path:
         """Assign the project path after validating it exists.
 
         Args:
@@ -249,7 +251,7 @@ class Project:
                         for _subcategory in self.all_folders[_area]["categories"][_category][
                             "subcategories"
                         ]:
-                            usable_folders.append(
+                            usable_folders.append(  # noqa: PERF401
                                 Folder(
                                     _subcategory,
                                     FolderType.SUBCATEGORY,

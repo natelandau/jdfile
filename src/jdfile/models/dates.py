@@ -18,7 +18,8 @@ class DatePattern:
     pattern_separator = r"[-\./_, :]*?"
     pattern_year = r"20[0-2][0-9]"
 
-    def _month_to_number(self, month: str) -> str:  # noqa: C901, PLR0911
+    @staticmethod
+    def _month_to_number(month: str) -> str:  # noqa: C901, PLR0911
         """Convert a month name to a number.
 
         Args:

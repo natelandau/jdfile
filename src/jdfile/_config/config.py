@@ -60,12 +60,8 @@ class Config:
             if "depth" in self.context and self.context["depth"] is not None
             else 1
         )
-        self._ignored_files = (
-            self.project_config["ignored_files"] if "ignored_files" in self.project_config else []
-        )
-        self._ignored_regex = (
-            self.project_config["ignored_regex"] if "ignored_regex" in self.project_config else []
-        )
+        self._ignored_files = self.project_config.get("ignored_files", [])
+        self._ignored_regex = self.project_config.get("ignored_regex", [])
         self._organize = (
             self.context["organize"]
             if "organize" in self.context and self.context["organize"] is not None

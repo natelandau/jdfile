@@ -264,8 +264,7 @@ class File:
             elif opcode == "delete":
                 output.append(f"{red}{a[a0:a1]}{endred}")
             elif opcode == "replace":
-                output.append(f"{green}{b[b0:b1]}{endgreen}")
-                output.append(f"{red}{a[a0:a1]}{endred}")
+                output.extend((f"{green}{b[b0:b1]}{endgreen}", f"{red}{a[a0:a1]}{endred}"))
 
         return "".join(output)
 

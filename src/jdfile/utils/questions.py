@@ -44,14 +44,14 @@ def select_folder(
     choices: list[dict[str, str] | questionary.Separator] = [questionary.Separator()]
     max_length = len(max(possible_folders, key=len))
 
-    for _k, _v in possible_folders.items():
-        matching_terms = ", ".join(set(_v[1]))
-        folder_path = str(_v[0].path.relative_to(project_path))
+    for v in possible_folders.values():
+        matching_terms = ", ".join(set(v[1]))
+        folder_path = str(v[0].path.relative_to(project_path))
 
         choices.append(
             {
                 "name": f"{folder_path:{max_length}} [matching: {matching_terms}]",
-                "value": _v[0].path,
+                "value": v[0].path,
             }
         )
 

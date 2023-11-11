@@ -35,22 +35,19 @@
         pytest-xdist           = "^3.3.1"
 
     [tool.poetry.group.dev.dependencies]
-        black                 = "^23.11.0"
         commitizen            = "^3.12.0"
         coverage              = "^7.3.0"
-        mypy                  = "^1.6.1"
+        mypy                  = "^1.7.0"
         pdoc                  = "^14.1.0"
         poethepoet            = "^0.24.2"
         pre-commit            = "^3.5.0"
-        ruff                  = "^0.1.4"
+        ruff                  = "^0.1.5"
         sh                    = "^2.0.6"
         shellcheck-py         = "^0.9.0.6"
         types-python-dateutil = "^2.8.19.14"
         typos                 = "^1.16.23"
         vulture               = "^2.10"
 
-[tool.black]
-    line-length = 100
 [tool.commitizen]
     bump_message             = "bump(release): v$current_version → v$new_version"
     tag_format               = "v$version"
@@ -154,14 +151,21 @@
         "D408",
         "D409",
         "D413",
+        "E266",
         "E501",
+        "ISC001",
         "N805",
         "PGH001",
         "PGH003",
+        "PLR0913",
+        "PLW3201",
+        "S311",
+        "T201",
         "UP007",
     ]
     ignore-init-module-imports = true
     line-length = 100
+    output-format = "grouped"
     per-file-ignores = { "cli.py" = [
         "PLR0912",
         "PLR0913",
@@ -171,35 +175,47 @@
         "S101",
     ] }
     select = [
-        "A",   # flake8-builtins
-        "ARG",
-        "B",   # flake8-bugbear
-        "BLE", # flake8-blind-exception
-        "C40", # flake8-comprehensions
-        "C90", # McCabe
-        "D",   # pydocstyle
-        "E",   # pycodestyle Errors
-        "ERA", # flake8-eradicate
-        "EXE", # flake8-executable
-        "F",   # pyflakes
-        "I",   # iSort
-        "N",   # Pep8-naming
-        "PGH", # pygrep-hooks
-        "PLC", # pylint Convention
-        "PLE", # pylint Error
-        "PLR", # pylint Refactor
-        "PLW", # pylint Warning
-        "PT",  # flake8-pytest-style
-        "PTH", # flake8-use-pathlib
-        "Q",   # flake8-quotes
-        "RET", # flake8-return
-        "RUF", # Ruff-specific rules
-        "S",   # flake8-bandit
-        "SIM", # flake8-simplify
-        "TID", # flake8-tidy-imports
-        "UP",  # pyupgrade
-        "W",   # pycodestyle Warnings
-        "YTT", # flake8-2020
+        "A",     # flake8-builtins
+        "ARG",   # flake8-unused-arguments
+        "ASYNC", # flake8-async
+        "B",     # flake8-bugbear
+        "BLE",   # flake8-blind-exception
+        "C4",    # flake8-comprehensions
+        "C90",   # McCabe
+        "D",     # pydocstyle
+        "E",     # pycodestyle Errors
+        "EM",    # flake8-errmsg
+        "ERA",   # flake8-eradicate
+        "EXE",   # flake8-executable
+        "F",     # pyflakes
+        "FA",    # flake8-future
+        "FLY",   # flynt
+        "FURB",  # refurb
+        "I",     # iSort
+        "ISC",   # flake8-implicit-str-concat
+        "N",     # Pep8-naming
+        "NPY",   # flake8-numpy
+        "PERF",  # Perflint
+        "PGH",   # pygrep-hooks
+        "PL",    # pylint
+        "PLC",   # pylint Convention
+        "PLE",   # pylint Error
+        "PLR",   # pylint Refactor
+        "PLW",   # pylint Warning
+        "PT",    # flake8-pytest-style
+        "PTH",   # flake8-use-pathlib
+        "Q",     # flake8-quotes
+        "RET",   # flake8-return
+        "RUF",   # Ruff-specific rules
+        "S",     # flake8-bandit
+        "SIM",   # flake8-simplify
+        "T20",   # flake8-print
+        "TID",   # flake8-tidy-imports
+        "TRY",   # tryceratops
+        "UP",    # pyupgrade
+        "W",     # pycodestyle Warnings
+        "YTT",   # flake8-2020
+        # "DTZ",   # flake8-datetimez
     ]
     src = ["src", "tests"]
     target-version = "py310"
@@ -214,6 +230,12 @@
 
     [tool.ruff.pylint]
         max-args = 6
+
+    [tool.ruff.format]
+        indent-style              = "space"
+        line-ending               = "auto"
+        quote-style               = "double"
+        skip-magic-trailing-comma = false
 
 [tool.vulture] # https://pypi.org/project/vulture/
     # exclude = ["file*.py", "dir/"]
@@ -240,10 +262,10 @@
         help = "Lint this package"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "ruff --no-fix src/"
+            shell = "ruff --preview --no-fix src/"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "black --check src/ tests/"
+            shell = "ruff format --check src/ tests/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "poetry check"

@@ -42,14 +42,10 @@ def find_synonyms(word: str) -> list[str]:  # pragma: no cover
 
     if len(wordnet.synsets(word)) > 0:
         for syn in wordnet.synsets(word):
-            for lm in syn.lemmas():
-                synonyms.append(lm.name())
+            synonyms.extend([lm.name() for lm in syn.lemmas()])
 
-        for w in wordnet.synsets(word)[0].also_sees():
-            synonyms.append(w.lemmas()[0].name())
-
-        for w in wordnet.synsets(word)[0].similar_tos():
-            synonyms.append(w.lemmas()[0].name())
+        synonyms.extend([w.lemmas()[0].name() for w in wordnet.synsets(word)[0].also_sees()])
+        synonyms.extend([w.lemmas()[0].name() for w in wordnet.synsets(word)[0].similar_tos()])
 
     if word.lower() in synonyms:
         synonyms.remove(word.lower())
