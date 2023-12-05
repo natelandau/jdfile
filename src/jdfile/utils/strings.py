@@ -1,4 +1,5 @@
 """String utilities."""
+
 import re
 from contextlib import suppress
 

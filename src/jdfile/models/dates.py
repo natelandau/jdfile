@@ -1,9 +1,37 @@
 """Date class for jdfile."""
+
 import re
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from enum import Enum
 
 from jdfile.utils.alerts import logger as log
+
+
+class MonthShort(Enum):
+    """Enum for short month names."""
+
+    JA = 1
+    FE = 2
+    MAR = 3
+    AP = 4
+    MAY = 5
+    JUN = 6
+    JUL = 7
+    AU = 8
+    SE = 9
+    OC = 10
+    NO = 11
+    DE = 12
+
+    @classmethod
+    def num_from_name(cls, month: str) -> str:
+        """Convert a month name to a number."""
+        for member in cls:
+            if re.search(member.name, month, re.I):
+                return str(member.value).zfill(2)
+
+        return ""
 
 
 @dataclass
@@ -17,43 +45,6 @@ class DatePattern:
     pattern_months = r"january|jan?|february|feb?|march|mar?|april|apr?|may|june?|july?|august|aug?|september|sep?t?|october|oct?|november|nov?|december|dec?"
     pattern_separator = r"[-\./_, :]*?"
     pattern_year = r"20[0-2][0-9]"
-
-    @staticmethod
-    def _month_to_number(month: str) -> str:  # noqa: C901, PLR0911
-        """Convert a month name to a number.
-
-        Args:
-            month: (str) The month to convert.
-
-        Returns:
-            (str) The month number.
-        """
-        if re.match(r"^ja.*", month, re.I):
-            return "01"
-        if re.match(r"^fe.*", month, re.I):
-            return "02"
-        if re.match(r"^mar.*", month, re.I):
-            return "03"
-        if re.match(r"^ap.*", month, re.I):
-            return "04"
-        if re.match(r"^may.*", month, re.I):
-            return "05"
-        if re.match(r"^jun.*", month, re.I):
-            return "06"
-        if re.match(r"^jul.*", month, re.I):
-            return "07"
-        if re.match(r"^au.*", month, re.I):
-            return "08"
-        if re.match(r"^se.*", month, re.I):
-            return "09"
-        if re.match(r"^oc.*", month, re.I):
-            return "10"
-        if re.match(r"^no.*", month, re.I):
-            return "11"
-        if re.match(r"^de.*", month, re.I):
-            return "12"
-
-        return ""
 
     def yyyy_mm_dd(self) -> tuple[date, str] | None:
         """Search for a date in the format yyyy-mm-dd.
@@ -90,6 +81,7 @@ class DatePattern:
             except ValueError as e:
                 log.trace(f"Error while reformatting date {match}: {e}")
                 return None
+
         return None
 
     def yyyy_dd_mm(self) -> tuple[date, str] | None:
@@ -153,7 +145,8 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            month = int(self._month_to_number(match.group("month")))
+            month = int(MonthShort.num_from_name(match.group("month")))
+
             try:
                 return (
                     date(int(match.group("year")), month, int(match.group("day"))),
@@ -189,7 +182,7 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            month = int(self._month_to_number(match.group("month")))
+            month = int(MonthShort.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, int(match.group("day"))),
@@ -222,7 +215,7 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            month = int(self._month_to_number(match.group("month")))
+            month = int(MonthShort.num_from_name(match.group("month")))
             year = date.today().year
             try:
                 return (
@@ -256,7 +249,7 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            month = int(self._month_to_number(match.group("month")))
+            month = int(MonthShort.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, 1),
@@ -289,7 +282,7 @@ class DatePattern:
         )
         match = pattern.search(self.string)
         if match:
-            month = int(self._month_to_number(match.group("month")))
+            month = int(MonthShort.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, 1),

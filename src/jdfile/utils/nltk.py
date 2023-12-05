@@ -36,7 +36,7 @@ def find_synonyms(word: str) -> list[str]:  # pragma: no cover
     Returns:
         list[str]: De-duped alphabetical list of synonyms.
     """
-    from nltk.corpus import wordnet
+    from nltk.corpus import wordnet  # noqa: PLC0415
 
     synonyms = [word]
 

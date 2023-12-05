@@ -1,5 +1,6 @@
 # type: ignore
 """Test jdfile utilities."""
+
 from pathlib import Path
 
 from jdfile._config.config import Config

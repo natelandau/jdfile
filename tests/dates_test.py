@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from jdfile.models.dates import Date, DatePattern
+from jdfile.models.dates import Date, DatePattern, MonthShort
 
 TODAY = date.today()
 YESTERDAY = date.today() - timedelta(days=1)
@@ -14,35 +14,34 @@ LAST_MONTH = date.today().replace(month=date.today().month - 1, day=1)
 LAST_WEEK = date.today() - timedelta(days=7)
 
 
-def test__month_to_number():
+def test__month_short_eunm():
     """Test month_to_number."""
-    date = DatePattern(string="")
-
-    assert date._month_to_number("JAN") == "01"
-    assert date._month_to_number("feb") == "02"
-    assert date._month_to_number("mar") == "03"
-    assert date._month_to_number("apr") == "04"
-    assert date._month_to_number("may") == "05"
-    assert date._month_to_number("jun") == "06"
-    assert date._month_to_number("jul") == "07"
-    assert date._month_to_number("aug") == "08"
-    assert date._month_to_number("sep") == "09"
-    assert date._month_to_number("oct") == "10"
-    assert date._month_to_number("nov") == "11"
-    assert date._month_to_number("dec") == "12"
-    assert date._month_to_number("january") == "01"
-    assert date._month_to_number("february") == "02"
-    assert date._month_to_number("march") == "03"
-    assert date._month_to_number("april") == "04"
-    assert date._month_to_number("may") == "05"
-    assert date._month_to_number("june") == "06"
-    assert date._month_to_number("july") == "07"
-    assert date._month_to_number("august") == "08"
-    assert date._month_to_number("september") == "09"
-    assert date._month_to_number("OcTobEr") == "10"
-    assert date._month_to_number("november") == "11"
-    assert date._month_to_number("december") == "12"
-    assert not date._month_to_number("xxx")
+    assert MonthShort.num_from_name("JAN") == "01"
+    assert MonthShort.num_from_name("feb") == "02"
+    assert MonthShort.num_from_name("mar") == "03"
+    assert MonthShort.num_from_name("apr") == "04"
+    assert MonthShort.num_from_name("may") == "05"
+    assert MonthShort.num_from_name("jun") == "06"
+    assert MonthShort.num_from_name("jul") == "07"
+    assert MonthShort.num_from_name("aug") == "08"
+    assert MonthShort.num_from_name("sep") == "09"
+    assert MonthShort.num_from_name("oct") == "10"
+    assert MonthShort.num_from_name("nov") == "11"
+    assert MonthShort.num_from_name("dec") == "12"
+    assert MonthShort.num_from_name("january") == "01"
+    assert MonthShort.num_from_name("february") == "02"
+    assert MonthShort.num_from_name("march") == "03"
+    assert MonthShort.num_from_name("april") == "04"
+    assert MonthShort.num_from_name("may") == "05"
+    assert MonthShort.num_from_name("june") == "06"
+    assert MonthShort.num_from_name("july") == "07"
+    assert MonthShort.num_from_name("august") == "08"
+    assert MonthShort.num_from_name("september") == "09"
+    assert MonthShort.num_from_name("OcTobEr") == "10"
+    assert MonthShort.num_from_name("november") == "11"
+    assert MonthShort.num_from_name("december") == "12"
+    assert not MonthShort.num_from_name("xxx")
+    assert not MonthShort.num_from_name("ma")
 
 
 @pytest.mark.parametrize(

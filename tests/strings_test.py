@@ -1,5 +1,6 @@
 # type: ignore
 """Tests for string utilities."""
+
 import hypothesis.strategies as st
 from hypothesis import given
 

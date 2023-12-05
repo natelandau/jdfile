@@ -257,7 +257,7 @@ class Config:
             raise typer.Exit(code=1)
 
         for key, value in config_file_dict.items():
-            if not isinstance(value, dict) or "path" not in config_file_dict[key]:
+            if not isinstance(value, dict) or "path" not in config_file_dict[key]:  # noqa: PLR1733
                 log.error(f"Configuration file '{self.config_path}' is malformed")
                 raise typer.Exit(code=1)
 

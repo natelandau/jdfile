@@ -1,5 +1,6 @@
 # type: ignore
 """Test alerts and logging."""
+
 import re
 
 import pytest

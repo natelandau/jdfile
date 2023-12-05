@@ -1,6 +1,5 @@
 """Utilities for jdfile."""
 
-
 import re
 from pathlib import Path
 

@@ -1,4 +1,5 @@
 """Model for the File object."""
+
 import difflib
 import re
 from datetime import datetime

@@ -1,4 +1,5 @@
 """Model for the project directory."""
+
 import functools
 import re
 from pathlib import Path
@@ -63,7 +64,7 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
 
-        return None  # type: ignore [unreachable]
+        return None
 
     @functools.cached_property
     def number(self) -> str:
@@ -77,7 +78,7 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.match(r"^(\d{2}\.\d{2})[- _]", str(self.path.name)).group(0).strip("- _")
 
-        return None  # type: ignore [unreachable]
+        return None
 
     @functools.cached_property
     def terms(self) -> list[str]:
