@@ -1,21 +1,28 @@
 ---
-github_actions:
-    - ".github/**"
+ci:
+    - changed-files:
+          - any-glob-to-any-file: ".github/**"
 dev_container:
-    - ".devcontainer/**"
+    - changed-files:
+          - any-glob-to-any-file: ".devcontainer/**"
 configuration:
-    - ".*"
-    - "*.js"
-    - "*.json"
-    - "*.toml"
-    - "*.yaml"
-    - "*.yml"
+    - changed-files:
+          - any-glob-to-any-file: ".*"
+          - any-glob-to-any-file: "*.js"
+          - any-glob-to-any-file: "*.json"
+          - any-glob-to-any-file: "*.toml"
+          - any-glob-to-any-file: "*.yaml"
+          - any-glob-to-any-file: "*.yml"
 documentation:
-    - "**.md"
-    - "docs/**"
-    - LICENSE
-python:
-    - "src/**"
-    - "tests/**"
-dependencies:
-    - "*.lock"
+    - changed-files:
+          - any-glob-to-any-file: "**.md"
+          - any-glob-to-any-file: "docs/**"
+tests:
+    - changed-files:
+          - any-glob-to-any-file: "tests/**"
+deps:
+    - changed-files:
+          - any-glob-to-any-file: "*.lock"
+jdfile:
+    - changed-files:
+          - any-glob-to-any-file: "src/**"

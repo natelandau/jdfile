@@ -1,5 +1,5 @@
 ---
-name: Create Release
+name: "Create Release"
 
 on:
     workflow_dispatch:
@@ -35,31 +35,27 @@ jobs:
                       install.python-poetry.org:443
                       pypi.org:443
                       python-poetry.org:443
-                      uploads.github.com:443
+                      *.github.com:443
+                      docker.io:443
+                      githubapp.com:443
+                      docker.com:443
 
             # ----------------------------------------------
-            #    Install python and checkout repository
+            #    Checkout repository
             # ----------------------------------------------
-
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v5
-              with:
-                  python-version: ${{ matrix.python-version }}
 
             - name: Checkout repository
               uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
 
             # ----------------------------------------------
-            #    Install poetry and project dependencies
+            #    Install Python, Poetry, and project dependencies
             # ----------------------------------------------
 
             - name: Setup Python and Poetry
               uses: ./.github/actions/setup-poetry
 
             # ----------------------------------------------
-            #    Grab version
+            #    Grab version number
             # ----------------------------------------------
 
             - name: Add version to environment vars
@@ -115,7 +111,6 @@ jobs:
             - name: Create Release Draft
               uses: softprops/action-gh-release@v1
               with:
-                  #   body_path: ".github/RELEASE-TEMPLATE.md"
                   body: ${{join(fromJson(steps.generate_notes.outputs.notes).notes, '')}}
                   draft: true
                   files: |
