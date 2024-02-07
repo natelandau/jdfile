@@ -1,40 +1,27 @@
 ---
-name: "Automated Tests"
+name: "Upload to Codecov"
 
 on:
     workflow_dispatch:
-    push:
-        paths:
-            - ".github/workflows/automated-tests.yml"
-            - ".github/actions/**"
-            - "**.py"
-            - "pyproject.toml"
-            - "poetry.lock"
+    workflow_run:
+        workflows: ["Automated Tests"]
+        types:
+            - completed
         branches:
             - main
-    pull_request:
-        types:
-            - opened
-            - reopened
-            - synchronize
-        paths:
-            - ".github/workflows/automated-tests.yml"
-            - ".github/actions/**"
-            - "**.py"
-            - "pyproject.toml"
-            - "poetry.lock"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
 jobs:
-    test-python-code:
+    upload-coverage:
         runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         strategy:
             fail-fast: true
             matrix:
-                python-version: ["3.10", "3.11", "3.12"]
+                python-version: ["3.11"]
         steps:
             - name: Harden Security Runner
               uses: step-security/harden-runner@v2
@@ -45,6 +32,7 @@ jobs:
                       api.github.com:443
                       api.snapcraft.io:443
                       auth.docker.io:443
+                      codecov.io:443
                       files.pythonhosted.org:443
                       github.com:443
                       install.python-poetry.org:443
@@ -53,6 +41,7 @@ jobs:
                       python-poetry.org:443
                       registry-1.docker.io:443
                       storage.googleapis.com:443
+                      *.codecov.io:443
 
             # ----------------------------------------------
             #    Checkout repository
@@ -69,17 +58,25 @@ jobs:
               uses: ./.github/actions/setup-poetry
 
             # ----------------------------------------------
-            #    run linters
-            # ----------------------------------------------
-
-            - name: lint with ruff
-              run: poetry run ruff --extend-ignore=I001,D401 src/
-            - name: check pyproject.toml
-              run: poetry run poetry check
-
-            # ----------------------------------------------
             #    run test suite
             # ----------------------------------------------
             - name: Run tests with pytest
               run: |
-                  poetry run pytest tests/
+                  poetry run coverage run
+                  poetry run coverage report
+                  poetry run coverage xml
+            # ----------------------------------------------
+            #             upload coverage stats
+            # ----------------------------------------------
+            - name: Upload coverage
+              uses: codecov/codecov-action@v4
+              with:
+                  files: reports/coverage.xml
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    on-failure:
+        runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+        steps:
+            - run: echo 'The triggering workflow failed'
