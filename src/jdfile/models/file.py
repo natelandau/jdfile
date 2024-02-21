@@ -61,7 +61,7 @@ class File:
         self.organize_possible_folders: dict[str, Any] = {}
         self.organize_skip = False
 
-        #### Create new attributes for the file ####
+        # Create new attributes for the file
         if self.config.date_format:
             self.date = Date(date_format=config.date_format, string=self.stem, ctime=self.created)
         else:
@@ -89,7 +89,7 @@ class File:
             else self.parent
         )
 
-    def __rich_repr__(self) -> rich.repr.RichReprResult:  # pragma: no cover
+    def __rich_repr__(self) -> rich.repr.RichReprResult:  # pragma: no cover  # noqa: PLW3201
         """Rich representation of the File object.
 
         Returns:

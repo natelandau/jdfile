@@ -28,7 +28,7 @@ class MonthShort(Enum):
     def num_from_name(cls, month: str) -> str:
         """Convert a month name to a number."""
         for member in cls:
-            if re.search(member.name, month, re.I):
+            if re.search(member.name, month, re.IGNORECASE):
                 return str(member.value).zfill(2)
 
         return ""
@@ -67,7 +67,7 @@ class DatePattern:
             )
             # (?:[^0-9].*|$)        # End of string from end of date
             """,
-            re.X,
+            re.VERBOSE,
         )
         match = pattern.search(self.string)
         if match:
@@ -105,7 +105,7 @@ class DatePattern:
             )
             # (?:[^0-9].*|$)
             """,
-            re.X,
+            re.VERBOSE,
         )
         match = pattern.search(self.string)
         if match:
@@ -141,7 +141,7 @@ class DatePattern:
             )
             ([^0-9].*|$) # End of string from end of date)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -178,7 +178,7 @@ class DatePattern:
             )
             (?:[^0-9].*|$) # text after date (7)
         """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -211,7 +211,7 @@ class DatePattern:
             )
             ([^0-9].*|$) # End of string from end of date)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -245,7 +245,7 @@ class DatePattern:
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -278,7 +278,7 @@ class DatePattern:
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -313,7 +313,7 @@ class DatePattern:
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -349,7 +349,7 @@ class DatePattern:
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -384,7 +384,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -418,7 +418,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -450,7 +450,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -477,7 +477,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -505,7 +505,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -533,7 +533,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:
@@ -560,7 +560,7 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
         match = pattern.search(self.string)
         if match:

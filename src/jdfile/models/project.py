@@ -42,7 +42,7 @@ class Folder:
         self.area = area
         self.category = category
 
-    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover
+    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover  # noqa: PLW3201
         """Rich representation of the Folder object."""
         yield "area", self.area
         yield "category", self.category
@@ -128,7 +128,7 @@ class Project:
             self.exists = self.path.exists()
             self.all_folders = self._find_folders()
 
-    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover
+    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover  # noqa: PLW3201
         """Rich representation of the Project object."""
         yield "exists", self.exists
         yield "name", self.name
@@ -276,22 +276,22 @@ class Project:
             alerts.warning("No Johnny Decimal project found.")
             return
         if self.exists:
-            print(self.path)
-            print("│")
+            print(self.path)  # noqa: T201
+            print("│")  # noqa: T201
             for _n, _area in enumerate(self.all_folders):
                 if _n < len(self.all_folders) - 1:
-                    print(branch, _area)
+                    print(branch, _area)  # noqa: T201
                     last_area = False
                 else:
-                    print(elbow, _area)
+                    print(elbow, _area)  # noqa: T201
                     last_area = True
                 for _nn, _category in enumerate(self.all_folders[_area]["categories"]):
                     area_pipe = space if last_area else pipe
                     if _nn < len(self.all_folders[_area]["categories"]) - 1:
-                        print(area_pipe, space, branch, _category)
+                        print(area_pipe, space, branch, _category)  # noqa: T201
                         last_cat = False
                     else:
-                        print(area_pipe, space, elbow, _category)
+                        print(area_pipe, space, elbow, _category)  # noqa: T201
                         last_cat = True
 
                     for _nnn, _subcategory in enumerate(
@@ -303,6 +303,6 @@ class Project:
                             < len(self.all_folders[_area]["categories"][_category]["subcategories"])
                             - 1
                         ):
-                            print(area_pipe, space, cat_pipe, space, branch, _subcategory.name)
+                            print(area_pipe, space, cat_pipe, space, branch, _subcategory.name)  # noqa: T201
                         else:
-                            print(area_pipe, space, cat_pipe, space, elbow, _subcategory.name)
+                            print(area_pipe, space, cat_pipe, space, elbow, _subcategory.name)  # noqa: T201

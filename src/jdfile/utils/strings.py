@@ -42,7 +42,10 @@ def match_case(string: str, match_case: list[str] = []) -> str:
         for term in match_case:
             with suppress(re.error):
                 string = re.sub(
-                    rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)", rf"\1{term}\2", string, flags=re.I
+                    rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)",
+                    rf"\1{term}\2",
+                    string,
+                    flags=re.IGNORECASE,
                 )
 
     return string
@@ -90,7 +93,7 @@ def split_camelcase_words(string: str, match_case: list[str] = []) -> str:
                 rf"(^|[-_ \d]){re.escape(split_phrase)}([-_ \d]|$)",
                 rf"\1{phrase}\2",
                 words,
-                flags=re.I,
+                flags=re.IGNORECASE,
             )
 
     return words
@@ -1358,7 +1361,7 @@ def strip_stopwords(string: str, stopwords: list[str] = []) -> str:
             rf"(^|[^A-Za-z0-9]){re.escape(word)}([^A-Za-z0-9]|$)",
             r"\1\2",
             tmp_string,
-            flags=re.I,
+            flags=re.IGNORECASE,
         )
 
     if re.match(r"^.$|^$|^[- _]+$", tmp_string):

@@ -175,7 +175,7 @@ class LoggerManager:
         self.log_level = log_level
 
         if self.log_file == Path("/logs") and self.log_to_file:  # pragma: no cover
-            print("No log file specified")
+            print("No log file specified")  # noqa: T201
             raise typer.Exit(1)
 
         if self.verbosity >= VerboseLevel.TRACE.value:

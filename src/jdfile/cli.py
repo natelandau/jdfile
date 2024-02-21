@@ -6,8 +6,8 @@ from typing import Any, Optional
 import typer
 from rich.prompt import Confirm
 
-from jdfile.__version__ import __version__
 from jdfile._config import Config
+from jdfile.constants import VERSION
 from jdfile.models.project import Project
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
@@ -24,12 +24,12 @@ typer.rich_utils.STYLE_HELPTEXT = ""
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        console.print(f"{__package__} version: {__version__}")
+        console.print(f"{__package__} version: {VERSION}")
         raise typer.Exit()
 
 
 @app.command()
-def main(  # noqa: C901
+def main(  # noqa: C901, PLR0917
     dry_run: bool = typer.Option(
         False,
         "--dry-run",

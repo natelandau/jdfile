@@ -76,7 +76,7 @@ class Config:
         # TODO: Add insert location to cli/config options
         self.insert_location = InsertLocation.BEFORE
 
-    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover
+    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover  # noqa: PLW3201
         """Return the representation of the configuration file."""
         yield "config_path", self.config_path
         yield "clean", self.clean
