@@ -9,9 +9,9 @@ import rich.repr
 import typer
 
 from jdfile._config import Config
+from jdfile.constants import FolderType
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
-from jdfile.utils.enums import FolderType
 
 
 @rich.repr.auto

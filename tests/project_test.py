@@ -4,8 +4,8 @@
 from pathlib import Path
 
 from jdfile._config.config import Config
+from jdfile.constants import FolderType
 from jdfile.models.project import Project
-from jdfile.utils.enums import FolderType
 from tests.helpers import strip_ansi
 
 

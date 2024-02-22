@@ -7,12 +7,11 @@ import typer
 from rich.prompt import Confirm
 
 from jdfile._config import Config
-from jdfile.constants import VERSION
+from jdfile.constants import VERSION, Separator, TransformCase
 from jdfile.models.project import Project
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
 from jdfile.utils.console import console
-from jdfile.utils.enums import Separator, TransformCase
 from jdfile.utils.nltk import instantiate_nltk
 from jdfile.utils.utilities import build_file_list, table_confirmation, table_skipped_files
 

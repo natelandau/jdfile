@@ -7,7 +7,7 @@ import pytest
 import typer
 
 from jdfile._config.config import Config
-from jdfile.utils.enums import Separator, TransformCase
+from jdfile.constants import Separator, TransformCase
 
 
 def test_create_config(tmp_path):

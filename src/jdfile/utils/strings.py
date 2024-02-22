@@ -3,8 +3,8 @@
 import re
 from contextlib import suppress
 
+from jdfile.constants import InsertLocation, Separator, TransformCase
 from jdfile.utils.alerts import logger as log
-from jdfile.utils.enums import InsertLocation, Separator, TransformCase
 
 
 def insert(string: str, value: str, location: InsertLocation, separator: Separator) -> str:

@@ -4,7 +4,7 @@
 import hypothesis.strategies as st
 from hypothesis import given
 
-from jdfile.utils.enums import InsertLocation, Separator, TransformCase
+from jdfile.constants import InsertLocation, Separator, TransformCase
 from jdfile.utils.strings import (
     insert,
     match_case,

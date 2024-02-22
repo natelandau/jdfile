@@ -111,6 +111,7 @@
     filterwarnings = ["error", "ignore::DeprecationWarning"]
     testpaths      = ["src", "tests"]
     xfail_strict   = true
+
 [tool.ruff] # https://github.com/charliermarsh/ruff
     exclude = [
         ".bzr",

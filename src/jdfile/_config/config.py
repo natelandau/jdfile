@@ -9,9 +9,9 @@ from typing import Any
 import rich.repr
 import typer
 
+from jdfile.constants import InsertLocation, Separator, TransformCase
 from jdfile.utils import alerts
 from jdfile.utils.alerts import logger as log
-from jdfile.utils.enums import InsertLocation, Separator, TransformCase
 
 try:
     import tomllib
