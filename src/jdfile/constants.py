@@ -1,6 +1,15 @@
 """Constants for the jdfile package."""
 
 from enum import Enum
+from pathlib import Path
+
+import typer
+
+APP_DIR = Path(typer.get_app_dir("jdfile"))
+CONFIG_PATH = APP_DIR / "config.toml"
+VERSION = "1.1.5"
+ALWAYS_IGNORE_FILES = (".DS_Store", ".jdfile", ".stignore")
+SPINNER = "bouncingBall"
 
 
 class FolderType(str, Enum):
@@ -37,6 +46,3 @@ class InsertLocation(str, Enum):
 
     AFTER = "after"
     BEFORE = "before"
-
-
-VERSION = "1.1.5"

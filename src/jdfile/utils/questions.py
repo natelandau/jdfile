@@ -5,21 +5,19 @@ from pathlib import Path
 import inflect
 import questionary
 import typer
+from loguru import logger
 
-from jdfile.utils import alerts
+from jdfile.models import Folder
 
 p = inflect.engine()
 
-questionary.prompts.select.DEFAULT_STYLE = questionary.Style(  # type:ignore [attr-defined]
-    [("qmark", "")]
-)
 
 STYLE = questionary.Style(
     [
-        ("qmark", "bold"),
+        ("qmark", ""),
         ("question", "bold"),
         ("separator", "fg:#808080"),
-        ("answer", "fg:#FF9D00 bold"),
+        ("answer", "fg:#FF9D00"),
         ("instruction", "fg:#808080"),
         ("highlighted", "bold underline"),
         ("text", ""),
@@ -29,29 +27,29 @@ STYLE = questionary.Style(
 
 
 def select_folder(
-    possible_folders: dict, project_path: Path, filename: str
+    possible_folders: dict[Folder, list[str]], project_path: Path, filename: str
 ) -> str:  # pragma: no cover
     """Select a folder from a list of choices.
 
     Args:
         filename (str): Name of the file.
-        possible_folders (dict): Dictionary of possible folders.
+        possible_folders (dict[Folder, list[str]]): List of possible folders.
         project_path (Path): Path to the root of the project.
 
     Returns:
         str: Path to the selected folder or "skip"
     """
     choices: list[dict[str, str] | questionary.Separator] = [questionary.Separator()]
-    max_length = len(max(possible_folders, key=len))
+    max_length = max(len(str(obj.path.relative_to(project_path))) for obj in possible_folders)
 
-    for v in possible_folders.values():
-        matching_terms = ", ".join(set(v[1]))
-        folder_path = str(v[0].path.relative_to(project_path))
+    for folder, terms in possible_folders.items():
+        matching_terms = ", ".join(set(terms))
+        folder_path = str(folder.path.relative_to(project_path))
 
         choices.append(
             {
                 "name": f"{folder_path:{max_length}} [matching: {matching_terms}]",
-                "value": v[0].path,
+                "value": str(folder.path),
             }
         )
 
@@ -63,12 +61,10 @@ def select_folder(
         ]
     )
 
-    alerts.notice(
+    logger.info(
         f"Found {len(possible_folders)} possible {p.plural_noun('folder', len(possible_folders))} for '[cyan bold]{filename}[/]'"
     )
-    result = questionary.select(
-        "Select a folder", choices=choices, style=STYLE, qmark="INPUT    |"
-    ).ask()
+    result = questionary.select("Select a folder", choices=choices, style=STYLE).ask()
 
     if result is None or result == "abort":
         raise typer.Abort()

@@ -3,28 +3,33 @@
 from pathlib import Path
 
 import nltk
+from loguru import logger
 
-from jdfile.utils.alerts import logger as log
+from jdfile.constants import APP_DIR
 
 
 def instantiate_nltk() -> None:  # pragma: no cover
-    """Instantiate nltk package."""
-    ntlk_data_path = Path(Path.home() / ".jdfile" / "nltk_data")
-    nltk.data.path.append(ntlk_data_path)
+    """Ensure necessary NLTK corpora are downloaded and available.
 
-    install = False
-    if Path(ntlk_data_path / "corpora" / "wordnet.zip").exists() is False:
-        install = True
-        nltk.download("wordnet", download_dir=ntlk_data_path)
+    Checks if the NLTK 'wordnet' and 'omw' corpora are present in APP_DIR. Downloads the corpora if not present. Logs the success of new installations and notes if the corpora were already installed.
+    """
+    nltk_data_path = Path(APP_DIR / "nltk_data")
+    nltk.data.path.append(str(nltk_data_path))  # Ensure nltk can find the custom data path
 
-    if Path(ntlk_data_path / "corpora" / "omw-1.4.zip").exists() is False:
-        install = True
-        nltk.download("omw-1.4", download_dir=ntlk_data_path)
+    # Define a list of corpora to check or download
+    corpora = [("wordnet", "corpora/wordnet.zip"), ("omw-1.4", "corpora/omw-1.4.zip")]
+    install = False  # Flag to track if any downloads were initiated
 
+    for corpus_name, corpus_path in corpora:
+        if not (nltk_data_path / corpus_path).exists():
+            nltk.download(corpus_name, download_dir=str(nltk_data_path))
+            install = True  # Mark that a download was necessary
+
+    # Log the outcome based on whether any installations took place
     if install:
-        log.success("NLTK English synonym library instantiated")
+        logger.success("NLTK English synonym library instantiated.")
     else:
-        log.trace("NLTK English synonym library already installed")
+        logger.trace("NLTK English synonym library already installed.")
 
 
 def find_synonyms(word: str) -> list[str]:  # pragma: no cover

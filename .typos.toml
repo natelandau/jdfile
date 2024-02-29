@@ -2,6 +2,16 @@
     default.locale = "en_us"
 
     [default.extend-words]
-        nd = "nd" # In the context of 2nd
+        amoungst = "amoungst"
+        ba       = "ba"
+        fo       = "fo"
+        nd       = "nd"
+        theyre   = "theyre"
+        throug   = "throug"
+        wheres   = "wheres"
+        whos     = "whos"
+        youre    = "youre"
+
+# Add words to the dictionary from the common misspellings list
 [files]
     extend-exclude = ["*_cache", ".venv", "src/jdfile/utils/strings.py"]

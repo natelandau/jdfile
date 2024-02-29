@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from enum import Enum
 
-from jdfile.utils.alerts import logger as log
+from loguru import logger
 
 
 class MonthShort(Enum):
@@ -79,7 +79,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
 
         return None
@@ -117,7 +117,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -153,7 +153,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -189,7 +189,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -223,7 +223,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -256,7 +256,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -289,7 +289,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -325,7 +325,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -361,7 +361,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -395,7 +395,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -429,7 +429,7 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
@@ -591,6 +591,10 @@ class Date:
             self.date, self.found_string = self._find_date()
             self.reformatted_date = self._reformat_date()
 
+    def __repr__(self) -> str:
+        """Return a string representation of the Date object."""
+        return f"{self.found_string} -> {self.reformatted_date}"
+
     def _find_date(self) -> tuple:  # noqa: C901,PLR0911,PLR0912
         """Find date in a string and reformat it to self.date_format. If no date is found, return None.
 
@@ -664,6 +668,6 @@ class Date:
             try:
                 return self.date.strftime(self.date_format)
             except ValueError as e:
-                log.trace(f"Error while reformatting date {self.date}: {e}")
+                logger.trace(f"Error while reformatting date {self.date}: {e}")
                 self.date, self.found_string, self.reformatted_date = None, None, None
         return None

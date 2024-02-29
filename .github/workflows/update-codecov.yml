@@ -10,6 +10,7 @@ on:
         branches:
             - main
 
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -17,7 +18,10 @@ concurrency:
 jobs:
     upload-coverage:
         runs-on: ubuntu-latest
+
+
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
         strategy:
             fail-fast: true
             matrix:
@@ -29,6 +33,7 @@ jobs:
                   egress-policy: block
                   disable-sudo: true
                   allowed-endpoints: >
+                      *.codecov.io:443
                       api.github.com:443
                       api.snapcraft.io:443
                       auth.docker.io:443
@@ -41,7 +46,6 @@ jobs:
                       python-poetry.org:443
                       registry-1.docker.io:443
                       storage.googleapis.com:443
-                      *.codecov.io:443
 
             # ----------------------------------------------
             #    Checkout repository
@@ -68,6 +72,7 @@ jobs:
             # ----------------------------------------------
             #             upload coverage stats
             # ----------------------------------------------
+
             - name: Upload coverage
               uses: codecov/codecov-action@v4
               with:

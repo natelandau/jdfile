@@ -1,5 +1,5 @@
 ---
-ci:
+github_actions:
     - changed-files:
           - any-glob-to-any-file: ".github/**"
 dev_container:
@@ -20,7 +20,7 @@ documentation:
 tests:
     - changed-files:
           - any-glob-to-any-file: "tests/**"
-deps:
+dependencies:
     - changed-files:
           - any-glob-to-any-file: "*.lock"
 jdfile:

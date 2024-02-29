@@ -13,39 +13,38 @@
     version     = "1.1.5"
 
     [tool.poetry.scripts] # https://python-poetry.org/docs/pyproject/#scripts
-        jdfile = "jdfile.cli:app"
+        jdfile = "jdfile.jdfile:app"
 
     [tool.poetry.dependencies]
+        confz       = "^2.0.1"
         inflect     = "^7.0.0"
         loguru      = "^0.7.2"
         nltk        = "^3.8.1"
         python      = "^3.10"
         questionary = "^2.0.1"
-        rich        = "^13.6.0"
+        rich        = "^13.7.0"
         shellingham = "^1.5.4"
-        tomli       = "^2.0.1"
         typer       = "^0.9.0"
 
     [tool.poetry.group.test.dependencies]
-        hypothesis     = "^6.88.3"
-        pytest         = "^7.4.3"
+        hypothesis     = "^6.98.10"
+        pytest         = "^8.0.1"
         pytest-clarity = "^1.0.1"
         pytest-mock    = "^3.12.0"
-        pytest-sugar   = "^0.9.7"
-        pytest-xdist   = "^3.3.1"
+        pytest-sugar   = "^1.0.0"
 
     [tool.poetry.group.dev.dependencies]
-        commitizen            = "^3.12.0"
-        coverage              = "^7.3.0"
+        commitizen            = "^3.15.0"
+        coverage              = "^7.4.2"
         mypy                  = "^1.8.0"
-        pdoc                  = "^14.1.0"
-        poethepoet            = "^0.24.2"
-        pre-commit            = "^3.5.0"
-        ruff                  = "^0.2.1"
+        pdoc                  = "^14.4.0"
+        poethepoet            = "^0.24.4"
+        pre-commit            = "^3.6.2"
+        ruff                  = "^0.2.2"
         sh                    = "^2.0.6"
         shellcheck-py         = "^0.9.0.6"
-        types-python-dateutil = "^2.8.19.14"
-        typos                 = "^1.16.23"
+        types-python-dateutil = "^2.8.19.20240106"
+        typos                 = "^1.18.2"
 
 [tool.commitizen]
     bump_message             = "bump(release): v$current_version → v$new_version"
@@ -168,9 +167,11 @@
         ], "tests/*.py" = [
             "A002",
             "A003",
+            "ARG001",
             "ARG002",
             "ARG005",
             "D102",
+            "ERA001",
             "F403",
             "PGH003",
             "PLR0913",

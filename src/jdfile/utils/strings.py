@@ -3,23 +3,27 @@
 import re
 from contextlib import suppress
 
+from loguru import logger
+
 from jdfile.constants import InsertLocation, Separator, TransformCase
-from jdfile.utils.alerts import logger as log
 
 
 def insert(string: str, value: str, location: InsertLocation, separator: Separator) -> str:
-    """Insert a value into the new filename.
+    """Insert a value into a string at a specified location with a separator.
+
+    Inserts a given value into the provided string using the specified location and separator.
+    If the separator is set to 'IGNORE', it defaults to an underscore ('_').
 
     Args:
-        string (str): String to insert value into.
-        location (InsertLocation): Where to insert the value.
-        separator (Separator): Separator to use.
-        value (str): Value to insert.
+        string: The original string.
+        value: The value to insert into the string.
+        location: The location where to insert the value.
+        separator: The separator to use; defaults to '_' if 'IGNORE'.
 
     Returns:
-        str: New filename with value inserted.
+        The modified string with the value inserted according to the specified location and separator.
     """
-    sep = separator.value if separator.name != "IGNORE" else "_"
+    sep = "_" if separator == Separator.IGNORE else separator.value
 
     match location:
         case InsertLocation.BEFORE:
@@ -28,18 +32,26 @@ def insert(string: str, value: str, location: InsertLocation, separator: Separat
             return f"{string}{sep}{value}"
 
 
-def match_case(string: str, match_case: list[str] = []) -> str:
-    """Match case of words in a string to a list of words.
+def match_case(string: str, match_case_list: tuple[str, ...] = ()) -> str:
+    """Adjust the case of specific words in a string according to a provided list.
+
+    Iterates over a list of words, adjusting the case of occurrences in the given string to match
+    the case of the word in the list. Matches whole words only, bounded by start/end of string,
+    spaces, or punctuation ('-', '_', ' ').
 
     Args:
-        match_case (list[str]): List of words to match case.
-        string (str): String to match case in.
+        string: The original string where case adjustments are to be made.
+        match_case_list: A tuple of words whose case will be matched in the string.
 
     Returns:
-        str: String with case matched.
+        A new string with the case of specified words adjusted to match the list.
+
+    Note:
+        Uses regular expressions to identify words with case-insensitive matching,
+        but ignores errors in regex compilation or matching.
     """
-    if len(match_case) > 0:
-        for term in match_case:
+    if len(match_case_list) > 0:
+        for term in match_case_list:
             with suppress(re.error):
                 string = re.sub(
                     rf"(^|[-_ ]){re.escape(term)}([-_ ]|$)",
@@ -52,39 +64,50 @@ def match_case(string: str, match_case: list[str] = []) -> str:
 
 
 def normalize_separators(string: str, separator: Separator = Separator.IGNORE) -> str:
-    """Normalize separators in a string.
+    """Normalize consecutive separator characters in a string to a single instance of the specified separator.
+
+    Replaces sequences of common separator characters (dash, underscore, space, and dot) with a single instance of the specified separator. If 'IGNORE' is selected, it collapses sequences to the first character in the sequence instead of replacing them.
 
     Args:
-        separator (Separator): Separator to normalize to.
-        string (str): String to fix separators in.
+        string: The input string to process.
+        separator: The target separator to which sequences will be normalized. Defaults to 'IGNORE', which simplifies sequences without replacing.
 
     Returns:
-        str: String with separators normalized.
+        The processed string with normalized separator characters.
     """
-    if separator.name != "IGNORE":
-        return re.sub(r"[-_ \.]+", separator.value, string).strip("-_ ")
+    pattern = r"[-_ \.]+"
 
-    return re.sub(r"([-_ \.])[-_ \.]+", r"\1", string).strip("-_ ")
+    if separator != Separator.IGNORE:
+        normalized_string = re.sub(pattern, separator.value, string)
+    else:
+        # For IGNORE, reduce sequences to the first character of the sequence
+        def replacement(match: re.Match[str]) -> str:
+            return match.group()[0]
+
+        normalized_string = re.sub(pattern, replacement, string)
+
+    # Strip leading/trailing separator characters (except for dot)
+    return normalized_string.strip("-_ ")
 
 
-def split_camelcase_words(string: str, match_case: list[str] = []) -> str:
-    """Split camelCase words in a string into separate words.
+def split_camelcase_words(string: str, match_case_list: tuple[str, ...] = ()) -> str:
+    """Split camelCase words into separate words, except for specified cases.
 
-    If camelCase words are in the match_case list, they will be put back together.
+    Splits camelCase words in the given string into separate words, using spaces. If certain camelCase words are specified in the match_case list, they are exempted from splitting.
 
     Args:
-        match_case (list[str], optional): List of words to retain case. Defaults to [].
-        string (str): String to split words in.
+        string: The string containing camelCase words to split.
+        match_case_list: A tuple of camelCase words that should not be split.
 
     Returns:
-        str: String with camelCase words split.
+        A string with camelCase words split into separate words, except for those specified in match_case_list.
     """
     words = " ".join([word for word in re.split(r"(?=[A-Z][a-z])", string) if word])
 
     # Put match case words back together
-    if len(match_case) > 0:
+    if len(match_case_list) > 0:
         match_case_terms = {}
-        for _match in match_case:
+        for _match in match_case_list:
             split_term = " ".join([w for w in re.split(r"(?=[A-Z][a-z])", _match) if w])
             match_case_terms[_match] = split_term
 
@@ -129,12 +152,12 @@ def strip_special_chars(string: str, replacement: str = "") -> str:
     return re.sub(r"[^\w\d_ -]", replacement, string)
 
 
-def strip_stopwords(string: str, stopwords: list[str] = []) -> str:
+def strip_stopwords(string: str, stopwords: tuple[str, ...] = ()) -> str:
     """Strip stopwords from the new filename.
 
     Args:
         string(str): String to strip stopwords from.
-        stopwords (list[str], optional): List of additional stopwords to strip. Defaults to [].
+        stopwords (tuple[str, ...], optional): List of stopwords to strip. Defaults to ().
 
     Returns:
         str: String with stopwords stripped.
@@ -1365,7 +1388,7 @@ def strip_stopwords(string: str, stopwords: list[str] = []) -> str:
         )
 
     if re.match(r"^.$|^$|^[- _]+$", tmp_string):
-        log.trace(f"Skip stripping stopwords. String is empty: {string}")
+        logger.trace(f"Skip stripping stopwords. String is empty: {string}")
         return string
 
     return tmp_string.strip(" -_")
