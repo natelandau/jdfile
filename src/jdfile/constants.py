@@ -15,9 +15,27 @@ SPINNER = "bouncingBall"
 class FolderType(str, Enum):
     """Enum for folder types."""
 
-    AREA = "area"
-    CATEGORY = "category"
-    SUBCATEGORY = "subcategory"
+    AREA = "area"  # Used by Johnny Decimal Folders
+    CATEGORY = "category"  # Used by Johnny Decimal Folders
+    SUBCATEGORY = "subcategory"  # Used by Johnny Decimal Folders
+    OTHER = "other"  # Any non-JD folder
+
+
+class ProjectType(str, Enum):
+    """Enum for project types."""
+
+    JD = "jd"
+    FOLDER = "folder"
+
+
+class Separator(str, Enum):
+    """Define choices for separator transformation."""
+
+    DASH = "-"
+    IGNORE = "ignore"
+    NONE = ""
+    SPACE = " "
+    UNDERSCORE = "_"
 
 
 class TransformCase(str, Enum):
@@ -29,16 +47,6 @@ class TransformCase(str, Enum):
     SENTENCE = "sentence"
     TITLE = "title"
     UPPER = "upper"
-
-
-class Separator(str, Enum):
-    """Define choices for separator transformation."""
-
-    DASH = "-"
-    IGNORE = "ignore"
-    NONE = ""
-    SPACE = " "
-    UNDERSCORE = "_"
 
 
 class InsertLocation(str, Enum):

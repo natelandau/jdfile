@@ -27,17 +27,21 @@ def confirmation_table(
     organized_files = bool(project_path and [x for x in files if x.has_new_parent])
 
     table = Table(
-        "#",
-        "Original Name",
-        "New Name",
-        "New Path" if organized_files else "",
-        "Diff" if verbosity > LogLevel.INFO.value else "",
         box=box.SIMPLE,
         show_header=True,
         header_style="bold",
         min_width=40,
         title=f"Pending changes for {len(files)} of {total_files} files",
     )
+
+    table.add_column("#")
+    table.add_column("Original Name", overflow="fold")
+    table.add_column("New Name", overflow="fold")
+    if organized_files:
+        table.add_column("New Path", overflow="fold")
+    if verbosity > LogLevel.INFO.value:
+        table.add_column("Diff", overflow="fold")
+
     for _n, file in enumerate(files, start=1):
         table.add_row(
             str(_n),

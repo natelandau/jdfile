@@ -9,7 +9,7 @@ from typing import Any, cast
 from loguru import logger
 from rich.status import Status
 
-from jdfile.constants import InsertLocation, Separator, TransformCase
+from jdfile.constants import InsertLocation, ProjectType, Separator, TransformCase
 from jdfile.utils import AppConfig, console
 from jdfile.utils.nltk import find_synonyms
 from jdfile.utils.questions import select_folder
@@ -248,7 +248,7 @@ class File:
             bool: True if the file was successfully moved or if a dry run is performed, False otherwise.
         """
         if not self.has_changes():
-            if verbosity > 0:
+            if verbosity > 0:  # pragma: no cover
                 logger.info(f"{self.path.name} -> No changes")
             return False
 
@@ -271,7 +271,7 @@ class File:
         logger.success(f"{self.path.name} -> {display}")
         return True
 
-    def get_new_parent(
+    def get_new_parent(  # noqa: C901
         self,
         project: Project,
         use_nltk: bool,
@@ -299,14 +299,17 @@ class File:
         """
         words_in_stem = self._tokenize_stem_with_synonyms(self.new_stem, use_nltk, user_terms)
 
-        # Direct matching by number in project folders
-        for folder in project.usable_folders:
-            if folder.number in words_in_stem:
-                if verbosity > 1:
-                    console.log(f"ORGANIZE: '{self.path.name}' matched by jd number: {folder.path}")
-                self.has_new_parent = True
-                self.new_parent = folder.path
-                return folder.path
+        # Direct matching by number in JD project folders
+        if project.project_type == ProjectType.JD:
+            for folder in project.usable_folders:
+                if folder.number in words_in_stem:
+                    if verbosity > 1:  # pragma: no cover
+                        console.log(
+                            f"ORGANIZE: '{self.path.name}' matched by jd number: {folder.path}"
+                        )
+                    self.has_new_parent = True
+                    self.new_parent = folder.path
+                    return folder.path
 
         # Collect folders matching any user terms or stem tokens
         matching_folders = {
@@ -327,8 +330,9 @@ class File:
         if matching_folders:
             if len(matching_folders) == 1 or force:
                 folder_to_move_to = next(iter(matching_folders.keys())).path
-                if verbosity > 1:
+                if verbosity > 1:  # pragma: no cover
                     console.log(f"ORGANIZE: '{self.path.name}' matched to '{folder_to_move_to}'")
+
             elif len(matching_folders) > 1:
                 status.stop() if status else None
                 selected_folder = select_folder(
@@ -339,7 +343,7 @@ class File:
                 folder_to_move_to = (
                     self.path.parent if selected_folder == "skip" else Path(selected_folder)
                 )
-                if verbosity > 1:
+                if verbosity > 1:  # pragma: no cover
                     console.log(
                         f"ORGANIZE:'{self.path.name}' matched to {folder_to_move_to} by user selection"
                     )

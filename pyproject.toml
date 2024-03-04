@@ -40,7 +40,7 @@
         pdoc                  = "^14.4.0"
         poethepoet            = "^0.24.4"
         pre-commit            = "^3.6.2"
-        ruff                  = "^0.2.2"
+        ruff                  = "^0.3.0"
         sh                    = "^2.0.6"
         shellcheck-py         = "^0.9.0.6"
         types-python-dateutil = "^2.8.19.20240106"
@@ -50,24 +50,17 @@
     bump_message             = "bump(release): v$current_version → v$new_version"
     tag_format               = "v$version"
     update_changelog_on_bump = true
-    version_files            = ["pyproject.toml:version", "src/jdfile/constants.py:VERSION"]
+    version_files            = ["src/jdfile/constants.py:VERSION"]
     version_provider         = "poetry"
 
 [tool.coverage.report] # https://coverage.readthedocs.io/en/latest/config.html#report
     exclude_lines = [
         'def __repr__',
         'except [\w\s\._]+ as .*:',
-        'log\.critical',
-        'log\.debug',
-        'log\.error',
-        'log\.exception',
-        'log\.info',
-        'log\.success',
-        'log\.trace',
-        'log\.warning',
         'pragma: no cover',
         'raise Abort',
         'raise Exit',
+        'raise typer\.Abort',
         'raise typer\.Exit',
     ]
     fail_under = 50
@@ -112,29 +105,6 @@
     xfail_strict   = true
 
 [tool.ruff] # https://github.com/charliermarsh/ruff
-    exclude = [
-        ".bzr",
-        ".direnv",
-        ".eggs",
-        ".git",
-        ".hg",
-        ".mypy_cache",
-        ".nox",
-        ".pants.d",
-        ".pytype",
-        ".ruff_cache",
-        ".svn",
-        ".tox",
-        ".venv",
-        "__pypackages__",
-        "_build",
-        "buck-out",
-        "build",
-        "dist",
-        "node_modules",
-        "venv",
-    ]
-
     fix            = true
     line-length    = 100
     output-format  = "grouped"
@@ -161,7 +131,7 @@
             "UP007",   # non-pep604-annotation
         ]
         ignore-init-module-imports = true
-        per-file-ignores = { "cli.py" = [
+        per-file-ignores = { "jdfile.py" = [
             "PLR0912",
             "PLR0913",
         ], "tests/*.py" = [
@@ -256,7 +226,7 @@
         help = "Lint this package"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "ruff --no-fix src/"
+            shell = "ruff check --no-fix src/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "ruff format --check src/ tests/"

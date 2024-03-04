@@ -1,12 +1,11 @@
 """Configuration file for the jdfile package."""
 
-
 from typing import Annotated, Any, ClassVar, Optional
 
 from confz import BaseConfig, ConfigSources, FileSource
 from pydantic import BaseModel, BeforeValidator
 
-from jdfile.constants import CONFIG_PATH, InsertLocation, Separator, TransformCase
+from jdfile.constants import CONFIG_PATH, InsertLocation, ProjectType, Separator, TransformCase
 
 
 def string_to_separator(value: str) -> Separator:
@@ -48,23 +47,46 @@ def string_to_insert_location(value: str) -> InsertLocation:
         raise ValueError(msg) from e
 
 
+def string_to_project_type(value: str) -> ProjectType:
+    """Convert a string to a ProjectType enum value.
+
+    Raises:
+        ValueError: If the provided value does not match any ProjectType enum.
+    """
+    # Common synonyms for folders
+    if value.lower() in {"folder", "dir", "directory"}:
+        return ProjectType.FOLDER
+
+    if value.lower() in {"jd", "johnnydecimal"}:
+        return ProjectType.JD
+
+    try:
+        return ProjectType[value.upper()]
+    except KeyError as e:
+        msg = f"Invalid project type: {value}"
+        raise ValueError(msg) from e
+
+
 ValidSeparator = Annotated[Separator, BeforeValidator(string_to_separator)]
 ValidTransformCase = Annotated[TransformCase, BeforeValidator(string_to_transform_case)]
 ValidInsertLocation = Annotated[InsertLocation, BeforeValidator(string_to_insert_location)]
+ValidProjectType = Annotated[ProjectType, BeforeValidator(string_to_project_type)]
 
 
 class ConfigProject(BaseModel):
     """Define a jdfile configuration project with customizable settings."""
 
-    date_format: Optional[str] = None
     clean_filenames: Optional[bool] = None
+    date_format: Optional[str] = None
     ignore_dotfiles: Optional[bool] = None
-    ignored_files: tuple[str, ...] = ()
     ignore_file_regex: Optional[str] = None
+    ignored_files: tuple[str, ...] = ()
     insert_location: Optional[InsertLocation] = None
     match_case_list: tuple[str, ...] = ()
     overwrite_existing: Optional[bool] = None
     path: str
+    project_depth: Optional[int] = 2
+    project_type: ValidProjectType
     separator: Optional[ValidSeparator] = None
     split_words: Optional[bool] = None
     stopwords: Optional[tuple[str, ...]] = None

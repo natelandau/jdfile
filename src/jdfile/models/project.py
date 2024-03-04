@@ -1,14 +1,16 @@
 """Project model."""
+
 import functools
 import re
+from collections.abc import Generator
 from pathlib import Path
 
 import typer
 from loguru import logger
 from rich.tree import Tree
 
-from jdfile.constants import FolderType
-from jdfile.utils import AppConfig, console
+from jdfile.constants import FolderType, ProjectType
+from jdfile.utils import AppConfig, console, match_pattern
 
 
 class Folder:
@@ -38,11 +40,11 @@ class Folder:
         self.area = area
         self.category = category
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         """String representation of the folder."""
         return f"FOLDER: {self.path.name} ({self.type.value}): {self.path}"
 
-    @functools.cached_property
+    @property
     def name(self) -> str:
         """Name of the folder."""
         if self.type == FolderType.AREA:
@@ -54,10 +56,10 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
 
-        return None
+        return self.path.name
 
-    @functools.cached_property
-    def number(self) -> str:
+    @property
+    def number(self) -> str | None:
         """Johnny Decimal number of the folder."""
         if self.type == FolderType.AREA:
             return re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(0).strip("- _")
@@ -74,10 +76,11 @@ class Folder:
     def terms(self) -> list[str]:
         """Terms used to match the folder."""
         terms = [word for word in re.split(r"[- _]", self.name) if word]
+
         if Path(self.path, ".jdfile").exists():
             content = Path(self.path, ".jdfile").read_text().splitlines()
             for line in content:
-                if line.startswith("#"):
+                if line.startswith("#") or line in terms:
                     continue
                 terms.append(line)
 
@@ -120,18 +123,42 @@ class Project:
         self.overwrite_existing: bool = AppConfig().get_attribute(
             project_name, "overwrite_existing"
         )
+        self.project_type: ProjectType = AppConfig().get_attribute(project_name, "project_type")
+        self.depth: int = AppConfig().get_attribute(project_name, "project_depth")
 
         # Validate and assign the project path
         self.path = self._validate_project_path(project_config.path)
 
         # Identify usable folders within the project
-        self.usable_folders = self._find_folders()
+        self.usable_folders = (
+            self._find_jd_folders()
+            if self.project_type == ProjectType.JD
+            else self._find_non_jd_folders()
+        )
 
     def __repr__(self) -> str:
         """String representation of the project."""
         return f"PROJECT: {self.name}: {self.path} {len(self.usable_folders)} usable folders"
 
-    def _find_folders(self) -> list[Folder]:
+    def _find_non_jd_folders(self) -> list[Folder]:
+        """Find and categorize all non-Johnny Decimal folders within the project up to the specified depth.
+
+        Returns:
+            List[Folder]: A sorted list of Folder objects categorized by their hierarchy.
+        """
+
+        def traverse_directory(directory: Path, depth: int) -> Generator[Folder, None, None]:
+            for item in directory.iterdir():
+                if item.is_dir() and item.name[0] != ".":  # Exclude hidden folders
+                    yield Folder(path=item, folder_type=FolderType.OTHER)
+                    if depth < self.depth:
+                        yield from traverse_directory(item, depth + 1)
+
+        non_jd_folders = list(traverse_directory(self.path, 0))
+        logger.trace(f"{len(non_jd_folders)} non-JD folders indexed in project: {self.name}")
+        return sorted(non_jd_folders, key=lambda folder: folder.path)
+
+    def _find_jd_folders(self) -> list[Folder]:
         """Find and categorize all relevant folders within the project according to their hierarchy.
 
         This method categorizes folders into areas, categories, and subcategories based on their naming convention. It also accounts for special `.jdfile` markers to include specific folders directly.
@@ -139,9 +166,6 @@ class Project:
         Returns:
             List[Folder]: A sorted list of Folder objects categorized by their hierarchy.
         """
-
-        def match_pattern(name: str, pattern: str) -> bool:
-            return re.match(pattern, name) is not None
 
         def create_folders(
             directory: Path,
@@ -191,7 +215,7 @@ class Project:
                     not any(existing.path == folder.path for existing in all_folders)
                     or Path(folder.path / ".jdfile").exists()
                 ):
-                    if self.verbosity > 1:
+                    if self.verbosity > 1:  # pragma: no cover
                         console.log(f"PROJECT: Add '{folder.path.name}'")
                     all_folders.append(folder)
 
@@ -237,9 +261,15 @@ class Project:
         )
         for path in paths:
             # Remove hidden files
-            if path.name.startswith("."):
+            if path.name.startswith(".") or not path.is_dir():
                 continue
-            if path.is_dir():
+
+            if self.project_type == ProjectType.JD:
+                for pattern in (r"^\d{2}-\d{2}[- _]", r"^\d{2}[- _]", r"^\d{2}\.\d{2}[- _]"):
+                    if match_pattern(path.name, pattern):
+                        branch = tree.add(f"{path.name}")
+                        self._walk_directory(path, branch)
+            else:
                 branch = tree.add(f"{path.name}")
                 self._walk_directory(path, branch)
 

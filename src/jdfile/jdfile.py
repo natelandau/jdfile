@@ -9,6 +9,8 @@ from loguru import logger
 
 from jdfile.cli import (
     confirm_changes_to_files,
+    get_file_list,
+    get_project,
     load_configuration,
     show_files_without_updates,
     update_files,
@@ -18,8 +20,6 @@ from jdfile.utils import (
     AppConfig,
     LogLevel,
     console,
-    get_file_list,
-    get_project,
     instantiate_logger,
 )
 from jdfile.utils.nltk import instantiate_nltk
@@ -33,6 +33,7 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 typer.rich_utils.STYLE_HELPTEXT = ""
+
 
 SeparatorOption = Enum("SeparatorOption", {x.name: x.name for x in Separator}, type=str)  # type: ignore [misc]
 TransformCaseOption = Enum("TransformCaseOption", {x.name: x.name for x in TransformCase}, type=str)  # type: ignore [misc]
@@ -317,7 +318,10 @@ def main(  # noqa: PLR0917
         logger.error("No files to process")
         raise typer.Exit(1)
 
-    project = get_project(project_name, exit_on_fail=False, verbosity=verbosity)
+    if not project_name:
+        project = None
+    else:
+        project = get_project(project_name, exit_on_fail=True, verbosity=verbosity)
 
     files_to_process = [
         File(

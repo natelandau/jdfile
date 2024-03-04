@@ -17,6 +17,13 @@ transform_case     = "ignore"
 use_synonyms       = false
 
 [projects]
-    [projects.test] # Uses "test" as a project name to reference the mock project directories
+    [projects.test_jd] # Tests a johnnydecimal project type
 
-        path = "PATH_GOES_HERE"
+        path         = "PATH_GOES_HERE"
+        project_type = "jd"
+
+    [projects.test_folder] # Tests a folder project type
+
+        path          = "PATH_GOES_HERE"
+        project_depth = 4
+        project_type  = "folder"

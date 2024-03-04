@@ -1,14 +1,13 @@
 # type: ignore
 """Shared fixtures for tests."""
+
 import re
 from pathlib import Path
-from textwrap import dedent
 
-import py
 import pytest
 from confz import DataSource, FileSource
 
-from jdfile.utils import AppConfig, console
+from jdfile.utils import console
 
 TEST_FILES = [
     "quick brown fox.txt",
@@ -60,7 +59,10 @@ def create_file(tmp_path):
             path (str, optional): The path to create the file in. Defaults to None.
             content (str, optional): The content to write to the file. Defaults to None.
         """
-        file_path = Path(path / name) if path else Path(tmp_path / name)
+        file_path = Path(tmp_path / path / name) if path else Path(tmp_path / name)
+
+        if path:
+            file_path.parent.mkdir(parents=True, exist_ok=True)
 
         if content:
             file_path.write_text(content)
