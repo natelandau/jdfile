@@ -70,51 +70,56 @@ Run `jdfile --help` for usage
 To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.jdfile/jdfile.toml`
 
 ```toml
-# The name of the project is used as a command line option.
-# (e.g. --organize=project_name)
-[project_name]
-    # (Required) Path to the folder containing the Johnny Decimal project
-    path = "~/johnnydecimal"
+# Clean special characters, normalize word separators, remove stopwords, based on your preferences.
+clean_filenames = true
 
-    # An optional date format. If specified, the date will be appended to the filename
-    # See https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes for details on how to specify a date.
-    date_format = "None"
+# An optional date format. If specified, the date will be appended to the filename
+# See https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes for details on how to specify a date.
+date_format = ""
 
-    # Ignores dotfiles (files that start with a period) when cleaning a directory.  true or false
-    ignore_dotfiles = true
+# Ignores dotfiles (files that start with a period) when cleaning a directory.  true or false
+ignore_dotfiles = true
 
-    # Files in this list will be skipped.
-    ignored_files = ['file1.txt', 'file2.txt']
+# List of file names to ignore when processing entire directories.
+ignored_files = ['file1.txt', 'file2.txt']
 
-    # File names matching this regex will be skipped.
-    # IMPORTANT: You must double escape within the pattern
-    ignored_regex = [".*\\.tar.gz$"]
+# File names matching this regex will be skipped.
+ignore_file_regex = ''
 
-    # Force the casing of certain words. Great for acronyms or proper nouns.
-    match_case = ["CEO", "CEOs", "iMac", "iPhone"]
+# Force the casing of certain words. Great for acronyms or proper nouns.
+match_case_list = ["iMac", "iPhone"]
 
-    # Overwrite existing files. true or false. If false, unique integers will be appended to the filename.
-    overwrite_existing = false
+# Overwrite existing files. true or false. If false, unique integers will be appended to the filename.
+overwrite_existing = false
 
-    # Separator to use between words. Options: "ignore", "underscore", "space", "dash", "none"
-    separator = "ignore"
+# Separator to use between words. Options: "ignore", "underscore", "space", "dash", "none"
+separator = "ignore"
 
-    # Split CamelCase words into separate words. true or false
-    split_words = false
+# Split CamelCase words into separate words. true or false
+split_words = false
 
-    # Optional list of project specific stopwords to be stripped from filenames
-    stopwords = ["stopword1", "stopword2"]
+# List of project specific stopwords to be stripped from filenames
+stopwords = []
 
-    # Strip stopwords from filenames. true or false
-    strip_stopwords = true
+# Strip stopwords from filenames. true or false
+strip_stopwords = true
 
-    # Transform case of filenames.
-    # Options: "lower", "upper", "title", "CamelCase", "sentence", "ignore",
-    transform_case = "ignore"
+# Transform case of filenames.
+# Options: "lower", "upper", "title", "CamelCase", "sentence", "ignore",
+transform_case = "ignore"
 
-    # Use the nltk wordnet corpus to find synonyms for words in filenames. true or false
-    # Note, this will download a large corpus (~400mb) the first time it is run.
-    use_synonyms = false
+# Use the nltk wordnet corpus to find synonyms for words in filenames. true or false
+# Note, this will download a large corpus (~400mb) the first time it is run.
+use_synonyms = false
+
+# USAGE: To create more projects, duplicate the [project_name] section below
+
+[projects]
+    [projects.project_name] # The name of the project is used as a command line option. (e.g. --project=project_name)
+
+        path = "~/johnnydecimal" # (Required) Path to the folder containing the Johnny Decimal project
+
+        # Any duplicated default values can be overridden here on a per project basis
 ```
 
 ### Example usage

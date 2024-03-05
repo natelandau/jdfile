@@ -2,10 +2,9 @@
 name: "Create Release"
 
 on:
-    workflow_dispatch:
     push:
         tags:
-            - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+            - "v*"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,7 +34,7 @@ jobs:
                       install.python-poetry.org:443
                       pypi.org:443
                       python-poetry.org:443
-                      *.github.com:443
+                      uploads.github.com:443
                       docker.io:443
                       githubapp.com:443
                       docker.com:443

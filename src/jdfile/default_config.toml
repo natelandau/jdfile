@@ -1,0 +1,60 @@
+# Define your Johnny Decimal projects below.
+# For more info on Johnny Decimal see: https://johnnydecimal.com
+
+# Clean special characters, normalize word separators, remove stopwords, based on your preferences.
+clean_filenames = true
+
+# An optional date format. If specified, the date will be appended to the filename
+# See https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes for details on how to specify a date.
+date_format = "%Y-%m-%d"
+
+# Ignores dotfiles (files that start with a period) when cleaning a directory.  true or false
+ignore_dotfiles = true
+
+# List of file names to ignore when processing entire directories.
+ignored_files = ['file1.txt', 'file2.txt']
+
+# File names matching this regex will be skipped.
+ignore_file_regex = ''
+
+# Force the casing of certain words. Great for acronyms or proper nouns.
+match_case_list = ["iMac", "iPhone"]
+
+# Overwrite existing files. true or false. If false, unique integers will be appended to the filename.
+overwrite_existing = false
+
+# Separator to use between words. Options: "ignore", "underscore", "space", "dash", "none"
+separator = "ignore"
+
+# Split CamelCase words into separate words. true or false
+split_words = false
+
+# List of project specific stopwords to be stripped from filenames
+stopwords = []
+
+# Strip stopwords from filenames. true or false
+strip_stopwords = true
+
+# Transform case of filenames.
+# Options: "lower", "upper", "title", "CamelCase", "sentence", "ignore",
+transform_case = "ignore"
+
+# Use the nltk wordnet corpus to find synonyms for words in filenames. true or false
+# Note, this will download a large corpus (~400mb) the first time it is run.
+use_synonyms = false
+
+# USAGE: To create more projects, duplicate the [project_name] section below
+
+[projects]
+    [projects.project_name] # The name of the project is used as a command line option. (e.g. --project=project_name)
+
+        # (Required) Path to the folder containing the Johnny Decimal project
+        path = "~/johnnydecimal"
+
+        # (Required) Options: "jd" for Johnny Decimal, "folder" for a folder structure
+        project_type = "jd"
+
+        # (Optional) The depth of folders to parse when using the "folder" project type. Default is 2
+        project_depth = 4
+
+        # Any duplicated default values can be overridden here on a per project basis

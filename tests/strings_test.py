@@ -4,7 +4,7 @@
 import hypothesis.strategies as st
 from hypothesis import given
 
-from jdfile.utils.enums import InsertLocation, Separator, TransformCase
+from jdfile.constants import InsertLocation, Separator, TransformCase
 from jdfile.utils.strings import (
     insert,
     match_case,
@@ -191,8 +191,8 @@ def test_camelcase_words():
     """Test splitting camelcase words in a string."""
     assert split_camelcase_words("foo bar baz") == "foo bar baz"
     assert split_camelcase_words("fooBarBaz") == "foo Bar Baz"
-    assert split_camelcase_words("fooBarBaz", match_case=["fooBarBaz"]) == "fooBarBaz"
-    assert split_camelcase_words("fooBarBaz", match_case=["BarBaz"]) == "foo BarBaz"
+    assert split_camelcase_words("fooBarBaz", match_case_list=["fooBarBaz"]) == "fooBarBaz"
+    assert split_camelcase_words("fooBarBaz", match_case_list=["BarBaz"]) == "foo BarBaz"
 
 
 def test_split_words():

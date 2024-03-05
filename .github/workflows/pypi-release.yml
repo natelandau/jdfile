@@ -6,6 +6,7 @@ on:
         types:
             - published
 
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -57,6 +58,7 @@ jobs:
             # ----------------------------------------------
             # Publish to PyPi
             # ----------------------------------------------
+
             - name: Publish
               env:
                   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

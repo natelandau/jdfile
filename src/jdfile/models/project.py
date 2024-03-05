@@ -1,20 +1,18 @@
-"""Model for the project directory."""
+"""Project model."""
 
 import functools
 import re
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any
 
-import rich.repr
 import typer
+from loguru import logger
+from rich.tree import Tree
 
-from jdfile._config import Config
-from jdfile.utils import alerts
-from jdfile.utils.alerts import logger as log
-from jdfile.utils.enums import FolderType
+from jdfile.constants import FolderType, ProjectType
+from jdfile.utils import AppConfig, console, match_pattern
 
 
-@rich.repr.auto
 class Folder:
     """Representation of a folder that is available for content to be filed to.
 
@@ -32,7 +30,7 @@ class Folder:
 
     def __init__(
         self,
-        path: str,
+        path: Path,
         folder_type: FolderType,
         area: Path | None = None,
         category: Path | None = None,
@@ -42,17 +40,11 @@ class Folder:
         self.area = area
         self.category = category
 
-    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover
-        """Rich representation of the Folder object."""
-        yield "area", self.area
-        yield "category", self.category
-        yield "name", self.name
-        yield "number", self.number
-        yield "path", self.path
-        yield "terms", self.terms
-        yield "type", self.type
+    def __str__(self) -> str:  # pragma: no cover
+        """String representation of the folder."""
+        return f"FOLDER: {self.path.name} ({self.type.value}): {self.path}"
 
-    @functools.cached_property
+    @property
     def name(self) -> str:
         """Name of the folder."""
         if self.type == FolderType.AREA:
@@ -64,10 +56,10 @@ class Folder:
         if self.type == FolderType.SUBCATEGORY:
             return re.sub(r"^\d{2}\.\d{2}[- _]", "", str(self.path.name)).strip()
 
-        return None
+        return self.path.name
 
-    @functools.cached_property
-    def number(self) -> str:
+    @property
+    def number(self) -> str | None:
         """Johnny Decimal number of the folder."""
         if self.type == FolderType.AREA:
             return re.match(r"^(\d{2}-\d{2})[- _]", str(self.path.name)).group(0).strip("- _")
@@ -84,225 +76,208 @@ class Folder:
     def terms(self) -> list[str]:
         """Terms used to match the folder."""
         terms = [word for word in re.split(r"[- _]", self.name) if word]
+
         if Path(self.path, ".jdfile").exists():
             content = Path(self.path, ".jdfile").read_text().splitlines()
             for line in content:
-                if line.startswith("#"):
+                if line.startswith("#") or line in terms:
                     continue
                 terms.append(line)
 
         return terms
 
 
-@rich.repr.auto
 class Project:
-    """Representation of a project directory.
+    """Represents a project directory, encapsulating its configuration, path, and folder structure.
 
     Attributes:
-        all_folders: (dict[str, dict[str, Any]]) All folders in the project.
-        config: (dict[str, Any]) Configuration for the project.
-        exists: (bool) Whether the project exists.
-        name: (str) Name of the project.
-        path: (Path) Path to the project.
-        usable_folders: (dict[str, dict[str, Any]]) Johnny Decimal folders that can be used for filing.
+        name (str): Name of the project.
+        path (Path): Path to the project directory.
+        ignore_dotfiles (bool): Flag to ignore dotfiles within the project.
+        ignored_files (tuple[str, ...]): A tuple of filenames to ignore within the project.
+        ignore_file_regex (str): Regex pattern to identify files to ignore.
+        overwrite_existing (bool): Flag indicating whether existing files should be overwritten.
+        usable_folders (dict[str, dict[str, Any]]): Johnny Decimal folders that are usable for filing.
+        verbosity (int): Verbosity level for logging.
     """
 
-    def __init__(
-        self,
-        config: Config = None,
-    ) -> None:
-        """Initialize the project folder."""
-        self.config = config
-        if (
-            self.config is None
-            or self.config.project_name is None
-            or self.config.project_path is None
-        ):
-            self.path = None
-            self.name = None
-            self.exists = False
-            self.all_folders = {}
-        else:
-            self.path = self._validate_project_path(self.config.project_path)
-            self.name = self.config.project_name
-            self.exists = self.path.exists()
-            self.all_folders = self._find_folders()
-
-    def __rich_repr__(self) -> rich.repr.Result:  # pragma: no cover
-        """Rich representation of the Project object."""
-        yield "exists", self.exists
-        yield "name", self.name
-        yield "path", self.path
-
-    def _find_folders(self) -> dict[str, dict[str, Any]]:
-        """Find all areas (top level folders) in the project.
-
-        Returns:
-            list[Path]: List of paths to areas.
-        """
-        area_dict = {}
-        for area in self.path.iterdir():
-            if area.is_dir() and re.match(r"^\d{2}-\d{2}[- _]", area.name):
-                area_dict[area.name] = {
-                    "path": area,
-                    "categories": self._find_categories(area),
-                }
-        return dict(sorted(area_dict.items()))
-
-    def _find_categories(self, area: Path) -> dict[str, dict[str, Any]]:
-        """Find all categories in the project.
+    def __init__(self, project_name: str, verbosity: int = 0) -> None:
+        """Initializes the Project instance by loading its configuration and determining usable folders.
 
         Args:
-            area: (Path) Path to the area.
-
-        Returns:
-            Dict[str, list[Path] | Path]: Dictionary of categories and subcategories.
+            project_name (str): The name of the project to be initialized.
+            verbosity (int, optional): Verbosity level for logging. Defaults to 0.
         """
-        category_dict = {}
-        for category in area.iterdir():
-            if category.is_dir() and re.match(r"^\d{2}[- _]", category.name):
-                category_dict[category.name] = {
-                    "path": category,
-                    "subcategories": self._find_subcategories(category),
-                }
-        return dict(sorted(category_dict.items()))
+        self.name = project_name
+        project_config = AppConfig().projects[project_name]
+        self.verbosity = verbosity
 
-    @staticmethod
-    def _find_subcategories(category: Path) -> list[Path]:
-        """Find all subcategories in the project.
+        # Read configuration attributes
+        self.ignore_dotfiles: bool = AppConfig().get_attribute(project_name, "ignore_dotfiles")
+        self.ignored_files: tuple[str, ...] = AppConfig().get_attribute(
+            project_name, "ignored_files"
+        )
+        self.ignore_file_regex: str | None = (
+            AppConfig().get_attribute(project_name, "ignore_file_regex") or "^$"
+        )
+        self.overwrite_existing: bool = AppConfig().get_attribute(
+            project_name, "overwrite_existing"
+        )
+        self.project_type: ProjectType = AppConfig().get_attribute(project_name, "project_type")
+        self.depth: int = AppConfig().get_attribute(project_name, "project_depth")
 
-        Args:
-            category: (Path) Path to the category.
+        # Validate and assign the project path
+        self.path = self._validate_project_path(project_config.path)
 
-        Returns:
-            list[Path]: List of paths to subcategories.
-        """
-        return sorted(
-            [
-                subcategory
-                for subcategory in category.iterdir()
-                if subcategory.is_dir() and re.match(r"^\d{2}\.\d{2}[- _]", subcategory.name)
-            ]
+        # Identify usable folders within the project
+        self.usable_folders = (
+            self._find_jd_folders()
+            if self.project_type == ProjectType.JD
+            else self._find_non_jd_folders()
         )
 
+    def __repr__(self) -> str:
+        """String representation of the project."""
+        return f"PROJECT: {self.name}: {self.path} {len(self.usable_folders)} usable folders"
+
+    def _find_non_jd_folders(self) -> list[Folder]:
+        """Find and categorize all non-Johnny Decimal folders within the project up to the specified depth.
+
+        Returns:
+            List[Folder]: A sorted list of Folder objects categorized by their hierarchy.
+        """
+
+        def traverse_directory(directory: Path, depth: int) -> Generator[Folder, None, None]:
+            for item in directory.iterdir():
+                if item.is_dir() and item.name[0] != ".":  # Exclude hidden folders
+                    yield Folder(path=item, folder_type=FolderType.OTHER)
+                    if depth < self.depth:
+                        yield from traverse_directory(item, depth + 1)
+
+        non_jd_folders = list(traverse_directory(self.path, 0))
+        logger.trace(f"{len(non_jd_folders)} non-JD folders indexed in project: {self.name}")
+        return sorted(non_jd_folders, key=lambda folder: folder.path)
+
+    def _find_jd_folders(self) -> list[Folder]:
+        """Find and categorize all relevant folders within the project according to their hierarchy.
+
+        This method categorizes folders into areas, categories, and subcategories based on their naming convention. It also accounts for special `.jdfile` markers to include specific folders directly.
+
+        Returns:
+            List[Folder]: A sorted list of Folder objects categorized by their hierarchy.
+        """
+
+        def create_folders(
+            directory: Path,
+            folder_type: FolderType,
+            parent_area: Path | None = None,
+            parent_category: Path | None = None,
+        ) -> list[Folder]:
+            pattern = {
+                FolderType.AREA: r"^\d{2}-\d{2}[- _]",
+                FolderType.CATEGORY: r"^\d{2}[- _]",
+                FolderType.SUBCATEGORY: r"^\d{2}\.\d{2}[- _]",
+            }[folder_type]
+
+            return [
+                Folder(
+                    path=item,
+                    folder_type=folder_type,
+                    area=parent_area or item,
+                    category=parent_category or item,
+                )
+                for item in directory.iterdir()
+                if item.is_dir() and match_pattern(item.name, pattern)
+            ]
+
+        areas = create_folders(self.path, FolderType.AREA)
+        categories = [
+            folder
+            for area in areas
+            for folder in create_folders(area.path, FolderType.CATEGORY, parent_area=area.path)
+        ]
+        subcategories = [
+            folder
+            for category in categories
+            for folder in create_folders(
+                category.path,
+                FolderType.SUBCATEGORY,
+                parent_area=category.area,
+                parent_category=category.path,
+            )
+        ]
+
+        # Filtering to avoid duplicates and include folders with .jdfile
+        all_folders: list[Folder] = []
+        for folder_list in (areas, categories, subcategories):
+            for folder in folder_list:
+                if (
+                    not any(existing.path == folder.path for existing in all_folders)
+                    or Path(folder.path / ".jdfile").exists()
+                ):
+                    if self.verbosity > 1:  # pragma: no cover
+                        console.log(f"PROJECT: Add '{folder.path.name}'")
+                    all_folders.append(folder)
+
+        logger.trace(f"{len(all_folders)} folders indexed in project: {self.name}")
+        return sorted(all_folders, key=lambda folder: folder.path)
+
     @staticmethod
-    def _validate_project_path(path: Path) -> Path:
-        """Assign the project path after validating it exists.
+    def _validate_project_path(path: str) -> Path:
+        """Validates the provided path for the project, ensuring it exists and is accessible.
 
         Args:
-            path: (Path) Path to the project.
+            path (str): The path to validate.
 
         Returns:
-            bool: Whether the path is valid.
+            Path: The validated path as a Path object.
+
+        Raises:
+            ValueError: If the path is not valid or does not exist.
         """
-        path = Path(path).expanduser().resolve()
+        path_to_validate = Path(path).expanduser().resolve()
 
-        if not path.exists():
-            alerts.error(f"Specified project path does not exist: {path}")
-            raise typer.Abort()
+        if not path_to_validate.exists():
+            logger.error(f"Specified project path does not exist: {path}")
+            raise typer.Exit(code=1)
 
-        if not path.is_dir():
-            alerts.error(f"Specified project path is not a directory: {path}")
-            raise typer.Abort()
+        if not path_to_validate.is_dir():
+            logger.error(f"Specified project path is not a directory: {path}")
+            raise typer.Exit(code=1)
 
-        return path
+        return path_to_validate
 
-    @functools.cached_property
-    def usable_folders(self) -> list[Folder]:
-        """Create property for usable folders.
+    def _walk_directory(self, directory: Path, tree: Tree) -> None:
+        """Recursively build a Tree with directory contents, excluding hidden files and sorting directories before files.
 
-        Returns:
-            list[Folder]: List of paths to usable folders.
+        Args:
+            directory (Path): The directory to walk through.
+            tree (Tree): The Tree object to which the directory structure will be added.
         """
-        if not self.exists:
-            return []
+        # Sort dirs first then by filename
+        paths = sorted(
+            Path(directory).iterdir(),
+            key=lambda path: (path.is_file(), path.name.lower()),
+        )
+        for path in paths:
+            # Remove hidden files
+            if path.name.startswith(".") or not path.is_dir():
+                continue
 
-        usable_folders: list[Folder] = []
-        for _area in self.all_folders:
-            if (
-                self.all_folders[_area]["categories"] == {}
-                or Path(self.all_folders[_area]["path"] / ".jdfile").exists()
-            ):
-                usable_folders.append(
-                    Folder(
-                        self.all_folders[_area]["path"],
-                        FolderType.AREA,
-                        area=self.all_folders[_area]["path"],
-                    )
-                )
-
-            if self.all_folders[_area]["categories"] != {}:
-                for _category in self.all_folders[_area]["categories"]:
-                    if (
-                        self.all_folders[_area]["categories"][_category]["subcategories"] == []
-                        or Path(
-                            self.all_folders[_area]["categories"][_category]["path"] / ".jdfile"
-                        ).exists()
-                    ):
-                        usable_folders.append(
-                            Folder(
-                                self.all_folders[_area]["categories"][_category]["path"],
-                                FolderType.CATEGORY,
-                                area=self.all_folders[_area]["path"],
-                                category=self.all_folders[_area]["categories"][_category]["path"],
-                            )
-                        )
-
-                    if len(self.all_folders[_area]["categories"][_category]["subcategories"]) > 0:
-                        for _subcategory in self.all_folders[_area]["categories"][_category][
-                            "subcategories"
-                        ]:
-                            usable_folders.append(  # noqa: PERF401
-                                Folder(
-                                    _subcategory,
-                                    FolderType.SUBCATEGORY,
-                                    area=self.all_folders[_area]["path"],
-                                    category=self.all_folders[_area]["categories"][_category][
-                                        "path"
-                                    ],
-                                ),
-                            )
-        log.trace(f"Populated {len(usable_folders)} folders")
-        return sorted(usable_folders, key=lambda x: x.path)
+            if self.project_type == ProjectType.JD:
+                for pattern in (r"^\d{2}-\d{2}[- _]", r"^\d{2}[- _]", r"^\d{2}\.\d{2}[- _]"):
+                    if match_pattern(path.name, pattern):
+                        branch = tree.add(f"{path.name}")
+                        self._walk_directory(path, branch)
+            else:
+                branch = tree.add(f"{path.name}")
+                self._walk_directory(path, branch)
 
     def tree(self) -> None:
-        """Print a tree of the project."""
-        pipe = "│"
-        branch = "├──"
-        space = "   "
-        elbow = "└──"
-
-        if self.exists is False:
-            alerts.warning("No Johnny Decimal project found.")
-            return
-        if self.exists:
-            print(self.path)
-            print("│")
-            for _n, _area in enumerate(self.all_folders):
-                if _n < len(self.all_folders) - 1:
-                    print(branch, _area)
-                    last_area = False
-                else:
-                    print(elbow, _area)
-                    last_area = True
-                for _nn, _category in enumerate(self.all_folders[_area]["categories"]):
-                    area_pipe = space if last_area else pipe
-                    if _nn < len(self.all_folders[_area]["categories"]) - 1:
-                        print(area_pipe, space, branch, _category)
-                        last_cat = False
-                    else:
-                        print(area_pipe, space, elbow, _category)
-                        last_cat = True
-
-                    for _nnn, _subcategory in enumerate(
-                        self.all_folders[_area]["categories"][_category]["subcategories"]
-                    ):
-                        cat_pipe = space if last_cat else pipe
-                        if (
-                            _nnn
-                            < len(self.all_folders[_area]["categories"][_category]["subcategories"])
-                            - 1
-                        ):
-                            print(area_pipe, space, cat_pipe, space, branch, _subcategory.name)
-                        else:
-                            print(area_pipe, space, cat_pipe, space, elbow, _subcategory.name)
+        """Print a tree representation of the project directory to the console."""
+        tree = Tree(
+            f":open_file_folder: [link file://{self.path}]{self.path}",
+            guide_style="dim",
+        )
+        self._walk_directory(Path(self.path), tree)
+        console.print(tree)

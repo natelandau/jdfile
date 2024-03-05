@@ -5,30 +5,38 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from enum import Enum
 
-from jdfile.utils.alerts import logger as log
+from loguru import logger
 
 
-class MonthShort(Enum):
-    """Enum for short month names."""
+class MonthToNumber(Enum):
+    """Enum for month names."""
 
-    JA = 1
-    FE = 2
-    MAR = 3
-    AP = 4
-    MAY = 5
-    JUN = 6
-    JUL = 7
-    AU = 8
-    SE = 9
-    OC = 10
-    NO = 11
-    DE = 12
+    January = 1
+    February = 2
+    March = 3
+    April = 4
+    May = 5
+    June = 6
+    July = 7
+    August = 8
+    September = 9
+    October = 10
+    November = 11
+    December = 12
 
     @classmethod
     def num_from_name(cls, month: str) -> str:
-        """Convert a month name to a number."""
+        """Convert a month name to its corresponding number.
+
+        Args:
+            month (str): Month name to convert.
+
+        Returns:
+            str: The month number or an empty string if the month name is not found.
+        """
+        month = month.lower()
         for member in cls:
-            if re.search(member.name, month, re.I):
+            if member.name.lower().startswith(month):
                 return str(member.value).zfill(2)
 
         return ""
@@ -38,7 +46,6 @@ class MonthShort(Enum):
 class DatePattern:
     """Regex patterns to find dates in filename strings."""
 
-    string: str
     pattern_day_flexible = r"0?[1-9]|[12][0-9]|3[01]"
     pattern_day_inflexible = r"0[1-9]|[12][0-9]|3[01]"
     pattern_month = r"0[1-9]|1[012]"
@@ -46,7 +53,8 @@ class DatePattern:
     pattern_separator = r"[-\./_, :]*?"
     pattern_year = r"20[0-2][0-9]"
 
-    def yyyy_mm_dd(self) -> tuple[date, str] | None:
+    @staticmethod
+    def yyyy_mm_dd(string: str) -> tuple[date, str] | None:
         """Search for a date in the format yyyy-mm-dd.
 
         Args:
@@ -59,17 +67,17 @@ class DatePattern:
             rf"""
             # (?:.*[^0-9]|^)        # Start of string
             (?P<found>
-                (?P<year>{self.pattern_year})
-                {self.pattern_separator}
-                (?P<month>{self.pattern_month})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_inflexible})
+                (?P<year>{DatePattern.pattern_year})
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_month})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_inflexible})
             )
             # (?:[^0-9].*|$)        # End of string from end of date
             """,
-            re.X,
+            re.VERBOSE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             try:
                 return (
@@ -79,12 +87,13 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
 
         return None
 
-    def yyyy_dd_mm(self) -> tuple[date, str] | None:
+    @staticmethod
+    def yyyy_dd_mm(string: str) -> tuple[date, str] | None:
         """Search for a date in the format yyyy-dd-mm.
 
         Args:
@@ -97,17 +106,17 @@ class DatePattern:
             rf"""
             # (?:.*[^0-9]|^)
             (?P<found>
-                (?P<year>{self.pattern_year})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_inflexible})
-                {self.pattern_separator}
-                (?P<month>{self.pattern_month})
+                (?P<year>{DatePattern.pattern_year})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_inflexible})
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_month})
             )
             # (?:[^0-9].*|$)
             """,
-            re.X,
+            re.VERBOSE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             try:
                 return (
@@ -117,11 +126,13 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
+
         return None
 
-    def month_dd_yyyy(self) -> tuple[date, str] | None:
+    @staticmethod
+    def month_dd_yyyy(string: str) -> tuple[date, str] | None:
         """Search for a date in the format month dd, yyyy.
 
         Args:
@@ -133,19 +144,19 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<month>{self.pattern_months})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_flexible})(?:nd|rd|th|st)?
-                {self.pattern_separator}
-                (?P<year>{self.pattern_year})
+                (?P<month>{DatePattern.pattern_months})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_flexible})(?:nd|rd|th|st)?
+                {DatePattern.pattern_separator}
+                (?P<year>{DatePattern.pattern_year})
             )
             ([^0-9].*|$) # End of string from end of date)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
-            month = int(MonthShort.num_from_name(match.group("month")))
+            month = int(MonthToNumber.num_from_name(match.group("month")))
 
             try:
                 return (
@@ -153,11 +164,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def dd_month_yyyy(self) -> tuple[date, str] | None:
+    @staticmethod
+    def dd_month_yyyy(string: str) -> tuple[date, str] | None:
         """Search for a date in the format dd month yyyy.
 
         Args:
@@ -170,30 +182,31 @@ class DatePattern:
             rf"""
             (?:.*[^0-9]|^) # text before date
             (?P<found>
-                (?P<day>{self.pattern_day_flexible})(?:nd|rd|th|st)?
-                {self.pattern_separator}
-                (?P<month>{self.pattern_months})
-                {self.pattern_separator}
-                (?P<year>{self.pattern_year})
+                (?P<day>{DatePattern.pattern_day_flexible})(?:nd|rd|th|st)?
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_months})
+                {DatePattern.pattern_separator}
+                (?P<year>{DatePattern.pattern_year})
             )
             (?:[^0-9].*|$) # text after date (7)
         """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
-            month = int(MonthShort.num_from_name(match.group("month")))
+            month = int(MonthToNumber.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, int(match.group("day"))),
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def month_dd(self) -> tuple[date, str] | None:
+    @staticmethod
+    def month_dd(string: str) -> tuple[date, str] | None:
         """Search for a date in the format month dd.
 
         Args:
@@ -205,17 +218,17 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<month>{self.pattern_months})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_flexible})(?:nd|rd|th|st)?
+                (?P<month>{DatePattern.pattern_months})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_flexible})(?:nd|rd|th|st)?
             )
             ([^0-9].*|$) # End of string from end of date)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
-            month = int(MonthShort.num_from_name(match.group("month")))
+            month = int(MonthToNumber.num_from_name(match.group("month")))
             year = date.today().year
             try:
                 return (
@@ -223,11 +236,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def month_yyyy(self) -> tuple[date, str] | None:
+    @staticmethod
+    def month_yyyy(string: str) -> tuple[date, str] | None:
         """Search for a date in the format month yyyy.
 
         Args:
@@ -239,28 +253,29 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<month>{self.pattern_months})
-                {self.pattern_separator}
-                (?P<year>{self.pattern_year})
+                (?P<month>{DatePattern.pattern_months})
+                {DatePattern.pattern_separator}
+                (?P<year>{DatePattern.pattern_year})
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
-            month = int(MonthShort.num_from_name(match.group("month")))
+            month = int(MonthToNumber.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, 1),
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def yyyy_month(self) -> tuple[date, str] | None:
+    @staticmethod
+    def yyyy_month(string: str) -> tuple[date, str] | None:
         """Search for a date in the format yyyy month.
 
         Args:
@@ -272,28 +287,29 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<year>{self.pattern_year})
-                {self.pattern_separator}
-                (?P<month>{self.pattern_months})
+                (?P<year>{DatePattern.pattern_year})
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_months})
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
-            month = int(MonthShort.num_from_name(match.group("month")))
+            month = int(MonthToNumber.num_from_name(match.group("month")))
             try:
                 return (
                     date(int(match.group("year")), month, 1),
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def mmddyyyy(self) -> tuple[date, str] | None:
+    @staticmethod
+    def mmddyyyy(string: str) -> tuple[date, str] | None:
         """Search for a date in the format mmddyyyy.
 
         Args:
@@ -305,17 +321,17 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<month>{self.pattern_month})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_inflexible})
-                {self.pattern_separator}
-                (?P<year>{self.pattern_year})
+                (?P<month>{DatePattern.pattern_month})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_inflexible})
+                {DatePattern.pattern_separator}
+                (?P<year>{DatePattern.pattern_year})
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             try:
                 return (
@@ -325,11 +341,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def ddmmyyyy(self) -> tuple[date, str] | None:
+    @staticmethod
+    def ddmmyyyy(string: str) -> tuple[date, str] | None:
         """Search for a date in the format ddmmyyyy.
 
         Args:
@@ -341,17 +358,17 @@ class DatePattern:
         pattern = re.compile(
             rf"""
             (?P<found>
-                (?P<day>{self.pattern_day_inflexible})
-                {self.pattern_separator}
-                (?P<month>{self.pattern_month})
-                {self.pattern_separator}
-                (?P<year>{self.pattern_year})
+                (?P<day>{DatePattern.pattern_day_inflexible})
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_month})
+                {DatePattern.pattern_separator}
+                (?P<year>{DatePattern.pattern_year})
             )
             ([^0-9].*|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             try:
                 return (
@@ -361,11 +378,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def mm_dd(self) -> tuple[date, str] | None:
+    @staticmethod
+    def mm_dd(string: str) -> tuple[date, str] | None:
         """Search for a date in the format mm-dd.
 
         Args:
@@ -378,15 +396,15 @@ class DatePattern:
             rf"""
             (?:^|[^0-9])
             (?P<found>
-                (?P<month>{self.pattern_month})
-                {self.pattern_separator}
-                (?P<day>{self.pattern_day_inflexible})
+                (?P<month>{DatePattern.pattern_month})
+                {DatePattern.pattern_separator}
+                (?P<day>{DatePattern.pattern_day_inflexible})
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             year = date.today().year
             try:
@@ -395,11 +413,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def dd_mm(self) -> tuple[date, str] | None:
+    @staticmethod
+    def dd_mm(string: str) -> tuple[date, str] | None:
         """Search for a date in the format dd-mm.
 
         Args:
@@ -412,15 +431,15 @@ class DatePattern:
             rf"""
             (?:^|[^0-9])
             (?P<found>
-                (?P<day>{self.pattern_day_inflexible})
-                {self.pattern_separator}
-                (?P<month>{self.pattern_month})
+                (?P<day>{DatePattern.pattern_day_inflexible})
+                {DatePattern.pattern_separator}
+                (?P<month>{DatePattern.pattern_month})
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             year = date.today().year
             try:
@@ -429,11 +448,12 @@ class DatePattern:
                     str(match.group("found")),
                 )
             except ValueError as e:
-                log.trace(f"Error while reformatting date {match}: {e}")
+                logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
         return None
 
-    def today(self) -> tuple[date, str] | None:
+    @staticmethod
+    def today(string: str) -> tuple[date, str] | None:
         """Search for a date in the format today.
 
         Args:
@@ -450,9 +470,9 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             return (
                 date.today(),
@@ -460,7 +480,8 @@ class DatePattern:
             )
         return None
 
-    def yesterday(self) -> tuple[date, str] | None:
+    @staticmethod
+    def yesterday(string: str) -> tuple[date, str] | None:
         """Search for a date in the format yesterday.
 
         Args:
@@ -477,9 +498,9 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             yesterday = date.today() - timedelta(days=1)
             return (
@@ -488,7 +509,8 @@ class DatePattern:
             )
         return None
 
-    def tomorrow(self) -> tuple[date, str] | None:
+    @staticmethod
+    def tomorrow(string: str) -> tuple[date, str] | None:
         """Search for a date in the format tomorrow.
 
         Args:
@@ -505,9 +527,9 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             tomorrow = date.today() + timedelta(days=1)
             return (
@@ -516,7 +538,8 @@ class DatePattern:
             )
         return None
 
-    def last_week(self) -> tuple[date, str] | None:
+    @staticmethod
+    def last_week(string: str) -> tuple[date, str] | None:
         """Search for a date in the format last week.
 
         Args:
@@ -533,9 +556,9 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             return (
                 date.today() - timedelta(days=7),
@@ -543,7 +566,8 @@ class DatePattern:
             )
         return None
 
-    def last_month(self) -> tuple[date, str] | None:
+    @staticmethod
+    def last_month(string: str) -> tuple[date, str] | None:
         """Search for a date in the format last month.
 
         Args:
@@ -560,9 +584,9 @@ class DatePattern:
             )
             (?:[^0-9]|$)
             """,
-            re.X | re.I,
+            re.VERBOSE | re.IGNORECASE,
         )
-        match = pattern.search(self.string)
+        match = pattern.search(string)
         if match:
             return (
                 date.today().replace(month=date.today().month - 1, day=1),
@@ -591,6 +615,10 @@ class Date:
             self.date, self.found_string = self._find_date()
             self.reformatted_date = self._reformat_date()
 
+    def __repr__(self) -> str:
+        """Return a string representation of the Date object."""
+        return f"{self.found_string} -> {self.reformatted_date}"
+
     def _find_date(self) -> tuple:  # noqa: C901,PLR0911,PLR0912
         """Find date in a string and reformat it to self.date_format. If no date is found, return None.
 
@@ -600,54 +628,54 @@ class Date:
         Returns:
             (tuple) A tuple containing the reformatted date and the date string found in the input.
         """
-        date_search = DatePattern(self.original_string)
-        if date_search.yyyy_mm_dd():
-            return date_search.yyyy_mm_dd()
+        date_search = DatePattern()
+        if date_search.yyyy_mm_dd(self.original_string):
+            return date_search.yyyy_mm_dd(self.original_string)
 
-        if date_search.yyyy_dd_mm():  # pragma: no cover
-            return date_search.yyyy_dd_mm()
+        if date_search.yyyy_dd_mm(self.original_string):  # pragma: no cover
+            return date_search.yyyy_dd_mm(self.original_string)
 
-        if date_search.month_dd_yyyy():  # pragma: no cover
-            return date_search.month_dd_yyyy()
+        if date_search.month_dd_yyyy(self.original_string):  # pragma: no cover
+            return date_search.month_dd_yyyy(self.original_string)
 
-        if date_search.dd_month_yyyy():  # pragma: no cover
-            return date_search.dd_month_yyyy()
+        if date_search.dd_month_yyyy(self.original_string):  # pragma: no cover
+            return date_search.dd_month_yyyy(self.original_string)
 
-        if date_search.month_dd():  # pragma: no cover
-            return date_search.month_dd()
+        if date_search.month_dd(self.original_string):  # pragma: no cover
+            return date_search.month_dd(self.original_string)
 
-        if date_search.month_yyyy():  # pragma: no cover
-            return date_search.month_yyyy()
+        if date_search.month_yyyy(self.original_string):  # pragma: no cover
+            return date_search.month_yyyy(self.original_string)
 
-        if date_search.yyyy_month():  # pragma: no cover
-            return date_search.yyyy_month()
+        if date_search.yyyy_month(self.original_string):  # pragma: no cover
+            return date_search.yyyy_month(self.original_string)
 
-        if date_search.mmddyyyy():  # pragma: no cover
-            return date_search.mmddyyyy()
+        if date_search.mmddyyyy(self.original_string):  # pragma: no cover
+            return date_search.mmddyyyy(self.original_string)
 
-        if date_search.ddmmyyyy():  # pragma: no cover
-            return date_search.ddmmyyyy()
+        if date_search.ddmmyyyy(self.original_string):  # pragma: no cover
+            return date_search.ddmmyyyy(self.original_string)
 
-        if date_search.mm_dd():  # pragma: no cover
-            return date_search.mm_dd()
+        if date_search.mm_dd(self.original_string):  # pragma: no cover
+            return date_search.mm_dd(self.original_string)
 
-        if date_search.dd_mm():  # pragma: no cover
-            return date_search.dd_mm()
+        if date_search.dd_mm(self.original_string):  # pragma: no cover
+            return date_search.dd_mm(self.original_string)
 
-        if date_search.today():  # pragma: no cover
-            return date_search.today()
+        if date_search.today(self.original_string):  # pragma: no cover
+            return date_search.today(self.original_string)
 
-        if date_search.yesterday():  # pragma: no cover
-            return date_search.yesterday()
+        if date_search.yesterday(self.original_string):  # pragma: no cover
+            return date_search.yesterday(self.original_string)
 
-        if date_search.tomorrow():  # pragma: no cover
-            return date_search.tomorrow()
+        if date_search.tomorrow(self.original_string):  # pragma: no cover
+            return date_search.tomorrow(self.original_string)
 
-        if date_search.last_week():  # pragma: no cover
-            return date_search.last_week()
+        if date_search.last_week(self.original_string):  # pragma: no cover
+            return date_search.last_week(self.original_string)
 
-        if date_search.last_month():  # pragma: no cover
-            return date_search.last_month()
+        if date_search.last_month(self.original_string):  # pragma: no cover
+            return date_search.last_month(self.original_string)
 
         if self.ctime:
             return date(self.ctime.year, self.ctime.month, self.ctime.day), None
@@ -664,6 +692,6 @@ class Date:
             try:
                 return self.date.strftime(self.date_format)
             except ValueError as e:
-                log.trace(f"Error while reformatting date {self.date}: {e}")
+                logger.trace(f"Error while reformatting date {self.date}: {e}")
                 self.date, self.found_string, self.reformatted_date = None, None, None
         return None
