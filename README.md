@@ -117,7 +117,14 @@ use_synonyms = false
 [projects]
     [projects.project_name] # The name of the project is used as a command line option. (e.g. --project=project_name)
 
-        path = "~/johnnydecimal" # (Required) Path to the folder containing the Johnny Decimal project
+        # (Required) Path to the folder containing the Johnny Decimal project
+        path = "~/johnnydecimal"
+
+        # (Required) Options: "jd" for Johnny Decimal, "folder" for a folder structure
+        project_type = "jd"
+
+        # (Optional) The depth of folders to parse. Ignored for Johnny Decimal projects. Default is 2
+        project_depth = 4
 
         # Any duplicated default values can be overridden here on a per project basis
 ```
