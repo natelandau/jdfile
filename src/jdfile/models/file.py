@@ -29,7 +29,29 @@ from .project import Project
 
 
 class File:
-    """Representation for a File object."""
+    """Represents a file object with methods to clean and organize its filename according to user and application configurations.
+
+    Attributes:
+        path (Path): The file's original path.
+        project_name (Optional[str]): The name of the project the file belongs to, if any.
+        stem (str): The stem of the file (filename without suffixes).
+        is_dotfile (bool): Indicates if the file is a dotfile.
+        has_new_parent (bool): Flag indicating if the file will have a new parent directory.
+        has_new_stem (bool): Flag indicating if the file's stem will change.
+        has_new_suffixes (bool): Flag indicating if the file's suffixes will change.
+        new_name (str): The new full name of the file, combining new stem and suffixes.
+        new_parent (Path): The new parent directory for the file.
+        new_stem (str): The new stem of the file after processing.
+        new_suffixes (List[str]): The new list of suffixes for the file after processing.
+        date_format (str): The date format to use when formatting dates within filenames.
+        format_dates (bool): Flag indicating if dates within filenames should be formatted.
+        overwrite_existing (bool): Flag indicating if existing files should be overwritten.
+        separator (Separator): The separator to use between words in the filename.
+        do_split_words (bool): Flag indicating if words in the stem should be split.
+        strip_stopwords (bool): Flag indicating if stopwords should be removed from the stem.
+        case_transformation (TransformCase): The type of case transformation to apply to the stem.
+        match_case_list (Tuple[str, ...]): A tuple of strings whose case should be preserved.
+    """
 
     def __init__(  # noqa: PLR0917
         self,
@@ -44,7 +66,9 @@ class File:
         user_overwrite_existing: bool | None,
         user_match_case_list: list[str] | None = None,
     ) -> None:
-        """Initializes the File object with path, project, and user preferences, setting up initial states and configuration based on application defaults or user inputs.
+        """Initialize the File object with path, project, and user preferences.
+
+        Sets up the file object with initial states and configurations based on the provided arguments or application defaults.
 
         Args:
             path (Path): The file's path.
@@ -108,12 +132,12 @@ class File:
         return f"{self.path.name}"
 
     def _clean_stem(self, date_only: bool = False) -> str:
-        """Generate a cleaned version of the file stem, optionally focusing on date removal or applying a full cleanup process.
+        """Generate a cleaned version of the file stem, applying various cleanup operations.
 
-        Conditionally remove the date from the stem, apply various cleanup operations like splitting camel case words, stripping stopwords, normalizing separators, and more, depending on the configuration. It optionally reinserts the date and ensures dotfile names are preserved.
+        Optionally focuses on date removal or applies a full cleanup process including splitting camelcase words, stripping stopwords, normalizing separators, and more, depending on configuration. It optionally reinserts the date and ensures dotfile names are preserved.
 
         Args:
-            date_only (bool, optional): If True, only remove the date from the stem. Defaults to False.
+            date_only (bool, optional): If True, focuses only on removing the date from the stem. Defaults to False.
 
         Returns:
             str: The cleaned stem of the file.
@@ -182,10 +206,12 @@ class File:
         return new_stem
 
     def _clean_suffixes(self) -> list[str]:
-        """Clean suffixes from the new filename.
+        """Clean the suffixes from the file's name, applying necessary conversions.
+
+        Converts ".jpeg" to ".jpg" and ensures all suffixes are lowercase. Sets a flag if changes are made.
 
         Returns:
-            list[str]: Cleaned suffixes.
+            list[str]: The cleaned list of suffixes for the file.
         """
         new_suffixes = [
             ".jpg" if ext.lower() == ".jpeg" else ext.lower() for ext in self.path.suffixes
@@ -196,7 +222,16 @@ class File:
         return new_suffixes
 
     def clean_filename(self, date_only: bool = False) -> str:
-        """Clean the filename and suffixes."""
+        """Clean the filename, combining the cleaned stem and suffixes into a new filename.
+
+        Optionally focuses on date removal from the stem or applies full filename cleaning.
+
+        Args:
+            date_only (bool, optional): If True, focuses only on removing the date from the stem. Defaults to False.
+
+        Returns:
+            str: The new name of the file after cleaning.
+        """
         self.new_stem = self._clean_stem(date_only=date_only)
         self.new_suffixes = self.path.suffixes if date_only else self._clean_suffixes()
 
@@ -207,18 +242,17 @@ class File:
     def _tokenize_stem_with_synonyms(
         stem: str, use_nltk: bool, user_terms: list[str] = []
     ) -> list[str]:
-        """Tokenize and stem the given file stem, optionally using NLTK for synonym expansion, and include user-defined terms.
+        """Tokenize the stem of the file, optionally using NLTK for synonym expansion, and include user-defined terms.
 
-        This method splits the camelcase and other words in the stem, optionally enriches the token list with synonyms using NLTK,
-        and incorporates any user-defined terms. The resulting list of tokens is made unique, converted to lowercase, and sorted.
+        Splits the camelcase and other words in the stem, enriches the tokens with synonyms if NLTK is used, and includes any user-defined terms. Results in a list of unique, sorted tokens.
 
         Args:
-            stem (str): The stem of the file to process.
+            stem (str): The stem of the file.
             use_nltk (bool): Flag to indicate the use of NLTK for finding synonyms.
             user_terms (list[str]): Additional user-defined terms to include in the token list.
 
         Returns:
-            list[str]: A sorted list of unique tokens derived from the stem, all in lowercase.
+            list[str]: A sorted list of unique tokens derived from the stem.
         """
         # Split the camelcase words and other words in the stem
         words_in_stem = split_words(split_camelcase_words(stem)) + user_terms
@@ -233,23 +267,27 @@ class File:
 
     @property
     def target(self) -> Path:
-        """Return the target path for the file.
+        """Return the target path for the file after changes.
+
+        Constructs the full target path combining new parent, stem, and suffixes.
 
         Returns:
-            Path: Target path for the file.
+            Path: The target path for the file.
         """
         return Path(self.new_parent / f"{self.new_stem}{''.join(self.new_suffixes)}")
 
     def commit(self, verbosity: int, project: Project | None, dry_run: bool) -> bool:
-        """Commit changes to the file by writing the new filename to disk.
+        """Commit changes to the file by renaming or moving it to the new location.
+
+        Logs the action taken based on verbosity level, project context, and whether it's a dry run.
 
         Args:
-            verbosity (int): Verbosity level, with a higher number indicating more detailed output.
-            project (Optional[Project]): Project object, if applicable. Defaults to None.
-            dry_run (bool): If True, perform a dry run without making actual changes. Defaults to False.
+            verbosity (int): Verbosity level for logging output.
+            project (Optional[Project]): The project context, if applicable.
+            dry_run (bool): If True, simulates changes without applying them.
 
         Returns:
-            bool: True if the file was successfully moved or if a dry run is performed, False otherwise.
+            bool: True if changes were applied or simulated successfully, False if no changes were made.
         """
         if not self.has_changes():
             if verbosity > 0:  # pragma: no cover
@@ -360,14 +398,12 @@ class File:
         return folder_to_move_to
 
     def get_diff_string(self) -> str:
-        """Generate a diff string highlighting the changes from the original to the new stem.
+        """Generate a diff string highlighting changes between the original and the new file name.
 
-        The method utilizes color codes to indicate insertions and deletions between
-        the original and new strings. Equal segments are not color-coded. Insertions
-        are highlighted in green, and deletions in red.
+        Utilizes difflib to compare the original file name against the new name, providing a visual representation of changes with color-coded insertions (green) and deletions (red). This can be useful for reviewing changes before applying them.
 
         Returns:
-            A single string with color-coded differences.
+            str: A string representing the differences between the original and new names, with insertions and deletions highlighted.
         """
         original = f"{self.stem}{''.join(self.path.suffixes)}"
         new = f"{self.new_stem}{''.join(self.new_suffixes)}"
@@ -392,13 +428,12 @@ class File:
         return "".join(diff_output)
 
     def has_changes(self) -> bool:
-        """Determine if the file's target state differs from its current state.
+        """Determine if there are pending changes to the file's name or location.
 
-        Evaluates whether any aspect of the file's target location (parent directory, stem, or suffixes)
-        differs from its current location, indicating pending changes.
+        Checks flags indicating changes to the file's parent directory, stem, or suffixes to assess if any renaming or relocations are pending. This is useful for deciding whether file processing actions need to be executed.
 
         Returns:
-            bool: True if there are pending changes to the file's location or name; False otherwise.
+            bool: True if there are changes pending; False otherwise.
         """
         return any(
             [
@@ -409,11 +444,9 @@ class File:
         )
 
     def unique_name(self) -> None:
-        """Append an integer to the filename to ensure uniqueness if the target path exists.
+        """Ensure the new filename is unique within the target directory by appending a number.
 
-        This method modifies `self.new_stem` by appending an incrementing integer, separated
-        by the defined separator (or an underscore if the separator is set to IGNORE), until
-        the constructed filename does not match an existing file path.
+        If the constructed new file name already exists in the target directory, this method appends an incrementing integer until a unique name is found. This prevents overwriting existing files and maintains file uniqueness.
         """
         sep = "_" if self.separator == Separator.IGNORE else self.separator.value
 

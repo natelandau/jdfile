@@ -23,7 +23,20 @@ def confirm_changes_to_files(
     project: Project,
     verbosity: int,
 ) -> bool:
-    """Confirm changes."""
+    """Prompt for confirmation of file changes if required, and display a summary of the changes.
+
+    This function generates and displays a table summarizing the pending changes to a list of files. It then prompts the user for confirmation before proceeding with the changes. The confirmation step can be bypassed with the force flag.
+
+    Args:
+        file_list (list[File]): The list of File objects to confirm changes for.
+        confirm_changes_flag (bool): Flag indicating whether user confirmation is required.
+        force (bool): If True, bypasses the confirmation prompt and proceeds with changes.
+        project (Project): The current project context, used for displaying relevant paths.
+        verbosity (int): Verbosity level for determining the detail of information displayed.
+
+    Returns:
+        bool: True if the changes are confirmed by the user or if confirmation is bypassed; False otherwise.
+    """
     if not force and confirm_changes_flag:
         logger.info("Confirm the changes below")
         table = confirmation_table(
@@ -41,9 +54,7 @@ def confirm_changes_to_files(
 def get_file_list(files: list[Path], depth: int, project: Project = None) -> list[Path]:
     """Build and return a sorted list of processable files from the given paths.
 
-    This function considers both individual files and directories in the input list. For directories,
-    it recursively searches for files up to the specified depth. It filters out files based on ignore patterns,
-    dotfiles, and specific ignore rules defined either in the Project object or the application's default configuration.
+    This function considers both individual files and directories in the input list. For directories, it recursively searches for files up to the specified depth. It filters out files based on ignore patterns, dotfiles, and specific ignore rules defined either in the Project object or the application's default configuration.
 
     Args:
         files: A list of files or directories to process.
@@ -130,7 +141,20 @@ def get_project(
 
 
 def load_configuration() -> None:
-    """Load the configuration."""
+    """Present a table of pending file changes for confirmation before committing them.
+
+    Displays a table summarizing the changes to be made to the files if the confirm_changes_flag is set and the operation is not forced. It asks for user confirmation to proceed with committing these changes. If the operation is forced or confirmation is not required, it returns True to indicate readiness to proceed without confirmation.
+
+    Args:
+        file_list (list[File]): List of File objects representing the files to be changed.
+        confirm_changes_flag (bool): Flag indicating if user confirmation is required.
+        force (bool): Flag indicating if the changes should be forced without confirmation.
+        project (Project): The project object, providing context such as the project path.
+        verbosity (int): Verbosity level for determining the detail of logging information.
+
+    Returns:
+        bool: True if changes are confirmed or confirmation is not required; False otherwise.
+    """
     if not CONFIG_PATH.exists():  # pragma: no cover
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         default_config_file = Path(__file__).parent.parent.resolve() / "default_config.toml"
@@ -150,7 +174,15 @@ def load_configuration() -> None:
 def show_files_without_updates(
     file_list: list[File], project: Project, organize_files_flag: bool
 ) -> None:
-    """Process files without updates."""
+    """Display a table of files that do not have a new parent directory after processing.
+
+    This function identifies files within the provided list that do not have updates to their parent directory and, if the organize files flag is enabled, displays a table of these files. It's useful for visualizing which files will remain unchanged in their current location after an organization operation.
+
+    Args:
+        file_list (list[File]): The list of File objects to check for updates.
+        project (Project): The current project context.
+        organize_files_flag (bool): Flag indicating whether file organization is enabled.
+    """
     files_without_new_parent = [x for x in file_list if not x.has_new_parent]
     if project and organize_files_flag and files_without_new_parent:
         table = skipped_file_table(files_without_new_parent)
@@ -167,7 +199,23 @@ def update_files(  # noqa: PLR0917
     force: bool,
     verbosity: int = 0,
 ) -> tuple[list[File], list[File]]:
-    """Process files."""
+    """Process files for cleaning and organizing based on the specified parameters.
+
+    This function iterates over a list of files, applying filename cleaning and, if specified, organizing them into new directories based on their content and additional user-specified terms. Files are processed for potential renaming and reorganization, and separated into lists of those with and without updates.
+
+    Args:
+        files_to_process (list[File]): The list of File objects to be processed.
+        clean_filenames (bool | None): Flag indicating whether filenames should be cleaned. If None, the application config will be used.
+        organize_files (bool | None): Flag indicating whether files should be organized into directories. If None, the application config will be used.
+        project (Project | None): The current project context, if applicable.
+        use_nltk_library (bool | None): Flag indicating whether the NLTK library should be used for synonym expansion in file organization.
+        terms (list[str]): List of additional terms to consider in file organization.
+        force (bool): Force file movement without confirmation for matching directories.
+        verbosity (int, optional): Verbosity level for logging. Defaults to 0.
+
+    Returns:
+        tuple[list[File], list[File]]: A tuple containing two lists: the first with files that did not require updates, and the second with files that were updated.
+    """
     files_with_no_updates = []
     files_with_updates = []
     with console.status(
