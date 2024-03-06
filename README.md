@@ -75,7 +75,10 @@ clean_filenames = true
 
 # An optional date format. If specified, the date will be appended to the filename
 # See https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes for details on how to specify a date.
-date_format = ""
+date_format = "%Y-%m-%d"
+
+# Format dates in filenames. true or false
+format_dates = true
 
 # Ignores dotfiles (files that start with a period) when cleaning a directory.  true or false
 ignore_dotfiles = true
@@ -117,7 +120,14 @@ use_synonyms = false
 [projects]
     [projects.project_name] # The name of the project is used as a command line option. (e.g. --project=project_name)
 
-        path = "~/johnnydecimal" # (Required) Path to the folder containing the Johnny Decimal project
+        # (Required) Path to the folder containing the Johnny Decimal project
+        path = "~/johnnydecimal"
+
+        # (Required) Options: "jd" for Johnny Decimal, "folder" for a folder structure
+        project_type = "jd"
+
+        # (Optional) The depth of folders to parse. Ignored for Johnny Decimal projects. Default is 2
+        project_depth = 4
 
         # Any duplicated default values can be overridden here on a per project basis
 ```
