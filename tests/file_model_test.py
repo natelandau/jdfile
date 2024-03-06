@@ -29,6 +29,7 @@ def test_with_hypothesis(stem, extension):
         path=Path(filename),
         project=None,
         user_date_format=False,
+        user_format_dates=False,
         user_separator=Separator.IGNORE,
         user_split_words=False,
         user_strip_stopwords=False,

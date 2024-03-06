@@ -36,6 +36,7 @@ class File:
         path: Path,
         project: Project | None,
         user_date_format: str | None,
+        user_format_dates: bool | None,
         user_separator: Separator | None,
         user_split_words: bool | None,
         user_strip_stopwords: bool | None,
@@ -49,6 +50,7 @@ class File:
             path (Path): The file's path.
             project (Optional[Project]): The associated project, if any.
             user_date_format (Optional[str]): User-specified date format.
+            user_format_dates (Optional[bool]): Flag to enable date formatting.
             user_separator (Optional[Separator]): User-specified separator.
             user_split_words (Optional[bool]): Flag to enable word splitting.
             user_strip_stopwords (Optional[bool]): Flag to enable stopword stripping.
@@ -87,6 +89,7 @@ class File:
             )
 
         self.date_format: str = get_config_or_default(user_date_format, "date_format")
+        self.format_dates: bool = get_config_or_default(user_format_dates, "format_dates")
         self.overwrite_existing: bool = get_config_or_default(
             user_overwrite_existing, "overwrite_existing"
         )
@@ -118,7 +121,7 @@ class File:
         new_stem = self.stem
 
         # Create a date object
-        if not self.is_dotfile and self.date_format:
+        if self.format_dates and not self.is_dotfile and self.date_format:
             date_object = (
                 Date(
                     date_format=self.date_format,
@@ -130,7 +133,7 @@ class File:
             )
 
             # Remove date from string
-            if date_object and date_object.found_string:
+            if self.format_dates and date_object and date_object.found_string:
                 new_stem = re.sub(re.escape(date_object.found_string), "", new_stem)
 
         # Apply transformations if not restricted to date_only
@@ -154,7 +157,8 @@ class File:
 
         # Insert date back into the string:
         if (
-            not self.is_dotfile
+            self.format_dates
+            and not self.is_dotfile
             and self.date_format
             and date_object
             and date_object.reformatted_date

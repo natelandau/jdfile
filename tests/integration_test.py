@@ -97,12 +97,12 @@ def test_failure_states(create_file, mock_config, args, filename, message, confi
             f"{date.today().strftime('%Y')}-foo-bar-baz.txt",
             {"separator": "dash", "date_format": "%Y"},
         ),
-        (["--split-words"], "FooBar Baz.txt", "Foo Bar Baz.txt", {"date_format": ""}),
+        (["--split-words", "--no-format-dates"], "FooBar Baz.txt", "Foo Bar Baz.txt", {}),
         (
-            ["--case", "LOWER", "--overwrite"],
+            ["--case", "LOWER", "--overwrite", "--no-format-dates"],
             "Foo Bar Baz.txt",
             "foo bar baz.txt",
-            {"date_format": ""},
+            {},
         ),
         (["--sep", "DASH"], "foo bar baz.TAR.gz", f"{TODAY}-foo-bar-baz.tar.gz", {}),
     ],
@@ -138,8 +138,8 @@ def test_filename_cleaning(
 @pytest.mark.parametrize(
     ("args"),
     [
-        (["--project=test_jd", "--no-clean"]),
-        (["--project=test_jd", "--no-clean", "--dry-run"]),
+        (["--project=test_jd", "--no-clean", "--no-format-dates"]),
+        (["--project=test_jd", "--no-clean", "--dry-run", "--no-format-dates"]),
     ],
 )
 def test_jdfile_project(mock_config, mock_project, debug, args):
@@ -148,9 +148,7 @@ def test_jdfile_project(mock_config, mock_project, debug, args):
 
     num_original_files = len(list(original_files_path.rglob("*")))
 
-    override_config = {
-        "date_format": "",  # Do not add dates to filenames
-    }
+    override_config = {}
 
     with AppConfig.change_config_sources(mock_config(**override_config)):
         result = runner.invoke(app, [str(original_files_path), *args])
@@ -218,10 +216,10 @@ def test_folder_project_tree(mock_config, mock_project, debug):
 @pytest.mark.parametrize(
     ("args", "expected_filename"),
     [
-        ([], "original_2.txt"),
-        (["--no-overwrite"], "original_2.txt"),
-        (["--overwrite"], "original.txt"),
-        (["--sep", "DASH"], "original-1.txt"),
+        (["--no-format-dates"], "original_2.txt"),
+        (["--no-overwrite", "--no-format-dates"], "original_2.txt"),
+        (["--overwrite", "--no-format-dates"], "original.txt"),
+        (["--sep", "DASH", "--no-format-dates"], "original-1.txt"),
     ],
 )
 def test_overwriting_files(tmp_path, mock_config, create_file, debug, args, expected_filename):
@@ -235,10 +233,10 @@ def test_overwriting_files(tmp_path, mock_config, create_file, debug, args, expe
     assert existing_file_2.exists()
     assert file_to_clean.exists()
 
-    with AppConfig.change_config_sources(mock_config(date_format="")):
+    with AppConfig.change_config_sources(mock_config()):
         result = runner.invoke(app, [str(file_to_clean), *args])
 
-    debug("result", strip_ansi(result.output))
+    # debug("result", strip_ansi(result.output))
 
     assert result.exit_code == 0
     assert existing_file_1.exists()
@@ -252,7 +250,7 @@ def test_overwriting_files(tmp_path, mock_config, create_file, debug, args, expe
     ("args", "user_input", "lines_expected"),
     [
         (
-            ["--confirm"],
+            ["--confirm", "--no-format-dates"],
             "n\r",
             [
                 "# Original Name New Name",
@@ -261,7 +259,7 @@ def test_overwriting_files(tmp_path, mock_config, create_file, debug, args, expe
             ],
         ),
         (
-            ["--confirm", "-v"],
+            ["--confirm", "-v", "--no-format-dates"],
             "y\r",
             [
                 "# Original Name New Name Diff",
@@ -280,7 +278,7 @@ def test_user_input(tmp_path, mock_config, create_file, debug, args, user_input,
     create_file("big brown bear.txt", path="originals")
     create_file("origi&$nal.txt", path="originals")
 
-    with AppConfig.change_config_sources(mock_config(date_format="")):
+    with AppConfig.change_config_sources(mock_config()):
         result = runner.invoke(
             app,
             [str(tmp_path / "originals"), *args],
@@ -288,7 +286,7 @@ def test_user_input(tmp_path, mock_config, create_file, debug, args, user_input,
             terminal_width=80,
         )
 
-    debug("result", strip_ansi(result.output))
+    # debug("result", strip_ansi(result.output))
 
     assert result.exit_code == 0
     assert "Pending changes for 2 of 2 files" in strip_ansi(result.output)

@@ -78,6 +78,7 @@ class ConfigProject(BaseModel):
 
     clean_filenames: Optional[bool] = None
     date_format: Optional[str] = None
+    format_dates: Optional[bool] = None
     ignore_dotfiles: Optional[bool] = None
     ignore_file_regex: Optional[str] = None
     ignored_files: tuple[str, ...] = ()
@@ -102,6 +103,7 @@ class AppConfig(BaseConfig):  # type: ignore [misc]
     # Default values
     clean_filenames: Optional[bool] = True
     date_format: Optional[str] = None
+    format_dates: bool = True
     ignore_dotfiles: bool = True
     ignore_file_regex: Optional[str] = "^$"  # Default to match nothing
     ignored_files: tuple[str, ...] = ()

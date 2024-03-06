@@ -131,6 +131,15 @@ def main(  # noqa: PLR0917
             show_default=True,
         ),
     ] = False,
+    format_dates: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--format-dates/--no-format-dates",
+            help="Format dates in filenames",
+            rich_help_panel="Filename Cleaning Options",
+            show_default=True,
+        ),
+    ] = None,
     log_file: Annotated[
         Path,
         typer.Option(
@@ -328,6 +337,7 @@ def main(  # noqa: PLR0917
             path=f,
             project=project,
             user_date_format=date_format,
+            user_format_dates=format_dates,
             user_separator=separator_callback(separator),
             user_split_words=split_words,
             user_strip_stopwords=strip_stopwords,
