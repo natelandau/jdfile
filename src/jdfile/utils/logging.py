@@ -1,4 +1,4 @@
-"""Logging utilities for jdfile."""
+"""Logging utilities for jdfile."""  # noqa: A005
 
 import contextlib
 import logging
@@ -22,7 +22,14 @@ class LogLevel(Enum):
 
 
 def log_formatter(record: dict) -> str:
-    """Use rich to style log messages."""
+    """Use rich to style log messages.
+
+    Args:
+        record (dict): The record.
+
+    Returns:
+        str: The formatted message.
+    """
     color_map = {
         "TRACE": "turquoise2",
         "DEBUG": "cyan",
@@ -71,9 +78,6 @@ def instantiate_logger(
             > 2: Include debug from installed libraries
         log_file (Path): The path to the log file where the log messages will be written.
         log_to_file (bool): Whether to log the messages to the file specified by `log_file`.
-
-    Returns:
-        None
     """
     level = verbosity if verbosity < 3 else 2  # noqa: PLR2004
 
@@ -128,7 +132,7 @@ class InterceptHandler(logging.Handler):  # pragma: no cover
     """
 
     @staticmethod
-    def emit(record):  # type: ignore [no-untyped-def]
+    def emit(record) -> None:  # type: ignore [no-untyped-def]  # noqa: ANN001
         """Intercepts standard logging and redirects to Loguru.
 
         This method is called by the Python logging module when a logging message is emitted. It intercepts the message and redirects it to Loguru, a third-party logging library. The method determines the corresponding Loguru level for the message and logs it using the Loguru logger.
@@ -143,7 +147,7 @@ class InterceptHandler(logging.Handler):  # pragma: no cover
             level = record.levelno
 
         # Find caller from where originated the logged message.
-        frame, depth = sys._getframe(6), 6
+        frame, depth = sys._getframe(6), 6  # noqa: SLF001
         while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1

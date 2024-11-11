@@ -41,7 +41,11 @@ class Folder:
         self.category = category
 
     def __str__(self) -> str:  # pragma: no cover
-        """String representation of the folder."""
+        """String representation of the folder.
+
+        Returns:
+            str: String representation of the folder.
+        """
         return f"FOLDER: {self.path.name} ({self.type.value}): {self.path}"
 
     @property
@@ -78,7 +82,7 @@ class Folder:
         terms = [word for word in re.split(r"[- _]", self.name) if word]
 
         if Path(self.path, ".jdfile").exists():
-            content = Path(self.path, ".jdfile").read_text().splitlines()
+            content = Path(self.path, ".jdfile").read_text(encoding="utf-8").splitlines()
             for line in content:
                 if line.startswith("#") or line in terms:
                     continue
@@ -113,18 +117,22 @@ class Project:
         self.verbosity = verbosity
 
         # Read configuration attributes
-        self.ignore_dotfiles: bool = AppConfig().get_attribute(project_name, "ignore_dotfiles")
+        self.ignore_dotfiles: bool = AppConfig().get_attribute(
+            project_name, "ignore_dotfiles", bool
+        )
         self.ignored_files: tuple[str, ...] = AppConfig().get_attribute(
-            project_name, "ignored_files"
+            project_name, "ignored_files", tuple[str, ...]
         )
         self.ignore_file_regex: str | None = (
-            AppConfig().get_attribute(project_name, "ignore_file_regex") or "^$"
+            AppConfig().get_attribute(project_name, "ignore_file_regex", str) or "^$"
         )
         self.overwrite_existing: bool = AppConfig().get_attribute(
-            project_name, "overwrite_existing"
+            project_name, "overwrite_existing", bool
         )
-        self.project_type: ProjectType = AppConfig().get_attribute(project_name, "project_type")
-        self.depth: int = AppConfig().get_attribute(project_name, "project_depth")
+        self.project_type: ProjectType = AppConfig().get_attribute(
+            project_name, "project_type", ProjectType
+        )
+        self.depth: int = AppConfig().get_attribute(project_name, "project_depth", int)
 
         # Validate and assign the project path
         self.path = self._validate_project_path(project_config.path)
@@ -137,7 +145,11 @@ class Project:
         )
 
     def __repr__(self) -> str:
-        """String representation of the project."""
+        """String representation of the project.
+
+        Returns:
+            str: String representation of the project.
+        """
         return f"PROJECT: {self.name}: {self.path} {len(self.usable_folders)} usable folders"
 
     def _find_non_jd_folders(self) -> list[Folder]:
@@ -233,7 +245,7 @@ class Project:
             Path: The validated path as a Path object.
 
         Raises:
-            ValueError: If the path is not valid or does not exist.
+            typer.Exit: If the path is not valid or does not exist.
         """
         path_to_validate = Path(path).expanduser().resolve()
 

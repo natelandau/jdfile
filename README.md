@@ -1,4 +1,4 @@
-[![PyPI version](https://badge.fury.io/py/jdfile.svg)](https://badge.fury.io/py/jdfile) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jdfile) [![Python Code Checker](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/automated-tests.yml) [![codecov](https://codecov.io/gh/natelandau/jdfile/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/jdfile)
+[![PyPI version](https://badge.fury.io/py/jdfile.svg)](https://badge.fury.io/py/jdfile) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/jdfile) [![Tests](https://github.com/natelandau/jdfile/actions/workflows/test.yml/badge.svg)](https://github.com/natelandau/jdfile/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/natelandau/jdfile/branch/main/graph/badge.svg?token=Y11Z883PMI)](https://codecov.io/gh/natelandau/jdfile)
 
 # jdfile
 
@@ -190,23 +190,20 @@ fi
 
 `jdfile` is built for my own personal use. YMMV depending on your system and requirements. I make no warranties for any data loss that may result from use. I strongly recommend running in `--dry-run` mode prior to updating files.
 
-## Contributing
+# Contributing
 
-### Setup: Once per project
+## Setup
 
-1. Install Python 3.10 and [Poetry](https://python-poetry.org)
-2. Clone this repository. `git clone https://github.com/natelandau/jdfile.git`
-3. Install the Poetry environment with `poetry install`.
-4. Activate your Poetry environment with `poetry shell`.
-5. Install the pre-commit hooks with `pre-commit install --install-hooks`.
+1. Install [uv](https://docs.astral.sh/uv/)
+2. Clone this repository `git clone https://github.com/natelandau/jdfile.git`
+3. Install dependencies `uv sync`
+4. Activate pre-commit hooks `uv run pre-commit install`
 
-### Developing
+## Development
 
--   This project follows the [Conventional Commits](https://www.conventionalcommits.org/) standard to automate [Semantic Versioning](https://semver.org/) and [Keep A Changelog](https://keepachangelog.com/) with [Commitizen](https://github.com/commitizen-tools/commitizen).
-    -   When you're ready to commit changes run `cz c`
--   Run `poe` from within the development environment to print a list of [Poe the Poet](https://github.com/nat-n/poethepoet) tasks available to run on this project. Common commands:
-    -   `poe lint` runs all linters
-    -   `poe test` runs all tests with Pytest
--   Run `poetry add {package}` from within the development environment to install a run time dependency and add it to `pyproject.toml` and `poetry.lock`.
--   Run `poetry remove {package}` from within the development environment to uninstall a run time dependency and remove it from `pyproject.toml` and `poetry.lock`.
--   Run `poetry update` from within the development environment to upgrade all dependencies to the latest versions allowed by `pyproject.toml`.
+-   Run the development version of the project `uv run jdfile`
+-   Run tests `uv run poe test`
+-   Run linting `uv run poe lint`
+-   Enter the virtual environment with `source .venv/bin/activate`
+-   Add or remove dependencies with `uv add/remove <package>`
+-   Upgrade dependencies with `uv run poe upgrade`

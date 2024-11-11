@@ -1,0 +1,99 @@
+---
+name: "Tests"
+
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - ".github/workflows/automated-tests.yml"
+            - ".github/actions/**"
+            - "**.py"
+            - "pyproject.toml"
+            - "uv.lock"
+        branches:
+            - main
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+        paths:
+            - ".github/workflows/automated-tests.yml"
+            - ".github/actions/**"
+            - "**.py"
+            - "pyproject.toml"
+            - "uv.lock"
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    test-python-code:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: true
+            matrix:
+                python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - uses: actions/cache@v4
+              with:
+                  path: ./.hypothesis
+                  key: hypothesis-${{ hashFiles('.src/jdfile/models/file.py') }}-${{ hashFiles('.src/jdfile/jdfile/utils/strings.py') }}
+
+            - name: Setup Python, uv, and the package
+              uses: ./.github/actions/setup_python_env
+
+            - name: Run tests
+              shell: bash
+              run: uv run pytest --cov --cov-config=pyproject.toml --cov-report=xml --cov-report=term tests/
+
+            - name: Upload coverage to Codecov
+              if: ${{ matrix.python-version == '3.13' }}
+              uses: codecov/codecov-action@v4
+              with:
+                  files: reports/coverage.xml
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    lint-project:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - uses: actions/cache@v4
+              with:
+                  path: ~/.cache/pre-commit
+                  key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+            - name: Setup Python, uv, and the package
+              uses: ./.github/actions/setup_python_env
+
+            - name: lint with ruff
+              shell: bash
+              run: uv run ruff check --no-fix src/
+
+            - name: check types with mypy
+              shell: bash
+              run: uv run mypy --config-file pyproject.toml src/
+
+            - name: check spelling with typos
+              shell: bash
+              run: uv run typos
+
+            - name: Check lock file consistency
+              run: uv sync --locked
+
+            - name: Run pre-commit
+              run: |
+                  uv run pre-commit run -a yamllint
+                  uv run pre-commit run -a typos
+                  uv run pre-commit run -a check-json
+                  uv run pre-commit run -a check-toml
+                  uv run pre-commit run -a check-xml
+                  uv run pre-commit run -a shellcheck
+                  uv run pre-commit run -a check-shebang-scripts-are-executable

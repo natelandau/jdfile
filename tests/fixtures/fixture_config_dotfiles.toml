@@ -5,7 +5,7 @@
 clean_filenames    = true
 date_format        = "%Y-%m-%d"
 format_dates       = true
-ignore_dotfiles    = true
+ignore_dotfiles    = false
 ignore_file_regex  = ''
 ignored_files      = ['file1.txt', 'file2.txt']
 match_case_list    = ["FooBar", "iMac", "iPhone"]

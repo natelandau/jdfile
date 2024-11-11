@@ -1,69 +1,82 @@
-[build-system]
-    build-backend = "poetry.core.masonry.api"
-    requires      = ["poetry-core>=1.0.0"]
-
-[tool.poetry] # https://python-poetry.org/docs/pyproject/
-    authors     = ["Nate Landau <github@natenate.org>"]
+[project]
+    authors = [{ name = "Nate Landau", email = "github@natenate.org" }]
+    dependencies = [
+        "confz>=2.0.1",
+        "inflect>=7.4.0",
+        "loguru>=0.7.2",
+        "nltk>=3.9.1,<4.0.0",
+        "pydantic>=2.9.2",
+        "questionary>=2.0.1",
+        "rich>=13.7.1",
+        "typer>=0.12.4",
+]
     description = "File Manager for the Johnny Decimal System"
-    homepage    = "https://github.com/natelandau/jdfile"
-    license     = "GNU AFFERO"
-    name        = "jdfile"
-    readme      = "README.md"
-    repository  = "https://github.com/natelandau/jdfile"
-    version     = "1.1.5"
+    license = { file = "LICENSE" }
+    name = "jdfile"
+    readme = "README.md"
+    requires-python = ">=3.11"
+    version = "1.1.5"
 
-    [tool.poetry.scripts] # https://python-poetry.org/docs/pyproject/#scripts
+    [project.urls]
+        Homepage   = "https://github.com/natelandau/jdfile"
+        Repository = "https://github.com/natelandau/jdfile"
+
+    [project.scripts]
         jdfile = "jdfile.jdfile:app"
 
-    [tool.poetry.dependencies]
-        confz       = "^2.0.1"
-        inflect     = "^7.0.0"
-        loguru      = "^0.7.2"
-        nltk        = "^3.8.1"
-        python      = "^3.10"
-        questionary = "^2.0.1"
-        rich        = "^13.7.0"
-        shellingham = "^1.5.4"
-        typer       = "^0.9.0"
+[build-system]
+    build-backend = "hatchling.build"
+    requires      = ["hatchling"]
 
-    [tool.poetry.group.test.dependencies]
-        hypothesis     = "^6.98.10"
-        pytest         = "^8.0.1"
-        pytest-clarity = "^1.0.1"
-        pytest-mock    = "^3.12.0"
-        pytest-sugar   = "^1.0.0"
-
-    [tool.poetry.group.dev.dependencies]
-        commitizen            = "^3.15.0"
-        coverage              = "^7.4.2"
-        mypy                  = "^1.8.0"
-        pdoc                  = "^14.4.0"
-        poethepoet            = "^0.24.4"
-        pre-commit            = "^3.6.2"
-        ruff                  = "^0.3.0"
-        sh                    = "^2.0.6"
-        shellcheck-py         = "^0.9.0.6"
-        types-python-dateutil = "^2.8.19.20240106"
-        typos                 = "^1.18.2"
+[tool.uv]
+    dev-dependencies = [
+        "commitizen>=3.29.0",
+        "coverage>=7.6.1",
+        "deptry>=0.21.0",
+        "hypothesis>=6.118.7",
+        "mypy>=1.11.1",
+        "poethepoet>=0.27.0",
+        "pre-commit>=3.8.0",
+        "pytest-clarity>=1.0.1",
+        "pytest-cov>=6.0.0",
+        "pytest-env>=1.1.3",
+        "pytest-mock>=3.14.0",
+        "pytest-pretty-terminal>=1.1.0",
+        "pytest-sugar>=1.0.0",
+        "pytest-xdist>=3.6.1",
+        "pytest>=8.3.2",
+        "ruff>=0.6.2",
+        "types-python-dateutil>=2.9.0.20241003",
+        "typos>=1.24.1",
+        "yamllint>=1.35.1",
+    ]
 
 [tool.commitizen]
-    bump_message             = "bump(release): v$current_version → v$new_version"
-    tag_format               = "v$version"
-    update_changelog_on_bump = true
-    version_files            = ["src/jdfile/constants.py:VERSION"]
-    version_provider         = "poetry"
+    bump_message               = "bump(release): v$current_version → v$new_version"
+    changelog_merge_prerelease = true
+    tag_format                 = "v$version"
+    update_changelog_on_bump   = true
+    version_files              = ["src/jdfile/constants.py:VERSION"]
+    version_provider           = "pep621"
 
 [tool.coverage.report] # https://coverage.readthedocs.io/en/latest/config.html#report
     exclude_lines = [
         'def __repr__',
         'except [\w\s\._]+ as .*:',
+        'log\.critical',
+        'log\.debug',
+        'log\.error',
+        'log\.exception',
+        'log\.info',
+        'log\.success',
+        'log\.trace',
+        'log\.warning',
         'pragma: no cover',
         'raise Abort',
         'raise Exit',
-        'raise typer\.Abort',
         'raise typer\.Exit',
     ]
-    fail_under = 50
+    fail_under = 60
     precision = 1
     show_missing = true
     skip_covered = true
@@ -76,6 +89,9 @@
 
 [tool.coverage.xml]
     output = "reports/coverage.xml"
+
+[tool.deptry]
+    known_first_party = ["jdfile"]
 
 [tool.mypy] # https://mypy.readthedocs.io/en/latest/config_file.html
     disallow_any_unimported = false
@@ -95,8 +111,8 @@
     show_error_context = true
     strict_optional = false
     warn_redundant_casts = true
-    warn_unreachable = false
-    warn_unused_ignores = false
+    warn_unreachable = true
+    warn_unused_ignores = true
 
 [tool.pytest.ini_options]
     addopts        = "--color=yes --doctest-modules --exitfirst --failed-first --strict-config --strict-markers --junitxml=reports/pytest.xml"
@@ -105,6 +121,29 @@
     xfail_strict   = true
 
 [tool.ruff] # https://github.com/charliermarsh/ruff
+    exclude = [
+        ".bzr",
+        ".direnv",
+        ".eggs",
+        ".git",
+        ".hg",
+        ".mypy_cache",
+        ".nox",
+        ".pants.d",
+        ".pytype",
+        ".ruff_cache",
+        ".svn",
+        ".tox",
+        ".venv",
+        "__pypackages__",
+        "_build",
+        "buck-out",
+        "build",
+        "dist",
+        "node_modules",
+        "venv",
+    ]
+
     fix            = true
     line-length    = 100
     output-format  = "grouped"
@@ -115,6 +154,8 @@
         ignore = [
             "B006",    # mutable-argument-default
             "B008",    # function-call-in-default-argument
+            "COM812",  # Trailing comma missing"
+            "CPY001",  # Missing copyright notice at top of file
             "D107",    # undocumented-public-init
             "D213",    # multi-line-summary-second-line
             "D215",    # section-underline-not-over-indented
@@ -124,23 +165,34 @@
             "D409",    # section-underline-matches-section-length
             "D413",    # blank-line-after-last-section
             "E501",    # line-too-long
+            "FBT001",  # Boolean default positional argument in function definition
+            "FBT002",  # Boolean default positional argument in function definition
+            "FIX002",  # Line contains TODO
             "ISC001",  # single-line-implicit-string-concatenation
             "N805",    # invalid-first-argument-name-for-method
             "PLR0913", # too-many-arguments
+            "PLR0917", # too many positional arguments
+            "RSE102",  # Unnecessary parentheses on raised exception"
             "S311",    # suspicious-non-cryptographic-random-usage
+            "TD002",   # Missing author in todo
+            "TD003",   # Missing ticket number in todo
             "UP007",   # non-pep604-annotation
         ]
-        ignore-init-module-imports = true
         per-file-ignores = { "jdfile.py" = [
             "PLR0912",
             "PLR0913",
         ], "tests/*.py" = [
             "A002",
             "A003",
+            "ANN001",
+            "ANN003",
+            "ANN201",
+            "ANN202",
             "ARG001",
             "ARG002",
             "ARG005",
             "D102",
+            "DOC201",
             "ERA001",
             "F403",
             "PGH003",
@@ -151,49 +203,7 @@
             "S101",
         ] }
         preview = true
-        select = [
-            "A",     # flake8-builtins
-            "ARG",   # flake8-unused-arguments
-            "ASYNC", # flake8-async
-            "B",     # flake8-bugbear
-            "BLE",   # flake8-blind-exception
-            "C4",    # flake8-comprehensions
-            "C90",   # McCabe
-            "D",     # pydocstyle
-            "E",     # pycodestyle Errors
-            "EM",    # flake8-errmsg
-            "ERA",   # flake8-eradicate
-            "EXE",   # flake8-executable
-            "F",     # pyflakes
-            "FA",    # flake8-future
-            "FLY",   # flynt
-            "FURB",  # refurb
-            "I",     # iSort
-            "ISC",   # flake8-implicit-str-concat
-            "N",     # Pep8-naming
-            "NPY",   # flake8-numpy
-            "PERF",  # Perflint
-            "PGH",   # pygrep-hooks
-            "PL",    # pylint
-            "PLC",   # pylint Convention
-            "PLE",   # pylint Error
-            "PLR",   # pylint Refactor
-            "PLW",   # pylint Warning
-            "PT",    # flake8-pytest-style
-            "PTH",   # flake8-use-pathlib
-            "Q",     # flake8-quotes
-            "RET",   # flake8-return
-            "RUF",   # Ruff-specific rules
-            "S",     # flake8-bandit
-            "SIM",   # flake8-simplify
-            "T20",   # flake8-print
-            "TID",   # flake8-tidy-imports
-            "TRY",   # tryceratops
-            "UP",    # pyupgrade
-            "W",     # pycodestyle Warnings
-            "YTT",   # flake8-2020
-            # "DTZ",   # flake8-datetimez
-        ]
+        select = ["ALL"]
         unfixable = ["E712", "ERA001", "F401", "F841", "UP007"]
         [tool.ruff.lint.mccabe]
             # Unlike Flake8, default to a complexity level of 10.
@@ -212,27 +222,22 @@
     skip-magic-trailing-comma = false
 
 [tool.poe.tasks]
-
-    [tool.poe.tasks.docs]
-        cmd = """
-    pdoc
-      --docformat google
-      --output-directory docs
-      src/jdfile
-    """
-        help = "Generate this package's docs"
+    [tool.poe.tasks.upgrade]
+        shell = """
+        echo "-- Upgrading packages --" &&
+        uv lock --upgrade &&
+        echo "-- Autoupdating pre-commit --" &&
+        pre-commit autoupdate
+        """
 
     [tool.poe.tasks.lint]
         help = "Lint this package"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "ruff check --no-fix src/"
+            shell = "ruff check --preview --no-fix src/"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "ruff format --check src/ tests/"
-
-        [[tool.poe.tasks.lint.sequence]]
-            shell = "poetry check"
 
         [[tool.poe.tasks.lint.sequence]]
             shell = "mypy --config-file pyproject.toml src/"
@@ -241,16 +246,12 @@
             shell = "typos"
 
         [[tool.poe.tasks.lint.sequence]]
-            shell = "yamllint ."
+            cmd = """
+                pre-commit run
+                    --all-files
+                    --color always
+                """
 
 [tool.poe.tasks.test]
-    help = "Test this package"
-
-    [[tool.poe.tasks.test.sequence]]
-        cmd = "coverage run"
-
-    [[tool.poe.tasks.test.sequence]]
-        cmd = "coverage report"
-
-    [[tool.poe.tasks.test.sequence]]
-        cmd = "coverage xml"
+    cmd  = "pytest --cov --cov-config=pyproject.toml --cov-report=xml --cov-report=term tests/"
+    help = "Test this package and generate coverage reports"

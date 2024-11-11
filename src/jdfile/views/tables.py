@@ -65,6 +65,9 @@ def skipped_file_table(files: list[File]) -> Table:
 
     Args:
         files (list[File]): List of files to process.
+
+    Returns:
+        Table: Table of skipped files.
     """
     table = Table(
         "#",
