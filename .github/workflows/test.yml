@@ -49,7 +49,7 @@ jobs:
 
             - name: Run tests
               shell: bash
-              run: uv run poe test
+              run: uv run pytest --cov --cov-config=pyproject.toml --cov-report=xml --cov-report=term tests/
 
             - name: Upload coverage to Codecov
               if: ${{ matrix.python-version == '3.13' }}
