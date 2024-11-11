@@ -2,7 +2,7 @@
 
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional, cast
+from typing import Annotated, Optional
 
 import typer
 from loguru import logger
@@ -40,24 +40,45 @@ TransformCaseOption = Enum("TransformCaseOption", {x.name: x.name for x in Trans
 
 
 def separator_callback(value: SeparatorOption) -> Separator:
-    """Convert a SeparatorOption to a Separator."""
+    """Convert a SeparatorOption to a Separator.
+
+    Args:
+        value (SeparatorOption): The SeparatorOption.
+
+    Returns:
+        Separator: The Separator.
+    """
     return Separator[value.name] if value else None
 
 
 def transform_case_callback(value: TransformCaseOption) -> TransformCase:
-    """Convert a TransformCaseOption to a TransformCase."""
+    """Convert a TransformCaseOption to a TransformCase.
+
+    Args:
+        value (TransformCaseOption): The TransformCaseOption.
+
+    Returns:
+        TransformCase: The TransformCase.
+    """
     return TransformCase[value.name] if value else None
 
 
 def version_callback(value: bool) -> None:
-    """Print version and exit."""
+    """Print version and exit.
+
+    Args:
+        value (bool): The value.
+
+    Raises:
+        typer.Exit: If the user chooses to exit.
+    """
     if value:
         console.print(f"{__package__} version: {VERSION}")
         raise typer.Exit()
 
 
 @app.command()
-def main(  # noqa: PLR0917
+def main(
     clean_filenames: Annotated[
         Optional[bool],
         typer.Option(
@@ -66,7 +87,7 @@ def main(  # noqa: PLR0917
             rich_help_panel="Filename Cleaning Options",
         ),
     ] = None,
-    case_transformation: Annotated[
+    transform_case: Annotated[
         Optional[TransformCaseOption],
         typer.Option(
             "--case",
@@ -197,15 +218,15 @@ def main(  # noqa: PLR0917
             show_default=False,
         ),
     ] = None,
-    syns_from_nltk: Annotated[
-        bool,
+    use_synonyms: Annotated[
+        Optional[bool],
         typer.Option(
             "--syns/--no-syns",
             help="Use synonyms from NLTK to help match folders. Note, this will download the NLTK corpus if it is not already installed.",
-            show_default=True,
+            show_default=False,
             rich_help_panel="File Organization Options",
         ),
-    ] = False,
+    ] = None,
     split_words: Annotated[
         Optional[bool],
         typer.Option(
@@ -313,7 +334,27 @@ def main(  # noqa: PLR0917
     $ jdfile ---project={project_name} --term=term1 --term=term2 path/to/some_file.jpg
     """
     instantiate_logger(verbosity, log_file, log_to_file)
-    load_configuration()
+
+    new_config_data: dict = {}
+    new_config_data.update(
+        {
+            k: v
+            for k, v in {
+                "clean_filenames": clean_filenames,
+                "date_format": date_format,
+                "format_dates": format_dates,
+                "overwrite_existing": overwrite_existing,
+                "separator": separator,
+                "split_words": split_words,
+                "strip_stopwords": strip_stopwords,
+                "transform_case": transform_case,
+                "use_synonyms": use_synonyms,
+            }.items()
+            if v is not None
+        }
+    )
+
+    load_configuration(new_config_data=new_config_data)
 
     if verbosity > 1:  # pragma: no cover
         console.log(AppConfig(), highlight=True)
@@ -321,7 +362,7 @@ def main(  # noqa: PLR0917
     if tree_view:
         project = get_project(project_name, exit_on_fail=True, verbosity=verbosity)
         project.tree()
-        raise typer.Exit()
+        raise typer.Exit()  # noqa: DOC501
 
     if not files:
         logger.error("No files to process")
@@ -333,17 +374,7 @@ def main(  # noqa: PLR0917
         project = get_project(project_name, exit_on_fail=True, verbosity=verbosity)
 
     files_to_process = [
-        File(
-            path=f,
-            project=project,
-            user_date_format=date_format,
-            user_format_dates=format_dates,
-            user_separator=separator_callback(separator),
-            user_split_words=split_words,
-            user_strip_stopwords=strip_stopwords,
-            user_case_transformation=transform_case_callback(case_transformation),
-            user_overwrite_existing=overwrite_existing,
-        )
+        File(path=f, project=project)
         for f in get_file_list(files=files, depth=depth, project=project)
     ]
 
@@ -352,9 +383,7 @@ def main(  # noqa: PLR0917
         raise typer.Exit(1)
 
     use_nltk_library = (
-        syns_from_nltk
-        or cast(bool, AppConfig().get_attribute(project_name, "use_synonyms"))
-        or False
+        use_synonyms or AppConfig().get_attribute(project_name, "use_synonyms", bool) or False
     )
     if project and use_nltk_library:  # pragma: no cover
         instantiate_nltk()

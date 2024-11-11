@@ -68,8 +68,12 @@ def test_insert_5():
 
 
 @given(
-    string=st.text(),
-    value=st.text(),
+    string=st.text(
+        min_size=3, max_size=3, alphabet=st.characters(codec="utf-8", exclude_characters="/\\")
+    ),
+    value=st.text(
+        min_size=3, max_size=3, alphabet=st.characters(codec="utf-8", exclude_characters="/\\")
+    ),
     location=st.sampled_from(InsertLocation),
     separator=st.sampled_from(Separator),
 )

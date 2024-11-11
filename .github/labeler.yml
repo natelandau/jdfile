@@ -1,28 +1,10 @@
 ---
 github_actions:
-    - changed-files:
-          - any-glob-to-any-file: ".github/**"
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
 dev_container:
-    - changed-files:
-          - any-glob-to-any-file: ".devcontainer/**"
-configuration:
-    - changed-files:
-          - any-glob-to-any-file: ".*"
-          - any-glob-to-any-file: "*.js"
-          - any-glob-to-any-file: "*.json"
-          - any-glob-to-any-file: "*.toml"
-          - any-glob-to-any-file: "*.yaml"
-          - any-glob-to-any-file: "*.yml"
-documentation:
-    - changed-files:
-          - any-glob-to-any-file: "**.md"
-          - any-glob-to-any-file: "docs/**"
-tests:
-    - changed-files:
-          - any-glob-to-any-file: "tests/**"
-dependencies:
-    - changed-files:
-          - any-glob-to-any-file: "*.lock"
+  - changed-files:
+      - any-glob-to-any-file: ".devcontainer/**"
 jdfile:
-    - changed-files:
-          - any-glob-to-any-file: "src/**"
+  - changed-files:
+      - any-glob-to-any-file: "src/**"

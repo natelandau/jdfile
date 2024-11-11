@@ -1,6 +1,6 @@
 """Configuration file for the jdfile package."""
 
-from typing import Annotated, Any, ClassVar, Optional
+from typing import Annotated, ClassVar, Optional, TypeVar
 
 from confz import BaseConfig, ConfigSources, FileSource
 from pydantic import BaseModel, BeforeValidator
@@ -10,6 +10,12 @@ from jdfile.constants import CONFIG_PATH, InsertLocation, ProjectType, Separator
 
 def string_to_separator(value: str) -> Separator:
     """Convert a string to a Separator enum value.
+
+    Args:
+        value: The string to convert.
+
+    Returns:
+        Separator: The Separator enum value.
 
     Raises:
         ValueError: If the provided value does not match any Separator enum.
@@ -24,6 +30,12 @@ def string_to_separator(value: str) -> Separator:
 def string_to_transform_case(value: str) -> TransformCase:
     """Convert a string to a TransformCase enum value.
 
+    Args:
+        value: The string to convert.
+
+    Returns:
+        TransformCase: The TransformCase enum value.
+
     Raises:
         ValueError: If the provided value does not match any TransformCase enum.
     """
@@ -37,6 +49,12 @@ def string_to_transform_case(value: str) -> TransformCase:
 def string_to_insert_location(value: str) -> InsertLocation:
     """Convert a string to an InsertLocation enum value.
 
+    Args:
+        value: The string to convert.
+
+    Returns:
+        InsertLocation: The InsertLocation enum value.
+
     Raises:
         ValueError: If the provided value does not match any InsertLocation enum.
     """
@@ -49,6 +67,12 @@ def string_to_insert_location(value: str) -> InsertLocation:
 
 def string_to_project_type(value: str) -> ProjectType:
     """Convert a string to a ProjectType enum value.
+
+    Args:
+        value: The string to convert.
+
+    Returns:
+        ProjectType: The ProjectType enum value.
 
     Raises:
         ValueError: If the provided value does not match any ProjectType enum.
@@ -66,6 +90,8 @@ def string_to_project_type(value: str) -> ProjectType:
         msg = f"Invalid project type: {value}"
         raise ValueError(msg) from e
 
+
+T = TypeVar("T")
 
 ValidSeparator = Annotated[Separator, BeforeValidator(string_to_separator)]
 ValidTransformCase = Annotated[TransformCase, BeforeValidator(string_to_transform_case)]
@@ -86,7 +112,7 @@ class ConfigProject(BaseModel):
     match_case_list: tuple[str, ...] = ()
     overwrite_existing: Optional[bool] = None
     path: str
-    project_depth: Optional[int] = 2
+    project_depth: int = 2
     project_type: ValidProjectType
     separator: Optional[ValidSeparator] = None
     split_words: Optional[bool] = None
@@ -121,7 +147,7 @@ class AppConfig(BaseConfig):  # type: ignore [misc]
 
     CONFIG_SOURCES: ClassVar[ConfigSources | None] = [FileSource(file=CONFIG_PATH)]
 
-    def get_attribute(cls, project_name: str, attribute: str) -> Any:
+    def get_attribute(cls, project_name: str, attribute: str, expected_type: type[T]) -> T | None:  # noqa: ARG002
         """Retrieve a project-specific attribute or a default attribute value.
 
         Searches for an attribute within a specified project's configuration. If the attribute
@@ -131,6 +157,7 @@ class AppConfig(BaseConfig):  # type: ignore [misc]
         Args:
             project_name: The name of the project to search for the attribute.
             attribute: The name of the attribute to retrieve.
+            expected_type: The expected type of the attribute.
 
         Returns:
             The value of the attribute from the project's configuration if present; otherwise,

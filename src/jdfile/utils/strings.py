@@ -1391,7 +1391,7 @@ def strip_stopwords(string: str, stopwords: tuple[str, ...] = ()) -> str:
         logger.trace(f"Skip stripping stopwords. String is empty: {string}")
         return string
 
-    return tmp_string.strip(" -_")
+    return tmp_string.strip(" -_")  # type: ignore [unreachable]
 
 
 def transform_case(string: str, transform_case: TransformCase) -> str:

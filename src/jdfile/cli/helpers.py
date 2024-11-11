@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 import typer
-from confz import validate_all_configs
+from confz import ConfigSource, DataSource, FileSource, validate_all_configs
 from loguru import logger
 from pydantic import ValidationError
 from rich.prompt import Confirm
@@ -65,13 +65,20 @@ def get_file_list(files: list[Path], depth: int, project: Project = None) -> lis
         A sorted list of Path objects representing files to be processed.
     """
     # Determine files to ignore and regex patterns based on project or default configuration
-    config: Project | AppConfig = project if project else AppConfig()
+    config: Project | AppConfig = project or AppConfig()
     files_to_ignore = ALWAYS_IGNORE_FILES + config.ignored_files
     ignore_file_regex = config.ignore_file_regex or "^$"
     ignore_dotfiles = config.ignore_dotfiles
 
     def is_ignored_file(file: Path) -> bool:
-        """Determine if a file should be ignored based on its name or path."""
+        """Determine if a file should be ignored based on its name or path.
+
+        Args:
+            file (Path): The file to check for ignore status.
+
+        Returns:
+            bool: True if the file should be ignored, False otherwise.
+        """
         return (
             (ignore_dotfiles and file.name.startswith("."))
             or (file.name in files_to_ignore)
@@ -140,26 +147,29 @@ def get_project(
     return Project(project_name, verbosity=verbosity)
 
 
-def load_configuration() -> None:
-    """Present a table of pending file changes for confirmation before committing them.
-
-    Displays a table summarizing the changes to be made to the files if the confirm_changes_flag is set and the operation is not forced. It asks for user confirmation to proceed with committing these changes. If the operation is forced or confirmation is not required, it returns True to indicate readiness to proceed without confirmation.
+def load_configuration(new_config_data: dict = {}) -> None:
+    """Load and validate the configuration file. Optionally override with new configuration data from CLI args.
 
     Args:
-        file_list (list[File]): List of File objects representing the files to be changed.
-        confirm_changes_flag (bool): Flag indicating if user confirmation is required.
-        force (bool): Flag indicating if the changes should be forced without confirmation.
-        project (Project): The project object, providing context such as the project path.
-        verbosity (int): Verbosity level for determining the detail of logging information.
+        new_config_data (dict): New configuration data to be validated.
 
-    Returns:
-        bool: True if changes are confirmed or confirmation is not required; False otherwise.
+    Raises:
+        typer.Exit: If the configuration file is invalid.
     """
     if not CONFIG_PATH.exists():  # pragma: no cover
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         default_config_file = Path(__file__).parent.parent.resolve() / "default_config.toml"
         shutil.copy(default_config_file, CONFIG_PATH)
         logger.info(f"Created default configuration file: {CONFIG_PATH}")
+
+    # Set up config sources with both file and override data from the CLI
+    config_sources: list[ConfigSource] = [
+        FileSource(file=CONFIG_PATH),
+        DataSource(data=new_config_data),
+    ]
+
+    # Update AppConfig class to use the new sources
+    AppConfig.CONFIG_SOURCES = config_sources
 
     # Load and validate configuration
     try:
@@ -189,7 +199,7 @@ def show_files_without_updates(
         console.print(table)
 
 
-def update_files(  # noqa: PLR0917
+def update_files(
     files_to_process: list[File],
     clean_filenames: bool | None,
     organize_files: bool | None,
@@ -224,7 +234,8 @@ def update_files(  # noqa: PLR0917
     ) as status:
         project_name = project.name if project else None
         do_clean_filename = clean_filenames or (
-            clean_filenames is None and AppConfig().get_attribute(project_name, "clean_filenames")
+            clean_filenames is None
+            and AppConfig().get_attribute(project_name, "clean_filenames", bool)  # type: ignore [unreachable]
         )
 
         for f in files_to_process:
@@ -244,6 +255,7 @@ def update_files(  # noqa: PLR0917
                     status=status,
                     verbosity=verbosity,
                 )
+
                 logger.trace(
                     f"📁 {Path(*Path(f.path).parts[-3:])} -> {Path(*Path(new_parent).parts[-3:])}"
                 )

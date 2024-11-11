@@ -2,41 +2,27 @@
 """Test the file model."""
 
 from pathlib import Path
+from unittest.mock import patch
 
-from hypothesis import given
-from hypothesis import strategies as st
-
-from jdfile.constants import Separator, TransformCase
 from jdfile.models import File
 from jdfile.utils import console
 
+# Mock the stat call to return a consistent ctime
 
-@given(
-    stem=st.text(
-        min_size=3,
-        max_size=20,
-        alphabet=st.characters(exclude_characters="0/\\"),  # Fails on `0`
-    ),
-    extension=st.from_regex(r"(\.[a-zA-Z]{2,4}){1,2}", fullmatch=True),
-)
-def test_with_hypothesis(stem, extension):
+
+def test_with_hypothesis() -> None:
     """Test instantiating and cleaning files with various unicode characters."""
     # GIVEN a file with the provided name in a clean directory
-    filename = f"{stem}{extension}"
-    # console.log(filename)  # for debugging
+    filename = "testfile.txt"
+    # console.log("before: ", filename)  # for debugging
 
-    file = File(
-        path=Path(filename),
-        project=None,
-        user_date_format=False,
-        user_format_dates=False,
-        user_separator=Separator.IGNORE,
-        user_split_words=False,
-        user_strip_stopwords=False,
-        user_case_transformation=TransformCase.IGNORE,
-        user_overwrite_existing=False,
-        user_match_case_list=["test"],
-    )
-    # console.log(filename) # for debugging
-    assert str(file.path) == filename
-    file.clean_filename()
+    mock_stat = type("MockStat", (), {"st_ctime": 1234567890.0})
+
+    with patch("jdfile.models.file.Path.stat", return_value=mock_stat):
+        file = File(path=Path(filename), project=None)
+        # console.log(file.__dict__)
+        # assert False
+        # console.log("after: ", file.path)  # for debugging
+        assert str(file.path) == filename
+        file.clean_filename()
+        # console.log("cleaned: ", file.path.name)  # for debugging

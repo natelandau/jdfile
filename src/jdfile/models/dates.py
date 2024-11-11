@@ -2,7 +2,7 @@
 
 import re
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 
 from loguru import logger
@@ -90,7 +90,7 @@ class DatePattern:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
 
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def yyyy_dd_mm(string: str) -> tuple[date, str] | None:
@@ -129,7 +129,7 @@ class DatePattern:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
 
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def month_dd_yyyy(string: str) -> tuple[date, str] | None:
@@ -166,7 +166,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def dd_month_yyyy(string: str) -> tuple[date, str] | None:
@@ -203,7 +203,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def month_dd(string: str) -> tuple[date, str] | None:
@@ -229,7 +229,7 @@ class DatePattern:
         match = pattern.search(string)
         if match:
             month = int(MonthToNumber.num_from_name(match.group("month")))
-            year = date.today().year
+            year = datetime.now(tz=timezone.utc).date().year
             try:
                 return (
                     date(year, month, int(match.group("day"))),
@@ -238,7 +238,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def month_yyyy(string: str) -> tuple[date, str] | None:
@@ -272,7 +272,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def yyyy_month(string: str) -> tuple[date, str] | None:
@@ -306,7 +306,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def mmddyyyy(string: str) -> tuple[date, str] | None:
@@ -343,7 +343,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def ddmmyyyy(string: str) -> tuple[date, str] | None:
@@ -380,7 +380,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def mm_dd(string: str) -> tuple[date, str] | None:
@@ -406,7 +406,7 @@ class DatePattern:
         )
         match = pattern.search(string)
         if match:
-            year = date.today().year
+            year = datetime.now(tz=timezone.utc).date().year
             try:
                 return (
                     date(year, int(match.group("month")), int(match.group("day"))),
@@ -415,7 +415,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def dd_mm(string: str) -> tuple[date, str] | None:
@@ -441,7 +441,7 @@ class DatePattern:
         )
         match = pattern.search(string)
         if match:
-            year = date.today().year
+            year = datetime.now(tz=timezone.utc).date().year
             try:
                 return (
                     date(year, int(match.group("month")), int(match.group("day"))),
@@ -450,7 +450,7 @@ class DatePattern:
             except ValueError as e:
                 logger.trace(f"Error while reformatting date {match}: {e}")
                 return None
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def today(string: str) -> tuple[date, str] | None:
@@ -475,10 +475,10 @@ class DatePattern:
         match = pattern.search(string)
         if match:
             return (
-                date.today(),
+                datetime.now(tz=timezone.utc).date(),
                 str(match.group("found")),
             )
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def yesterday(string: str) -> tuple[date, str] | None:
@@ -502,12 +502,12 @@ class DatePattern:
         )
         match = pattern.search(string)
         if match:
-            yesterday = date.today() - timedelta(days=1)
+            yesterday = datetime.now(tz=timezone.utc).date() - timedelta(days=1)
             return (
                 date(yesterday.year, yesterday.month, yesterday.day),
                 str(match.group("found")),
             )
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def tomorrow(string: str) -> tuple[date, str] | None:
@@ -531,12 +531,12 @@ class DatePattern:
         )
         match = pattern.search(string)
         if match:
-            tomorrow = date.today() + timedelta(days=1)
+            tomorrow = datetime.now(tz=timezone.utc).date() + timedelta(days=1)
             return (
                 date(tomorrow.year, tomorrow.month, tomorrow.day),
                 str(match.group("found")),
             )
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def last_week(string: str) -> tuple[date, str] | None:
@@ -561,10 +561,10 @@ class DatePattern:
         match = pattern.search(string)
         if match:
             return (
-                date.today() - timedelta(days=7),
+                datetime.now(tz=timezone.utc).date() - timedelta(days=7),
                 str(match.group("found")),
             )
-        return None
+        return None  # type: ignore [unreachable]
 
     @staticmethod
     def last_month(string: str) -> tuple[date, str] | None:
@@ -589,10 +589,12 @@ class DatePattern:
         match = pattern.search(string)
         if match:
             return (
-                date.today().replace(month=date.today().month - 1, day=1),
+                datetime.now(tz=timezone.utc)
+                .date()
+                .replace(month=datetime.now(tz=timezone.utc).date().month - 1, day=1),
                 str(match.group("found")),
             )
-        return None
+        return None  # type: ignore [unreachable]
 
 
 class Date:

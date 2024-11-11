@@ -47,7 +47,7 @@ DIRS = [
 FIXTURE_CONFIG = Path(__file__).resolve().parent / "fixtures/fixture_config.toml"
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_file(tmp_path):
     """Create a file for testing."""
 
@@ -74,42 +74,31 @@ def create_file(tmp_path):
     return _inner
 
 
-@pytest.fixture()
+@pytest.fixture
 def debug():
     """Print debug information to the console. This is used to debug tests while writing them."""
 
-    def _debug_inner(label: str, value: str | Path, breakpoint: bool = False, width: int = 80):
+    def _debug_inner(label: str, value: str | Path, stop: bool = False):
         """Print debug information to the console. This is used to debug tests while writing them.
 
         Args:
             label (str): The label to print above the debug information.
             value (str | Path): The value to print. When this is a path, prints all files in the path.
-            breakpoint (bool, optional): Whether to break after printing. Defaults to False.
-            width (int, optional): The width of the console output. Defaults to 80, pytest's default when running without `-s`.
+            stop (bool, optional): Whether to break after printing. Defaults to False.
 
         Returns:
             bool: Whether to break after printing.
         """
-        regexes_to_strip = [
-            r"\( *● *\) Processing Files...  \(Can take a while for large directory trees\)",
-            r"\]8;id=.*8;;",
-        ]
-
         console.rule(label)
-        # If a directory is passed, print the contents
-        if isinstance(value, Path) and value.is_dir():
-            for p in value.rglob("*"):
-                console.print(p, width=width)
+        if not isinstance(value, Path) or not value.is_dir():
+            console.print(value)
         else:
-            for line in value.split("\n"):
-                stripped_line = line
-                for regex in regexes_to_strip:
-                    stripped_line = re.sub(regex, "", stripped_line)
-                console.print(stripped_line, width=width)
+            for p in value.rglob("*"):
+                console.print(p)
 
         console.rule()
 
-        if breakpoint:
+        if stop:
             return pytest.fail("Breakpoint")
 
         return True
@@ -117,7 +106,7 @@ def debug():
     return _debug_inner
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_config(tmp_path):
     """Mock specific configuration data for use in tests by accepting arbitrary keyword arguments.
 
@@ -158,12 +147,12 @@ def mock_config(tmp_path):
     return _inner
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_project(tmp_path):
     """Fixture to create a config object with values parsed from a config file.
 
     Returns:
-        tuple: (original_files_dir, project_root_dir)
+        tuple: (original_files_dir, project_root_dir, config_path)
     """
     project_path = Path(tmp_path / "project")
     project_path.mkdir(parents=True, exist_ok=True)
@@ -177,25 +166,8 @@ def mock_project(tmp_path):
 
     for d in DIRS:
         Path(project_path / d).mkdir(parents=True, exist_ok=True)
-    # term_file1 = Path(project_path, "10-19 foo/11 bar/11.01 foo/.jdfile")
-    # term_file2 = Path(project_path, "foo/bar/baz/.jdfile")
-    # term_file1.write_text(
-    #     dedent(
-    #         """\
-    #         # words to match
-    #         lorem
-    #         """
-    #     )
-    # )
-    # term_file2.write_text(
-    #     dedent(
-    #         """\
-    #         Ipsum
-    #         """
-    #     )
-    # )
 
     for f in TEST_FILES:
         Path(original_files_path / f).touch()
 
-    return original_files_path, project_path
+    return original_files_path, project_path, config_path

@@ -38,6 +38,9 @@ def select_folder(
 
     Returns:
         str: Path to the selected folder or "skip"
+
+    Raises:
+        typer.Abort: If the user chooses to abort.
     """
     choices: list[dict[str, str] | questionary.Separator] = [questionary.Separator()]
     max_length = max(len(str(obj.path.relative_to(project_path))) for obj in possible_folders)

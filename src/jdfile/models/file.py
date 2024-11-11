@@ -2,9 +2,9 @@
 
 import difflib
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, cast
+from typing import TypeVar
 
 from loguru import logger
 from rich.status import Status
@@ -26,6 +26,8 @@ from jdfile.utils.strings import (
 
 from .dates import Date
 from .project import Project
+
+T = TypeVar("T")
 
 
 class File:
@@ -53,19 +55,7 @@ class File:
         match_case_list (Tuple[str, ...]): A tuple of strings whose case should be preserved.
     """
 
-    def __init__(  # noqa: PLR0917
-        self,
-        path: Path,
-        project: Project | None,
-        user_date_format: str | None,
-        user_format_dates: bool | None,
-        user_separator: Separator | None,
-        user_split_words: bool | None,
-        user_strip_stopwords: bool | None,
-        user_case_transformation: TransformCase | None,
-        user_overwrite_existing: bool | None,
-        user_match_case_list: list[str] | None = None,
-    ) -> None:
+    def __init__(self, path: Path, project: Project | None) -> None:
         """Initialize the File object with path, project, and user preferences.
 
         Sets up the file object with initial states and configurations based on the provided arguments or application defaults.
@@ -73,14 +63,6 @@ class File:
         Args:
             path (Path): The file's path.
             project (Optional[Project]): The associated project, if any.
-            user_date_format (Optional[str]): User-specified date format.
-            user_format_dates (Optional[bool]): Flag to enable date formatting.
-            user_separator (Optional[Separator]): User-specified separator.
-            user_split_words (Optional[bool]): Flag to enable word splitting.
-            user_strip_stopwords (Optional[bool]): Flag to enable stopword stripping.
-            user_case_transformation (Optional[TransformCase]): User-specified case transformation.
-            user_overwrite_existing (Optional[bool]): Flag to enable overwriting existing files.
-            user_match_case_list (Optional[list[str]]): User-specified list of words to match case.
         """
         self.path = path
         self.project_name = project.name if project else None
@@ -100,31 +82,19 @@ class File:
         self.new_stem = self.stem
         self.new_suffixes = self.path.suffixes
 
-        # Configuration attributes, favoring CLI options over configuration file defaults
-
-        def get_config_or_default(
-            user_value: bool | str | list[str] | None, config_key: str
-        ) -> Any:
-            """Helper function to simplify value assignment."""
-            return (
-                user_value
-                if user_value is not None
-                else AppConfig().get_attribute(self.project_name, config_key)
-            )
-
-        self.date_format: str = get_config_or_default(user_date_format, "date_format")
-        self.format_dates: bool = get_config_or_default(user_format_dates, "format_dates")
-        self.overwrite_existing: bool = get_config_or_default(
-            user_overwrite_existing, "overwrite_existing"
+        self.date_format = AppConfig().get_attribute(self.project_name, "date_format", str)
+        self.format_dates = AppConfig().get_attribute(self.project_name, "format_dates", bool)
+        self.overwrite_existing = AppConfig().get_attribute(
+            self.project_name, "overwrite_existing", bool
         )
-        self.separator: Separator = get_config_or_default(user_separator, "separator")
-        self.do_split_words: bool = get_config_or_default(user_split_words, "split_words")
-        self.strip_stopwords: bool = get_config_or_default(user_strip_stopwords, "strip_stopwords")
-        self.case_transformation: TransformCase = get_config_or_default(
-            user_case_transformation, "transform_case"
+        self.separator = AppConfig().get_attribute(self.project_name, "separator", Separator)
+        self.do_split_words = AppConfig().get_attribute(self.project_name, "split_words", bool)
+        self.strip_stopwords = AppConfig().get_attribute(self.project_name, "strip_stopwords", bool)
+        self.case_transformation = AppConfig().get_attribute(
+            self.project_name, "transform_case", TransformCase
         )
-        self.match_case_list: tuple[str, ...] = get_config_or_default(
-            user_match_case_list, "match_case_list"
+        self.match_case_list = AppConfig().get_attribute(
+            self.project_name, "match_case_list", tuple[str, ...]
         )
 
     def __repr__(self) -> str:
@@ -150,7 +120,7 @@ class File:
                 Date(
                     date_format=self.date_format,
                     string=self.stem,
-                    ctime=datetime.fromtimestamp(self.path.stat().st_ctime),
+                    ctime=datetime.fromtimestamp(self.path.stat().st_ctime, tz=timezone.utc),
                 )
                 if self.date_format
                 else None
@@ -168,9 +138,7 @@ class File:
             if self.strip_stopwords:
                 new_stem = strip_stopwords(
                     new_stem,
-                    cast(
-                        tuple[str, ...], AppConfig().get_attribute(self.project_name, "stopwords")
-                    ),
+                    AppConfig().get_attribute(self.project_name, "stopwords", tuple[str, ...]),
                 )
 
             new_stem = strip_special_chars(new_stem)
@@ -190,9 +158,7 @@ class File:
             new_stem = insert(
                 new_stem,
                 date_object.reformatted_date,
-                cast(
-                    InsertLocation, AppConfig().get_attribute(self.project_name, "insert_location")
-                ),
+                AppConfig().get_attribute(self.project_name, "insert_location", InsertLocation),
                 self.separator,
             )
 
@@ -254,6 +220,9 @@ class File:
         Returns:
             list[str]: A sorted list of unique tokens derived from the stem.
         """
+        if not user_terms:
+            user_terms = []
+
         # Split the camelcase words and other words in the stem
         words_in_stem = split_words(split_camelcase_words(stem)) + user_terms
 
