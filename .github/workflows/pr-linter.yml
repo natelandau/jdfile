@@ -10,6 +10,10 @@ on:
         branches:
             - main
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
 permissions: # added using https://github.com/step-security/secure-workflows
     contents: read
 
@@ -21,14 +25,6 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Harden Security Runner
-              uses: step-security/harden-runner@v2
-              with:
-                  egress-policy: block
-                  allowed-endpoints: >
-                      *.github.com:443
-                      github.com:443
-
             - name: Lint Pull Request
               uses: amannn/action-semantic-pull-request@v5
               with:
