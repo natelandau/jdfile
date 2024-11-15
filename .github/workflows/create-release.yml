@@ -94,6 +94,9 @@ jobs:
     publish-to-pypi:
         runs-on: ubuntu-latest
         needs: auto-release
+        env:
+            TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+            TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         strategy:
             matrix:
                 python-version: ["3.11"]

@@ -11,6 +11,10 @@ on:
             - reopened
             - synchronize
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
 permissions: # added using https://github.com/step-security/secure-workflows
     contents: read
 
@@ -22,14 +26,6 @@ jobs:
             pull-requests: read # for wagoid/commitlint-github-action to get commits in PR
         runs-on: ubuntu-latest
         steps:
-            - name: Harden Security Runner
-              uses: step-security/harden-runner@v2
-              with:
-                  egress-policy: block
-                  allowed-endpoints: >
-                      api.github.com:443
-                      github.com:443
-
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
