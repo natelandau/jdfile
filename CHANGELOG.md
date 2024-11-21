@@ -1,3 +1,20 @@
+## v2.0.0 (2024-11-21)
+
+### BREAKING CHANGE
+
+- new location for configuration file `~/.config/jdfile/config.toml`
+
+### Feat
+
+- use XDG spec for configuration files (#95)
+- add `--format-dates/--no-format-dates` option (#90)
+- support non-johnnydecimal project structures (#89)
+
+### Refactor
+
+- migrate to uv (#93)
+- use inflect package for pluralization (#59)
+
 ## v1.1.5 (2023-05-14)
 
 ### Fix
