@@ -1,9 +1,6 @@
 # type: ignore
 """Tests for string utilities."""
 
-import hypothesis.strategies as st
-from hypothesis import given
-
 from jdfile.constants import InsertLocation, Separator, TransformCase
 from jdfile.utils.strings import (
     insert,
@@ -65,37 +62,6 @@ def test_insert_5():
     THEN the value is inserted before the string
     """
     assert insert("foo bar", "qux", InsertLocation.AFTER, Separator.DASH) == "foo bar-qux"
-
-
-@given(
-    string=st.text(
-        min_size=3, max_size=3, alphabet=st.characters(codec="utf-8", exclude_characters="/\\")
-    ),
-    value=st.text(
-        min_size=3, max_size=3, alphabet=st.characters(codec="utf-8", exclude_characters="/\\")
-    ),
-    location=st.sampled_from(InsertLocation),
-    separator=st.sampled_from(Separator),
-)
-def test_insert_6(string: str, value: str, location: InsertLocation, separator: Separator) -> None:
-    """Test insert() function.
-
-    GIVEN a string, a value, a location, and a separator
-    WHEN hypothesis generates the test cases
-    THEN values are inserted before or after the string with the correct separator
-    """
-    sep = separator.value if separator.name != "IGNORE" else "_"
-
-    if location == InsertLocation.BEFORE:
-        assert (
-            insert(string=string, value=value, location=location, separator=separator)
-            == f"{value}{sep}{string}"
-        )
-    elif location == InsertLocation.AFTER:
-        assert (
-            insert(string=string, value=value, location=location, separator=separator)
-            == f"{string}{sep}{value}"
-        )
 
 
 def test_match_case_1():

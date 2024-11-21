@@ -1,11 +1,10 @@
 [project]
     authors = [{ name = "Nate Landau", email = "github@natenate.org" }]
     dependencies = [
-        "confz>=2.0.1",
+        "dynaconf>=3.2.6",
         "inflect>=7.4.0",
         "loguru>=0.7.2",
         "nltk>=3.9.1,<4.0.0",
-        "pydantic>=2.9.2",
         "questionary>=2.0.1",
         "rich>=13.7.1",
         "typer>=0.12.4",
@@ -33,7 +32,6 @@
         "commitizen>=3.29.0",
         "coverage>=7.6.1",
         "deptry>=0.21.0",
-        "hypothesis>=6.118.7",
         "mypy>=1.11.1",
         "poethepoet>=0.27.0",
         "pre-commit>=3.8.0",
@@ -49,7 +47,7 @@
         "types-python-dateutil>=2.9.0.20241003",
         "typos>=1.24.1",
         "yamllint>=1.35.1",
-    ]
+]
 
 [tool.commitizen]
     bump_message               = "bump(release): v$current_version → v$new_version"
@@ -164,6 +162,7 @@
             "D408",    # section-underline-after-name
             "D409",    # section-underline-matches-section-length
             "D413",    # blank-line-after-last-section
+            "DOC501",  # docstring does not contain raised exceptions
             "E501",    # line-too-long
             "FBT001",  # Boolean default positional argument in function definition
             "FBT002",  # Boolean default positional argument in function definition

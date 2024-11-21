@@ -5,7 +5,7 @@ from pathlib import Path
 import nltk
 from loguru import logger
 
-from jdfile.constants import APP_DIR
+from jdfile.constants import CACHE_DIR
 
 
 def instantiate_nltk() -> None:  # pragma: no cover
@@ -13,7 +13,9 @@ def instantiate_nltk() -> None:  # pragma: no cover
 
     Checks if the NLTK 'wordnet' and 'omw' corpora are present in APP_DIR. Downloads the corpora if not present. Logs the success of new installations and notes if the corpora were already installed.
     """
-    nltk_data_path = Path(APP_DIR / "nltk_data")
+    nltk_data_path = Path(CACHE_DIR / "nltk_data")
+    if not nltk_data_path.exists():
+        nltk_data_path.mkdir(parents=True)
     nltk.data.path.append(str(nltk_data_path))  # Ensure nltk can find the custom data path
 
     # Define a list of corpora to check or download

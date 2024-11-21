@@ -2,58 +2,58 @@
 
 ### Fix
 
-- `--separator` no longer contains NoneType to avoid error printing help
+-   `--separator` no longer contains NoneType to avoid error printing help
 
 ## v1.1.4 (2023-03-31)
 
 ### Fix
 
-- `last month` defaults to day 1
+-   `last month` defaults to day 1
 
 ## v1.1.3 (2023-03-26)
 
 ### Fix
 
-- improve edge case management when inserting strings
-- usage alerts use console width
+-   improve edge case management when inserting strings
+-   usage alerts use console width
 
 ## v1.1.2 (2023-02-28)
 
 ### Fix
 
-- log messages no longer bold
-- filter files by regex
-- gracefully handle invalid date exceptions
-- improve instructions in default configuration file
+-   log messages no longer bold
+-   filter files by regex
+-   gracefully handle invalid date exceptions
+-   improve instructions in default configuration file
 
 ## v1.1.1 (2023-02-27)
 
 ### Fix
 
-- respect verbosity in file lists
+-   respect verbosity in file lists
 
 ### Refactor
 
-- improve handling of files without matching folders
+-   improve handling of files without matching folders
 
 ## v1.1.0 (2023-02-26)
 
 ### Feat
 
-- add `--organize`, `--no-organize` to control filing into a project
+-   add `--organize`, `--no-organize` to control filing into a project
 
 ### Fix
 
-- improve error handling with invalid path to project
-- **stopwords**: keep stopwords when combined with numbers
+-   improve error handling with invalid path to project
+-   **stopwords**: keep stopwords when combined with numbers
 
 ## v1.0.0 (2023-02-26)
 
 ### Refactor
 
-- full rewrite (#33)
-- refactor alerts
-- **package**: renamge package from `filemanager` to `jdfile`
+-   full rewrite (#33)
+-   refactor alerts
+-   **package**: renamge package from `filemanager` to `jdfile`
 
 ## v0.4.7 (2022-11-19)
 

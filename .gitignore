@@ -4,7 +4,6 @@ scratch/
 # Caches
 *_cache/
 __pycache__/
-.hypothesis/
 
 # Coverage.py
 htmlcov/
