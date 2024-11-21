@@ -7,24 +7,23 @@ from typing import Annotated, Optional
 import typer
 from loguru import logger
 
+from jdfile import settings
 from jdfile.cli import (
     confirm_changes_to_files,
     get_file_list,
-    get_project,
     load_configuration,
     show_files_without_updates,
     update_files,
 )
-from jdfile.constants import APP_DIR, VERSION, Separator, TransformCase
+from jdfile.constants import STATE_DIR, VERSION, Separator, TransformCase
 from jdfile.utils import (
-    AppConfig,
     LogLevel,
     console,
     instantiate_logger,
 )
 from jdfile.utils.nltk import instantiate_nltk
 
-from jdfile.models import File  # isort: skip
+from jdfile.models import File, Project  # isort: skip
 
 app = typer.Typer(
     add_completion=False,
@@ -37,30 +36,6 @@ typer.rich_utils.STYLE_HELPTEXT = ""
 
 SeparatorOption = Enum("SeparatorOption", {x.name: x.name for x in Separator}, type=str)  # type: ignore [misc]
 TransformCaseOption = Enum("TransformCaseOption", {x.name: x.name for x in TransformCase}, type=str)  # type: ignore [misc]
-
-
-def separator_callback(value: SeparatorOption) -> Separator:
-    """Convert a SeparatorOption to a Separator.
-
-    Args:
-        value (SeparatorOption): The SeparatorOption.
-
-    Returns:
-        Separator: The Separator.
-    """
-    return Separator[value.name] if value else None
-
-
-def transform_case_callback(value: TransformCaseOption) -> TransformCase:
-    """Convert a TransformCaseOption to a TransformCase.
-
-    Args:
-        value (TransformCaseOption): The TransformCaseOption.
-
-    Returns:
-        TransformCase: The TransformCase.
-    """
-    return TransformCase[value.name] if value else None
 
 
 def version_callback(value: bool) -> None:
@@ -170,7 +145,7 @@ def main(
             file_okay=True,
             exists=False,
         ),
-    ] = Path(f"{APP_DIR}/jdfile.log"),
+    ] = STATE_DIR / "jdfile.log",
     log_to_file: Annotated[
         bool,
         typer.Option(
@@ -282,6 +257,13 @@ def main(
             help="Print version and exit",
         ),
     ] = None,
+    settings_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--settings-file",
+            help="Path to settings file if not using the default",
+        ),
+    ] = None,
 ) -> None:
     """[bold]jdfile[/] cleans and normalizes filenames. In addition, if you have directories which follow the [Johnny Decimal](https://johnnydecimal.com), jdfile can move your files into the appropriate directory.
 
@@ -335,75 +317,50 @@ def main(
     """
     instantiate_logger(verbosity, log_file, log_to_file)
 
-    new_config_data: dict = {}
-    new_config_data.update(
-        {
-            k: v
-            for k, v in {
-                "clean_filenames": clean_filenames,
-                "date_format": date_format,
-                "format_dates": format_dates,
-                "overwrite_existing": overwrite_existing,
-                "separator": separator,
-                "split_words": split_words,
-                "strip_stopwords": strip_stopwords,
-                "transform_case": transform_case,
-                "use_synonyms": use_synonyms,
-            }.items()
-            if v is not None
-        }
-    )
+    # Map CLI options to settings attributes
+    cli_overrides = {
+        "separator": separator,
+        "use_synonyms": use_synonyms,
+        "split_words": split_words,
+        "strip_stopwords": strip_stopwords,
+        "format_dates": format_dates,
+        "date_format": date_format,
+        "transform_case": transform_case,
+        "overwrite_existing": overwrite_existing,
+        "depth": depth,
+        "clean_filenames": clean_filenames,
+        "organize_files": organize_files,
+        "verbosity": verbosity,
+        "dry_run": dry_run,
+    }
+    load_configuration(cli_overrides, settings_file, project_name)
 
-    load_configuration(new_config_data=new_config_data)
-
-    if verbosity > 1:  # pragma: no cover
-        console.log(AppConfig(), highlight=True)
-
-    if tree_view:
-        project = get_project(project_name, exit_on_fail=True, verbosity=verbosity)
-        project.tree()
-        raise typer.Exit()  # noqa: DOC501
-
-    if not files:
-        logger.error("No files to process")
+    project = Project() if project_name and settings.get("project_name") else None
+    if (project_name or tree_view) and not project:
+        logger.error("No project specified or found in configuration file")
         raise typer.Exit(1)
 
-    if not project_name:
-        project = None
-    else:
-        project = get_project(project_name, exit_on_fail=True, verbosity=verbosity)
+    if tree_view:
+        project.tree()
+        raise typer.Exit()
 
-    files_to_process = [
-        File(path=f, project=project)
-        for f in get_file_list(files=files, depth=depth, project=project)
-    ]
+    files_to_process = [File(path=f) for f in get_file_list(files=files)]
 
     if not files_to_process:
         logger.error("No files to process")
         raise typer.Exit(1)
 
-    use_nltk_library = (
-        use_synonyms or AppConfig().get_attribute(project_name, "use_synonyms", bool) or False
-    )
-    if project and use_nltk_library:  # pragma: no cover
+    if project and settings.use_synonyms:  # pragma: no cover
         instantiate_nltk()
 
     files_with_no_updates, files_with_updates = update_files(
         files_to_process=files_to_process,
-        clean_filenames=clean_filenames,
-        organize_files=organize_files,
         project=project,
-        use_nltk_library=use_nltk_library,
         terms=terms,
         force=force,
-        verbosity=verbosity,
     )
 
-    show_files_without_updates(
-        files_with_no_updates,
-        project,
-        organize_files,
-    )
+    show_files_without_updates(files_with_no_updates, project)
 
     if not files_with_updates:
         logger.info(f"No changes out of {len(files_to_process)} files")
@@ -411,17 +368,17 @@ def main(
 
     files_to_confirm = (
         files_with_updates
-        if verbosity < LogLevel.DEBUG.value
+        if settings.verbosity < LogLevel.DEBUG.value
         else files_with_updates + files_with_no_updates
     )
-    if not confirm_changes_to_files(files_to_confirm, confirm_changes, force, project, verbosity):
+    if not confirm_changes_to_files(files_to_confirm, confirm_changes, force, project):
         raise typer.Exit()
 
     logger.info(
         f"Committing {len(files_with_updates)} with changes of {len(files_to_process)} total files"
     )
     for file in files_with_updates:
-        file.commit(verbosity=verbosity, project=project, dry_run=dry_run)
+        file.commit(project=project)
 
     raise typer.Exit()
 

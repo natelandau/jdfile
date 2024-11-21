@@ -35,10 +35,3 @@ runs:
     - name: Minimize uv cache
       shell: bash
       run: uv cache prune --ci
-
-    # ----------------------------------------------
-    #    copy config file to runner
-    # ----------------------------------------------
-    - name: Create empty configuration file
-      shell: bash
-      run: mkdir -p /home/runner/.config/jdfile && cp ./src/jdfile/default_config.toml /home/runner/.config/jdfile/config.toml

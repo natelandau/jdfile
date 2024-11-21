@@ -9,8 +9,8 @@ from typing import TypeVar
 from loguru import logger
 from rich.status import Status
 
-from jdfile.constants import InsertLocation, ProjectType, Separator, TransformCase
-from jdfile.utils import AppConfig, console
+from jdfile import settings
+from jdfile.constants import ProjectType, Separator
 from jdfile.utils.nltk import find_synonyms
 from jdfile.utils.questions import select_folder
 from jdfile.utils.strings import (
@@ -31,41 +31,17 @@ T = TypeVar("T")
 
 
 class File:
-    """Represents a file object with methods to clean and organize its filename according to user and application configurations.
+    """Represents a file object with methods to clean and organize its filename according to user and application configurations."""
 
-    Attributes:
-        path (Path): The file's original path.
-        project_name (Optional[str]): The name of the project the file belongs to, if any.
-        stem (str): The stem of the file (filename without suffixes).
-        is_dotfile (bool): Indicates if the file is a dotfile.
-        has_new_parent (bool): Flag indicating if the file will have a new parent directory.
-        has_new_stem (bool): Flag indicating if the file's stem will change.
-        has_new_suffixes (bool): Flag indicating if the file's suffixes will change.
-        new_name (str): The new full name of the file, combining new stem and suffixes.
-        new_parent (Path): The new parent directory for the file.
-        new_stem (str): The new stem of the file after processing.
-        new_suffixes (List[str]): The new list of suffixes for the file after processing.
-        date_format (str): The date format to use when formatting dates within filenames.
-        format_dates (bool): Flag indicating if dates within filenames should be formatted.
-        overwrite_existing (bool): Flag indicating if existing files should be overwritten.
-        separator (Separator): The separator to use between words in the filename.
-        do_split_words (bool): Flag indicating if words in the stem should be split.
-        strip_stopwords (bool): Flag indicating if stopwords should be removed from the stem.
-        case_transformation (TransformCase): The type of case transformation to apply to the stem.
-        match_case_list (Tuple[str, ...]): A tuple of strings whose case should be preserved.
-    """
-
-    def __init__(self, path: Path, project: Project | None) -> None:
+    def __init__(self, path: Path) -> None:
         """Initialize the File object with path, project, and user preferences.
 
         Sets up the file object with initial states and configurations based on the provided arguments or application defaults.
 
         Args:
             path (Path): The file's path.
-            project (Optional[Project]): The associated project, if any.
         """
         self.path = path
-        self.project_name = project.name if project else None
         self.stem = str(self.path)[: str(self.path).rfind("".join(self.path.suffixes))].replace(
             f"{self.path.parent}/", ""
         )
@@ -81,21 +57,6 @@ class File:
         self.new_parent = self.path.parent
         self.new_stem = self.stem
         self.new_suffixes = self.path.suffixes
-
-        self.date_format = AppConfig().get_attribute(self.project_name, "date_format", str)
-        self.format_dates = AppConfig().get_attribute(self.project_name, "format_dates", bool)
-        self.overwrite_existing = AppConfig().get_attribute(
-            self.project_name, "overwrite_existing", bool
-        )
-        self.separator = AppConfig().get_attribute(self.project_name, "separator", Separator)
-        self.do_split_words = AppConfig().get_attribute(self.project_name, "split_words", bool)
-        self.strip_stopwords = AppConfig().get_attribute(self.project_name, "strip_stopwords", bool)
-        self.case_transformation = AppConfig().get_attribute(
-            self.project_name, "transform_case", TransformCase
-        )
-        self.match_case_list = AppConfig().get_attribute(
-            self.project_name, "match_case_list", tuple[str, ...]
-        )
 
     def __repr__(self) -> str:
         """Return a string representation of the File object."""
@@ -115,51 +76,48 @@ class File:
         new_stem = self.stem
 
         # Create a date object
-        if self.format_dates and not self.is_dotfile and self.date_format:
+        if settings.format_dates and not self.is_dotfile and settings.date_format:
             date_object = (
                 Date(
-                    date_format=self.date_format,
+                    date_format=settings.date_format,
                     string=self.stem,
                     ctime=datetime.fromtimestamp(self.path.stat().st_ctime, tz=timezone.utc),
                 )
-                if self.date_format
+                if settings.date_format
                 else None
             )
 
             # Remove date from string
-            if self.format_dates and date_object and date_object.found_string:
+            if settings.format_dates and date_object and date_object.found_string:
                 new_stem = re.sub(re.escape(date_object.found_string), "", new_stem)
 
         # Apply transformations if not restricted to date_only
         if not date_only:
-            if self.do_split_words:
-                new_stem = split_camelcase_words(new_stem, self.match_case_list)
+            if settings.split_words:
+                new_stem = split_camelcase_words(new_stem, settings.match_case_list)
 
-            if self.strip_stopwords:
-                new_stem = strip_stopwords(
-                    new_stem,
-                    AppConfig().get_attribute(self.project_name, "stopwords", tuple[str, ...]),
-                )
+            if settings.strip_stopwords:
+                new_stem = strip_stopwords(new_stem, settings.stopwords)
 
             new_stem = strip_special_chars(new_stem)
-            new_stem = transform_case(new_stem, self.case_transformation)
-            new_stem = match_case(new_stem, self.match_case_list)
-            new_stem = normalize_separators(new_stem, self.separator)
+            new_stem = transform_case(new_stem, settings.transform_case)
+            new_stem = match_case(new_stem, settings.match_case_list)
+            new_stem = normalize_separators(new_stem, settings.separator)
             new_stem = new_stem.strip(" -_.")
 
         # Insert date back into the string:
         if (
-            self.format_dates
+            settings.format_dates
             and not self.is_dotfile
-            and self.date_format
+            and settings.date_format
             and date_object
             and date_object.reformatted_date
         ):
             new_stem = insert(
                 new_stem,
                 date_object.reformatted_date,
-                AppConfig().get_attribute(self.project_name, "insert_location", InsertLocation),
-                self.separator,
+                settings.insert_location,
+                settings.separator,
             )
 
         # Keep dotfiles as dotfiles
@@ -205,9 +163,7 @@ class File:
         return self.new_name
 
     @staticmethod
-    def _tokenize_stem_with_synonyms(
-        stem: str, use_nltk: bool, user_terms: list[str] = []
-    ) -> list[str]:
+    def _tokenize_stem_with_synonyms(stem: str, user_terms: list[str] = []) -> list[str]:
         """Tokenize the stem of the file, optionally using NLTK for synonym expansion, and include user-defined terms.
 
         Splits the camelcase and other words in the stem, enriches the tokens with synonyms if NLTK is used, and includes any user-defined terms. Results in a list of unique, sorted tokens.
@@ -227,7 +183,7 @@ class File:
         words_in_stem = split_words(split_camelcase_words(stem)) + user_terms
 
         # Extend with synonyms if NLTK is used
-        if use_nltk:  # pragma: no cover
+        if settings.use_synonyms:  # pragma: no cover
             synonyms = [synonym for word in words_in_stem for synonym in find_synonyms(word)]
             words_in_stem.extend(synonyms)
 
@@ -245,25 +201,23 @@ class File:
         """
         return Path(self.new_parent / f"{self.new_stem}{''.join(self.new_suffixes)}")
 
-    def commit(self, verbosity: int, project: Project | None, dry_run: bool) -> bool:
+    def commit(self, project: Project | None) -> bool:
         """Commit changes to the file by renaming or moving it to the new location.
 
         Logs the action taken based on verbosity level, project context, and whether it's a dry run.
 
         Args:
-            verbosity (int): Verbosity level for logging output.
             project (Optional[Project]): The project context, if applicable.
-            dry_run (bool): If True, simulates changes without applying them.
 
         Returns:
             bool: True if changes were applied or simulated successfully, False if no changes were made.
         """
         if not self.has_changes():
-            if verbosity > 0:  # pragma: no cover
+            if settings.verbosity > 0:  # pragma: no cover
                 logger.info(f"{self.path.name} -> No changes")
             return False
 
-        if self.target.exists() and (not self.overwrite_existing or self.target.is_dir()):
+        if self.target.exists() and (not settings.overwrite_existing or self.target.is_dir()):
             self.unique_name()
 
         if project:
@@ -274,7 +228,7 @@ class File:
         else:
             display = self.target.name
 
-        if dry_run:
+        if settings.dry_run:
             logger.log("DRYRUN", f"{self.path.name} -> {display}")
             return True
 
@@ -282,14 +236,12 @@ class File:
         logger.success(f"{self.path.name} -> {display}")
         return True
 
-    def get_new_parent(  # noqa: C901
+    def get_new_parent(
         self,
         project: Project,
-        use_nltk: bool,
         user_terms: list[str] = [],
         force: bool = False,
         status: Status = None,
-        verbosity: int = 0,
     ) -> Path:
         """Determine the new parent directory based on the file's stem and additional criteria.
 
@@ -299,25 +251,22 @@ class File:
 
         Args:
             project (Project): The project object containing usable folders.
-            use_nltk (bool): Flag to use NLTK for tokenizing the stem.
             user_terms (List[str], optional): Additional user-specified terms to consider. Defaults to None.
             force (bool): If True, forces the file into the first matching folder. Defaults to False.
             status (Status, optional): A rich status object for interactive feedback. Defaults to None.
-            verbosity (int, optional): Verbosity level for logging. Defaults to 0.
 
         Returns:
             Path: The path to the new parent directory.
         """
-        words_in_stem = self._tokenize_stem_with_synonyms(self.new_stem, use_nltk, user_terms)
+        words_in_stem = self._tokenize_stem_with_synonyms(self.new_stem, user_terms)
 
         # Direct matching by number in JD project folders
-        if project.project_type == ProjectType.JD:
+        if settings.project_type == ProjectType.JD:
             for folder in project.usable_folders:
                 if folder.number in words_in_stem:
-                    if verbosity > 1:  # pragma: no cover
-                        console.log(
-                            f"ORGANIZE: '{self.path.name}' matched by jd number: {folder.path}"
-                        )
+                    logger.trace(
+                        f"ORGANIZE: '{self.path.name}' matched by jd number: {folder.path}"
+                    )
                     self.has_new_parent = True
                     self.new_parent = folder.path
                     return folder.path
@@ -341,8 +290,8 @@ class File:
         if matching_folders:
             if len(matching_folders) == 1 or force:
                 folder_to_move_to = next(iter(matching_folders.keys())).path
-                if verbosity > 1:  # pragma: no cover
-                    console.log(f"ORGANIZE: '{self.path.name}' matched to '{folder_to_move_to}'")
+
+                logger.trace(f"ORGANIZE: '{self.path.name}' matched to '{folder_to_move_to}'")
 
             elif len(matching_folders) > 1:
                 status.stop() if status else None
@@ -354,10 +303,10 @@ class File:
                 folder_to_move_to = (
                     self.path.parent if selected_folder == "skip" else Path(selected_folder)
                 )
-                if verbosity > 1:  # pragma: no cover
-                    console.log(
-                        f"ORGANIZE:'{self.path.name}' matched to {folder_to_move_to} by user selection"
-                    )
+
+                logger.trace(
+                    f"ORGANIZE: '{self.path.name}' matched to {folder_to_move_to} by user selection"
+                )
                 status.start() if status else None
 
             if folder_to_move_to != self.path.parent:
@@ -417,7 +366,7 @@ class File:
 
         If the constructed new file name already exists in the target directory, this method appends an incrementing integer until a unique name is found. This prevents overwriting existing files and maintains file uniqueness.
         """
-        sep = "_" if self.separator == Separator.IGNORE else self.separator.value
+        sep = "_" if settings.separator == Separator.IGNORE else settings.separator.value
 
         i = 1
         original_new_stem = self.new_stem

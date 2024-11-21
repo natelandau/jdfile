@@ -1,14 +1,21 @@
 """Constants for the jdfile package."""
 
+import os
 from enum import Enum
 from pathlib import Path
 
-import typer
+PACKAGE_NAME = __package__.replace("_", "-").replace(".", "-").replace(" ", "-")
+CONFIG_DIR = Path(os.getenv("XDG_CONFIG_HOME", "~/.config")).expanduser().absolute() / PACKAGE_NAME
+DATA_DIR = Path(os.getenv("XDG_DATA_HOME", "~/.local/share")).expanduser().absolute() / PACKAGE_NAME
+STATE_DIR = (
+    Path(os.getenv("XDG_STATE_HOME", "~/.local/state")).expanduser().absolute() / PACKAGE_NAME
+)
+CACHE_DIR = Path(os.getenv("XDG_CACHE_HOME", "~/.cache")).expanduser().absolute() / PACKAGE_NAME
+PROJECT_ROOT_PATH = Path(__file__).parents[2].absolute()
+CONFIG_PATH = CONFIG_DIR / "config.toml"
 
-APP_DIR = Path(typer.get_app_dir("jdfile"))
-CONFIG_PATH = APP_DIR / "config.toml"
 VERSION = "1.1.5"
-ALWAYS_IGNORE_FILES = (".DS_Store", ".jdfile", ".stignore")
+ALWAYS_IGNORE_FILES = [".DS_Store", ".jdfile", ".stignore"]
 SPINNER = "bouncingBall"
 
 

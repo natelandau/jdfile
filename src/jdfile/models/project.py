@@ -9,8 +9,9 @@ import typer
 from loguru import logger
 from rich.tree import Tree
 
+from jdfile import settings
 from jdfile.constants import FolderType, ProjectType
-from jdfile.utils import AppConfig, console, match_pattern
+from jdfile.utils import console, match_pattern
 
 
 class Folder:
@@ -92,55 +93,19 @@ class Folder:
 
 
 class Project:
-    """Represents a project directory, encapsulating its configuration, path, and folder structure.
+    """Represents a project directory, encapsulating its configuration, path, and folder structure."""
 
-    Attributes:
-        name (str): Name of the project.
-        path (Path): Path to the project directory.
-        ignore_dotfiles (bool): Flag to ignore dotfiles within the project.
-        ignored_files (tuple[str, ...]): A tuple of filenames to ignore within the project.
-        ignore_file_regex (str): Regex pattern to identify files to ignore.
-        overwrite_existing (bool): Flag indicating whether existing files should be overwritten.
-        usable_folders (dict[str, dict[str, Any]]): Johnny Decimal folders that are usable for filing.
-        verbosity (int): Verbosity level for logging.
-    """
-
-    def __init__(self, project_name: str, verbosity: int = 0) -> None:
-        """Initializes the Project instance by loading its configuration and determining usable folders.
-
-        Args:
-            project_name (str): The name of the project to be initialized.
-            verbosity (int, optional): Verbosity level for logging. Defaults to 0.
-        """
-        self.name = project_name
-        project_config = AppConfig().projects[project_name]
-        self.verbosity = verbosity
-
-        # Read configuration attributes
-        self.ignore_dotfiles: bool = AppConfig().get_attribute(
-            project_name, "ignore_dotfiles", bool
-        )
-        self.ignored_files: tuple[str, ...] = AppConfig().get_attribute(
-            project_name, "ignored_files", tuple[str, ...]
-        )
-        self.ignore_file_regex: str | None = (
-            AppConfig().get_attribute(project_name, "ignore_file_regex", str) or "^$"
-        )
-        self.overwrite_existing: bool = AppConfig().get_attribute(
-            project_name, "overwrite_existing", bool
-        )
-        self.project_type: ProjectType = AppConfig().get_attribute(
-            project_name, "project_type", ProjectType
-        )
-        self.depth: int = AppConfig().get_attribute(project_name, "project_depth", int)
+    def __init__(self) -> None:
+        """Initializes the Project instance by loading its configuration and determining usable folders."""
+        self.name = settings.project_name
 
         # Validate and assign the project path
-        self.path = self._validate_project_path(project_config.path)
+        self.path = self._validate_project_path(settings.path)
 
         # Identify usable folders within the project
         self.usable_folders = (
             self._find_jd_folders()
-            if self.project_type == ProjectType.JD
+            if settings.project_type == ProjectType.JD
             else self._find_non_jd_folders()
         )
 
@@ -163,7 +128,7 @@ class Project:
             for item in directory.iterdir():
                 if item.is_dir() and item.name[0] != ".":  # Exclude hidden folders
                     yield Folder(path=item, folder_type=FolderType.OTHER)
-                    if depth < self.depth:
+                    if depth < settings.project_depth:
                         yield from traverse_directory(item, depth + 1)
 
         non_jd_folders = list(traverse_directory(self.path, 0))
@@ -227,8 +192,7 @@ class Project:
                     not any(existing.path == folder.path for existing in all_folders)
                     or Path(folder.path / ".jdfile").exists()
                 ):
-                    if self.verbosity > 1:  # pragma: no cover
-                        console.log(f"PROJECT: Add '{folder.path.name}'")
+                    logger.debug(f"PROJECT: Add '{folder.path.name}'")
                     all_folders.append(folder)
 
         logger.trace(f"{len(all_folders)} folders indexed in project: {self.name}")
@@ -271,19 +235,13 @@ class Project:
             Path(directory).iterdir(),
             key=lambda path: (path.is_file(), path.name.lower()),
         )
+
         for path in paths:
-            # Remove hidden files
             if path.name.startswith(".") or not path.is_dir():
                 continue
 
-            if self.project_type == ProjectType.JD:
-                for pattern in (r"^\d{2}-\d{2}[- _]", r"^\d{2}[- _]", r"^\d{2}\.\d{2}[- _]"):
-                    if match_pattern(path.name, pattern):
-                        branch = tree.add(f"{path.name}")
-                        self._walk_directory(path, branch)
-            else:
-                branch = tree.add(f"{path.name}")
-                self._walk_directory(path, branch)
+            branch = tree.add(f"{path.name}")
+            self._walk_directory(path, branch)
 
     def tree(self) -> None:
         """Print a tree representation of the project directory to the console."""

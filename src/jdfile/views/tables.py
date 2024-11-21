@@ -6,20 +6,18 @@ from loguru import logger
 from rich import box
 from rich.table import Table
 
+from jdfile import settings
 from jdfile.models import File
 from jdfile.utils import LogLevel
 
 
-def confirmation_table(
-    files: list[File], project_path: Path | None, total_files: int, verbosity: int
-) -> Table:
+def confirmation_table(files: list[File], project_path: Path | None, total_files: int) -> Table:
     """Display a confirmation table to the user.
 
     Args:
         files (list[File]): List of files to process.
         project_path (Path): Path to project root.
         total_files (int): Total number of files to process.
-        verbosity (int): Verbosity level.
 
     Returns:
         Table: Confirmation table.
@@ -39,7 +37,7 @@ def confirmation_table(
     table.add_column("New Name", overflow="fold")
     if organized_files:
         table.add_column("New Path", overflow="fold")
-    if verbosity > LogLevel.INFO.value:
+    if settings.verbosity > LogLevel.INFO.value:
         table.add_column("Diff", overflow="fold")
 
     for _n, file in enumerate(files, start=1):
@@ -53,7 +51,7 @@ def confirmation_table(
             if organized_files and file.has_new_parent
             else "",
             file.get_diff_string()
-            if verbosity > LogLevel.INFO.value and file.has_changes()
+            if settings.verbosity > LogLevel.INFO.value and file.has_changes()
             else "",
         )
 

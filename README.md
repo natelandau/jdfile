@@ -67,7 +67,7 @@ Run `jdfile --help` for usage
 
 ### Configuration
 
-To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.jdfile/jdfile.toml`
+To organize files into folders, a valid [toml](https://toml.io/en/) configuration file is required at `~/.config/jdfile/config.toml` or your `XDG_CONFIG_HOME` if set.
 
 ```toml
 # Clean special characters, normalize word separators, remove stopwords, based on your preferences.

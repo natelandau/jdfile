@@ -1,11 +1,10 @@
 # type: ignore
 """Shared fixtures for tests."""
 
-import re
 from pathlib import Path
 
 import pytest
-from confz import DataSource, FileSource
+from dynaconf import settings
 
 from jdfile.utils import console
 
@@ -104,47 +103,6 @@ def debug():
         return True
 
     return _debug_inner
-
-
-@pytest.fixture
-def mock_config(tmp_path):
-    """Mock specific configuration data for use in tests by accepting arbitrary keyword arguments.
-
-    The function dynamically collects provided keyword arguments, filters out any that are None,
-    and prepares data sources with the overridden configuration for file processing.
-
-    Usage:
-        def test_something(mock_config):
-            # Override the configuration with specific values
-            with AppConfig.change_config_sources(config_data(some_key="some_value")):
-                    # Test the functionality
-                    result = do_something()
-                    assert result
-    """
-
-    def _inner(**kwargs):
-        """Collects provided keyword arguments, omitting any that are None, and prepares data sources with the overridden configuration.
-
-        Args:
-            **kwargs: Arbitrary keyword arguments representing configuration settings.
-
-        Returns:
-            list: A list containing a FileSource initialized with the fixture configuration and a DataSource with the overridden data.
-        """
-        # Filter out None values from kwargs
-        override_data = {key: value for key, value in kwargs.items() if value is not None}
-
-        # If a 'config.toml' file exists in the test directory, use it as the configuration source
-        if Path(tmp_path / "config.toml").exists():
-            config_file_source = str(tmp_path / "config.toml")
-        else:
-            # Check for 'config_file' in kwargs and use it if present, else default to FIXTURE_CONFIG
-            config_file_source = kwargs.get("config_file", FIXTURE_CONFIG)
-
-        # Return a list of data sources with the overridden configuration
-        return [FileSource(config_file_source), DataSource(data=override_data)]
-
-    return _inner
 
 
 @pytest.fixture

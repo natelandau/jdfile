@@ -1,18 +1,17 @@
 """Helpers for the jdfile cli."""
 
 import re
-import shutil
 from pathlib import Path
 
 import typer
-from confz import ConfigSource, DataSource, FileSource, validate_all_configs
+from dynaconf import ValidationError
 from loguru import logger
-from pydantic import ValidationError
 from rich.prompt import Confirm
 
-from jdfile.utils import AppConfig, console  # isort: skip
-from jdfile.constants import ALWAYS_IGNORE_FILES, CONFIG_PATH, SPINNER
+from jdfile import settings
+from jdfile.constants import ALWAYS_IGNORE_FILES, SPINNER
 from jdfile.models import File, Project
+from jdfile.utils import console
 from jdfile.views import confirmation_table, skipped_file_table
 
 
@@ -21,7 +20,6 @@ def confirm_changes_to_files(
     confirm_changes_flag: bool,
     force: bool,
     project: Project,
-    verbosity: int,
 ) -> bool:
     """Prompt for confirmation of file changes if required, and display a summary of the changes.
 
@@ -32,7 +30,6 @@ def confirm_changes_to_files(
         confirm_changes_flag (bool): Flag indicating whether user confirmation is required.
         force (bool): If True, bypasses the confirmation prompt and proceeds with changes.
         project (Project): The current project context, used for displaying relevant paths.
-        verbosity (int): Verbosity level for determining the detail of information displayed.
 
     Returns:
         bool: True if the changes are confirmed by the user or if confirmation is bypassed; False otherwise.
@@ -43,7 +40,6 @@ def confirm_changes_to_files(
             files=file_list,
             project_path=project.path if project else None,
             total_files=len(file_list),
-            verbosity=verbosity,
         )
         console.print(table)
         return Confirm.ask("Commit changes?")
@@ -51,24 +47,22 @@ def confirm_changes_to_files(
     return True
 
 
-def get_file_list(files: list[Path], depth: int, project: Project = None) -> list[Path]:
+def get_file_list(files: list[Path]) -> list[Path]:
     """Build and return a sorted list of processable files from the given paths.
 
     This function considers both individual files and directories in the input list. For directories, it recursively searches for files up to the specified depth. It filters out files based on ignore patterns, dotfiles, and specific ignore rules defined either in the Project object or the application's default configuration.
 
     Args:
         files: A list of files or directories to process.
-        depth: The depth to search for files within directories.
-        project: An optional project configuration that specifies files to ignore.
 
     Returns:
         A sorted list of Path objects representing files to be processed.
     """
+    if not files:
+        return []
     # Determine files to ignore and regex patterns based on project or default configuration
-    config: Project | AppConfig = project or AppConfig()
-    files_to_ignore = ALWAYS_IGNORE_FILES + config.ignored_files
-    ignore_file_regex = config.ignore_file_regex or "^$"
-    ignore_dotfiles = config.ignore_dotfiles
+    files_to_ignore = ALWAYS_IGNORE_FILES + settings.ignored_files
+    ignore_file_regex = settings.ignore_file_regex or "^$"
 
     def is_ignored_file(file: Path) -> bool:
         """Determine if a file should be ignored based on its name or path.
@@ -80,7 +74,7 @@ def get_file_list(files: list[Path], depth: int, project: Project = None) -> lis
             bool: True if the file should be ignored, False otherwise.
         """
         return (
-            (ignore_dotfiles and file.name.startswith("."))
+            (settings.ignore_dotfiles and file.name.startswith("."))
             or (file.name in files_to_ignore)
             or re.search(ignore_file_regex, file.name) is not None
         )
@@ -98,7 +92,7 @@ def get_file_list(files: list[Path], depth: int, project: Project = None) -> lis
             for f in _dir.rglob("*"):
                 depth_of_file = len(f.relative_to(_dir).parts)
                 if (
-                    depth_of_file <= depth
+                    depth_of_file <= settings.depth
                     and f.is_file()
                     and not is_ignored_file(f)
                     and f not in processable_files
@@ -109,81 +103,46 @@ def get_file_list(files: list[Path], depth: int, project: Project = None) -> lis
     return sorted(processable_files)
 
 
-def get_project(
-    project_name: str | None, exit_on_fail: bool = True, verbosity: int = 0
-) -> Project | None:
-    """Attempt to instantiate a Project object based on the provided project name.
-
-    This function looks up the project name in the application's configuration. If the project name is not provided, or if the specified project does not exist in the configuration, the function either returns `None` or exits the application based on the `exit_on_fail` flag.
-
-    Args:
-        project_name: The name of the project to instantiate, or `None` if no project name is provided.
-        exit_on_fail: Whether to exit the application with an error code if the project cannot be instantiated. Defaults to `True`.
-        verbosity: Verbosity level for logging.
-
-    Returns:
-        An instance of `Project` if the project is found, otherwise `None`, depending on `exit_on_fail`.
-
-    Raises:
-        typer.Exit: If the project is not found and `exit_on_fail` is `True`.
-    """
-    if not project_name:
-        msg = "No project specified"
-        if exit_on_fail:
-            logger.error(msg)
-            raise typer.Exit(code=1)
-
-        logger.trace(msg)
-        return None
-
-    if project_name not in AppConfig().projects:
-        msg = f"Project not found: {project_name}"
-        logger.error(msg)
-        if exit_on_fail:
-            raise typer.Exit(code=1)
-        return None
-
-    logger.debug(f"Project '{project_name}' loaded successfully.")
-    return Project(project_name, verbosity=verbosity)
-
-
-def load_configuration(new_config_data: dict = {}) -> None:
+def load_configuration(
+    cli_overrides: dict = {}, settings_file: Path | None = None, project_name: str | None = None
+) -> None:
     """Load and validate the configuration file. Optionally override with new configuration data from CLI args.
 
     Args:
-        new_config_data (dict): New configuration data to be validated.
+        cli_overrides (dict): New configuration data to be validated.
+        settings_file (Path | None): Path to settings file if not using the default.
+        project_name (str | None): Name of the project to use if not using the default.
 
     Raises:
         typer.Exit: If the configuration file is invalid.
     """
-    if not CONFIG_PATH.exists():  # pragma: no cover
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        default_config_file = Path(__file__).parent.parent.resolve() / "default_config.toml"
-        shutil.copy(default_config_file, CONFIG_PATH)
-        logger.info(f"Created default configuration file: {CONFIG_PATH}")
+    if settings_file:
+        settings.load_file(path=settings_file)
 
-    # Set up config sources with both file and override data from the CLI
-    config_sources: list[ConfigSource] = [
-        FileSource(file=CONFIG_PATH),
-        DataSource(data=new_config_data),
-    ]
+    if project_name:
+        use_project_settings(project_name)
 
-    # Update AppConfig class to use the new sources
-    AppConfig.CONFIG_SOURCES = config_sources
+    # Update settings for any non-None CLI options
+    for option, value in cli_overrides.items():
+        if value is not None:
+            setattr(settings, option, value)
 
-    # Load and validate configuration
+    # Validate settings
     try:
-        validate_all_configs()
-    except ValidationError as e:  # pragma: no cover
-        logger.error(f"Invalid configuration file: {CONFIG_PATH}")
-        for error in e.errors():
-            console.print(f"           [red]{error['loc'][0]}: {error['msg']}[/red]")
-        raise typer.Exit(code=1) from e
+        settings.validators.validate_all()
+    except ValidationError as e:
+        accumulative_errors = e.details
+        logger.error(accumulative_errors)
+        raise typer.Exit(1) from e
+    except KeyError as e:
+        logger.error(f"{e}")
+        raise typer.Exit(1) from e
+
+    if settings.verbosity >= 2:  # pragma: no cover  # noqa: PLR2004
+        logger.debug(settings.as_dict())
 
 
-def show_files_without_updates(
-    file_list: list[File], project: Project, organize_files_flag: bool
-) -> None:
+def show_files_without_updates(file_list: list[File], project: Project) -> None:
     """Display a table of files that do not have a new parent directory after processing.
 
     This function identifies files within the provided list that do not have updates to their parent directory and, if the organize files flag is enabled, displays a table of these files. It's useful for visualizing which files will remain unchanged in their current location after an organization operation.
@@ -194,20 +153,16 @@ def show_files_without_updates(
         organize_files_flag (bool): Flag indicating whether file organization is enabled.
     """
     files_without_new_parent = [x for x in file_list if not x.has_new_parent]
-    if project and organize_files_flag and files_without_new_parent:
+    if project and settings.organize_files and files_without_new_parent:
         table = skipped_file_table(files_without_new_parent)
         console.print(table)
 
 
 def update_files(
     files_to_process: list[File],
-    clean_filenames: bool | None,
-    organize_files: bool | None,
     project: Project | None,
-    use_nltk_library: bool | None,
     terms: list[str],
     force: bool,
-    verbosity: int = 0,
 ) -> tuple[list[File], list[File]]:
     """Process files for cleaning and organizing based on the specified parameters.
 
@@ -215,13 +170,9 @@ def update_files(
 
     Args:
         files_to_process (list[File]): The list of File objects to be processed.
-        clean_filenames (bool | None): Flag indicating whether filenames should be cleaned. If None, the application config will be used.
-        organize_files (bool | None): Flag indicating whether files should be organized into directories. If None, the application config will be used.
         project (Project | None): The current project context, if applicable.
-        use_nltk_library (bool | None): Flag indicating whether the NLTK library should be used for synonym expansion in file organization.
         terms (list[str]): List of additional terms to consider in file organization.
         force (bool): Force file movement without confirmation for matching directories.
-        verbosity (int, optional): Verbosity level for logging. Defaults to 0.
 
     Returns:
         tuple[list[File], list[File]]: A tuple containing two lists: the first with files that did not require updates, and the second with files that were updated.
@@ -232,28 +183,20 @@ def update_files(
         "Processing Files...  [dim](Can take a while for large directory trees)[/]",
         spinner=SPINNER,
     ) as status:
-        project_name = project.name if project else None
-        do_clean_filename = clean_filenames or (
-            clean_filenames is None
-            and AppConfig().get_attribute(project_name, "clean_filenames", bool)  # type: ignore [unreachable]
-        )
-
         for f in files_to_process:
-            if do_clean_filename:
+            if settings.clean_filenames:
                 new_filename = f.clean_filename()
             else:
                 new_filename = f.clean_filename(date_only=True)
 
             logger.trace(f"{f.path.name} -> {new_filename}")
 
-            if organize_files and project:
+            if settings.organize_files and project:
                 new_parent = f.get_new_parent(
                     project=project,
-                    use_nltk=use_nltk_library,
                     user_terms=terms,
                     force=force,
                     status=status,
-                    verbosity=verbosity,
                 )
 
                 logger.trace(
@@ -266,3 +209,17 @@ def update_files(
                 files_with_no_updates.append(f)
 
     return files_with_no_updates, files_with_updates
+
+
+def use_project_settings(project_name: str) -> None:
+    """Update global settings with project-specific configuration.
+
+    Args:
+        project_name: The name of the project to use.
+    """
+    if project := settings.projects.get(project_name):
+        logger.debug(f"Using project settings for {project_name}")
+        settings.project_name = project_name
+        # Update settings only for attributes that exist in the project config
+        for key, value in project.items():
+            setattr(settings, key, value)

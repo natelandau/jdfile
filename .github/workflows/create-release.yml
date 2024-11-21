@@ -85,7 +85,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                   body: ${{join(fromJson(steps.generate_notes.outputs.notes).notes, '')}}
-                  draft: true
+                  draft: false
                   files: |
                       dist/*-${{env.PROJECT_VERSION}}-py3-none-any.whl
                       dist/*-${{env.PROJECT_VERSION}}.tar.gz
